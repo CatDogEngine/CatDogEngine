@@ -226,36 +226,19 @@ bool RenderContext::OnShaderHotModified(Entity entity, const std::string& progra
 void RenderContext::UploadShaderProgram(const std::string& programName, const std::string& featuresCombine)
 {
 	assert(m_pShaderCollections->IsProgramValid(StringCrc{ programName }));
-
 	auto [vsName, fsName, csName] = IdentifyShaderTypes(m_pShaderCollections->GetShaders(StringCrc{ programName }));
 
-	if (featuresCombine.empty())
+	if (!vsName.empty() && !fsName.empty() && csName.empty())
 	{
-		// Non-uber shader case.
-		if (!vsName.empty() && !fsName.empty() && csName.empty())
-		{
-			CreateProgram(programName, vsName.data(), fsName.data());
-		}
-		else if (!csName.empty())
-		{
-			CreateProgram(programName, csName.data());
-		}
-		else
-		{
-			CD_ENGINE_WARN("Unknown non-uber shader program type of {0}!", programName);
-		}
+		CreateProgram(programName, vsName.data(), fsName.data(), featuresCombine);
+	}
+	else if (!csName.empty())
+	{
+		CreateProgram(programName, csName.data());
 	}
 	else
 	{
-		// Uber shader case.
-		if (!vsName.empty() && !fsName.empty() && csName.empty())
-		{
-			CreateProgram(programName, vsName.data(), fsName.data(), featuresCombine);
-		}
-		else
-		{
-			CD_ENGINE_WARN("Unknown uber shader program type of {0}!", programName);
-		}
+		CD_ENGINE_WARN("Unknown non-uber shader program type of {0}!", programName);
 	}
 }
 
@@ -277,7 +260,7 @@ void RenderContext::AddShaderCompileInfo(ShaderCompileInfo info)
 {
 	if (m_shaderCompileInfos.find(info) == m_shaderCompileInfos.end())
 	{
-		CD_ENGINE_INFO("Shader compile task added for {0} with shader features : [{1}]", info.m_programName, info.m_featuresCombine);
+		CD_ENGINE_INFO("Shader compile task added for {0} with shader features : [{1}]", info.GetProgramName(), info.GetFeaturesCombine());
 		m_shaderCompileInfos.insert(cd::MoveTemp(info));
 	}
 }

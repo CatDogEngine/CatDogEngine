@@ -43,16 +43,16 @@ constexpr const char* lightParams                 = "u_lightParams";
 constexpr const char* LightDir                    = "u_LightDir";
 constexpr const char* HeightOffsetAndshadowLength = "u_HeightOffsetAndshadowLength";
 
-constexpr const char* lightViewProjs= "u_lightViewProjs";
-constexpr const char* cubeShadowMapSamplers[3] = { "s_texCubeShadowMap_1", "s_texCubeShadowMap_2" ,  "s_texCubeShadowMap_3" };
+constexpr const char* lightViewProjs              = "u_lightViewProjs";
+constexpr const char* cubeShadowMapSamplers[3]    = { "s_texCubeShadowMap_1", "s_texCubeShadowMap_2" ,  "s_texCubeShadowMap_3" };
 
-constexpr const char* cameraNearFarPlane = "u_cameraNearFarPlane";
-constexpr const char* cameraLookAt = "u_cameraLookAt";
-constexpr const char* clipFrustumDepth = "u_clipFrustumDepth";
+constexpr const char* cameraNearFarPlane          = "u_cameraNearFarPlane";
+constexpr const char* cameraLookAt                = "u_cameraLookAt";
+constexpr const char* clipFrustumDepth            = "u_clipFrustumDepth";
 
-constexpr const char* directionShadowMapTexture = "DirectionShadowMapTexture";
-constexpr const char* pointShadowMapTexture = "PointShadowMapTexture";
-constexpr const char* spotShadowMapTexture = "SpotShadowMapTexture";
+constexpr const char* directionShadowMapTexture   = "DirectionShadowMapTexture";
+constexpr const char* pointShadowMapTexture       = "PointShadowMapTexture";
+constexpr const char* spotShadowMapTexture        = "SpotShadowMapTexture";
 
 constexpr uint64_t samplerFlags = BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP;
 constexpr uint64_t defaultRenderingState = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS;
@@ -112,13 +112,13 @@ void WorldRenderer::Render(float deltaTime)
 	const cd::Transform& cameraTransform = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity())->GetTransform();
 	SkyComponent* pSkyComponent = m_pCurrentSceneWorld->GetSkyComponent(m_pCurrentSceneWorld->GetSkyEntity());
 
-	auto lightEntities = m_pCurrentSceneWorld->GetLightEntities();
+	const auto lightEntities = m_pCurrentSceneWorld->GetLightEntities();
 	size_t lightEntityCount = lightEntities.size();
 
 	// Blit RTV to SRV to update light shadow map
 	for (int i = 0; i < lightEntityCount; i++)
 	{
-		auto lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[i]);
+		const auto lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[i]);
 		cd::LightType lightType = lightComponent->GetType();
 		if (cd::LightType::Directional == lightType)
 		{

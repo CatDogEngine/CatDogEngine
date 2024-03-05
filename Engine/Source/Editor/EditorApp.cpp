@@ -436,7 +436,7 @@ void EditorApp::CompileAndLoadShaders()
 		for (const auto& info : m_pRenderContext->GetShaderCompileInfos())
 		{
 			// Info still in RenderContext::m_shaderCompileInfos means compiling is successful.
-			const uint32_t entity = info.m_entity;
+			const uint32_t entity = info.GetEntity();
 			auto& failedEntities = m_pRenderContext->GetCompileFailedEntities();
 			if (failedEntities.find(entity) != failedEntities.end())
 			{
@@ -445,8 +445,8 @@ void EditorApp::CompileAndLoadShaders()
 				failedEntities.erase(entity);
 			}
 
-			m_pRenderContext->DestroyShaderProgram(info.m_programName, info.m_featuresCombine);
-			m_pRenderContext->UploadShaderProgram(info.m_programName, info.m_featuresCombine);
+			m_pRenderContext->DestroyShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
+			m_pRenderContext->UploadShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
 		}
 
 		m_pRenderContext->ClearShaderCompileInfos();
@@ -460,10 +460,10 @@ void EditorApp::OnShaderCompileFailed(uint32_t handle, std::span<const char> str
 
 	while (it != infos.end())
 	{
-		const auto& handles = it->m_taskHandles;
+		const auto& handles = it->GetTaskHandles();
 		if (handles.find(handle) != handles.end())
 		{
-			const uint32_t entity = it->m_entity;
+			const uint32_t entity = it->GetEntity();
 			m_pRenderContext->AddCompileFailedEntity(entity);
 			engine::MaterialComponent* pMaterialComponent = m_pSceneWorld->GetMaterialComponent(entity);
 			pMaterialComponent->SetFactor(cd::MaterialPropertyGroup::BaseColor, cd::Vec3f{ 1.0f, 0.0f, 1.0f });

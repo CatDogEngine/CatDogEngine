@@ -76,7 +76,7 @@ void ShaderSchema::Build()
 		}
 	}
 
-	// Should ShaderSchema handle uber shader without shader feature?
+	// ShaderScheme also handles case without ShaderFeature.
 	m_allFeatureCombines.insert("");
 }
 

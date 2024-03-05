@@ -98,8 +98,8 @@ void ShaderBuilder::BuildShaderInfos(engine::RenderContext* pRenderContext, Task
 
 	for (auto info : pRenderContext->GetShaderCompileInfos())
 	{
-		engine::ShaderCompileInfo newInfo{ info.m_entity, cd::MoveTemp(info.m_programName), cd::MoveTemp(info.m_featuresCombine) };
-		const std::set<std::string>& shaders = pRenderContext->GetShaderCollections()->GetShaders(engine::StringCrc(newInfo.m_programName));
+		engine::ShaderCompileInfo newInfo{ info.GetEntity(), cd::MoveTemp(info.GetProgramName()), cd::MoveTemp(info.GetFeaturesCombine())};
+		const std::set<std::string>& shaders = pRenderContext->GetShaderCollections()->GetShaders(engine::StringCrc{ newInfo.GetProgramName() });
 
 		for (const auto& shader : shaders)
 		{
@@ -111,16 +111,16 @@ void ShaderBuilder::BuildShaderInfos(engine::RenderContext* pRenderContext, Task
 				// No uber shader support for VS and CS.
 				TaskHandle handle = ResourceBuilder::Get().AddShaderBuildTask(shaderType,
 					inputVSFilePath.c_str(), outputVSFilePath.c_str(), "", callbacks);
-				newInfo.m_taskHandles.insert(handle);
+				newInfo.AddTaskHandle(handle);
 
 			}
 			else if (engine::ShaderType::Fragment == shaderType)
 			{
 				std::string inputFSFilePath = engine::Path::GetBuiltinShaderInputPath(shader.c_str());
-				std::string outputFSFilePath = engine::Path::GetShaderOutputPath(shader.c_str(), newInfo.m_featuresCombine);
+				std::string outputFSFilePath = engine::Path::GetShaderOutputPath(shader.c_str(), newInfo.GetFeaturesCombine());
 				TaskHandle handle = ResourceBuilder::Get().AddShaderBuildTask(engine::ShaderType::Fragment,
-					inputFSFilePath.c_str(), outputFSFilePath.c_str(), newInfo.m_featuresCombine.c_str(), callbacks);
-				newInfo.m_taskHandles.insert(handle);
+					inputFSFilePath.c_str(), outputFSFilePath.c_str(), newInfo.GetFeaturesCombine().c_str(), callbacks);
+				newInfo.AddTaskHandle(handle);
 			}
 			else
 			{
