@@ -310,71 +310,10 @@ void TestQuaternion()
 	//}
 }
 
-void Test()
-{
-	cd::Vec3f m_up = cd::Vec3f(0.0f, 1.0f, 0.0f);
-	cd::Vec3f m_front = cd::Vec3f(0.0f, 0.0f, 1.0f);
-	//cd::Quaternion rot1 = cd::Quaternion::FromAxisAngle(m_up, cd::Math::DegreeToRadian<float>(30.0f));
-	cd::Quaternion rot1 = cd::Quaternion::FromPitchYawRoll(0.0f, 30.0f, 0.0f);
-	m_up = rot1 * m_up;
-	m_front = rot1 * m_front;
-	//cd::Quaternion rot2 = cd::Quaternion::FromAxisAngle(m_up, cd::Math::DegreeToRadian(30.0f));
-	cd::Quaternion rot2 = cd::Quaternion::FromPitchYawRoll(0.0f, 30.0f, 0.0f);
-	m_up = rot2 * m_up;
-	m_front = rot2 * m_front;
-	//cd::Quaternion rot3 = cd::Quaternion::FromAxisAngle(m_front, cd::Math::DegreeToRadian(90.0f));
-	cd::Quaternion rot3 = cd::Quaternion::FromPitchYawRoll(0.0f, 0.0f, 90.0f);
-	m_up = rot3 * m_up;
-	m_front = rot3 * m_front;
-	int a = 0;
-}
-
-float D_GGX_TR(float NdotH, float a)
-{
-	float a2 = a * a;
-	float NdotH2 = NdotH * NdotH;
-
-	float nom = a2;
-	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-	denom = 3.1415 * denom * denom;
-
-	return nom / denom;
-}
-
-float G_SchlicksmithGGX(float dotNL, float dotNV, float roughness) {
-	float r = roughness + 1.0f;
-	float k = (r * r) / 8.0f;
-	float GL = dotNL / (dotNL * (1.0f - k) + k);
-	float GV = dotNV / (dotNV * (1.0f - k) + k);
-	return GL * GV;
-}
-
-float GeometrySchlickGGX(float NdotV, float k)
-{
-	float nom = NdotV;
-	float denom = NdotV * (1.0 - k) + k;
-
-	return nom / denom;
-}
-
-float GeometrySmith(float NdotV, float NdotL, float k)
-{
-	float ggx1 = GeometrySchlickGGX(NdotV, k);
-	float ggx2 = GeometrySchlickGGX(NdotL, k);
-	return ggx1 * ggx2;
-}
-
-cd::Vec3f fresnelSchlick(float cosTheta, cd::Vec3f F0)
-{
-	return F0 + cd::Vec3f(cd::Vec3f::One() - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
 int main()
 {
-	float deg = 3.1415926 / 180;
-	float r = 0.1;
-	float NdotV = std::cos(30 * deg);
-	float NdotL = std::cos(30 * deg);
-	float HdotV = NdotV;
-	float N = D_GGX_TR(r,)
+	TestVector();
+	TestQuaternion();
+
+	return 0;
 }
