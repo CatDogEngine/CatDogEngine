@@ -67,6 +67,19 @@ public:
 		std::variant<float, cd::Vec3f, cd::Vec4f> factor;
 	};
 
+	struct ToonParameters
+	{
+		bool isOpenOutLine = false;
+		cd::Vec3f outLineColor = cd::Vec3f::Zero();
+		float outLineSize = 0.5f;
+		cd::Vec3f firstShadowColor = cd::Vec3f::Zero();
+		cd::Vec3f secondShadowColor = cd::Vec3f::Zero();
+		cd::Vec4f rimLight = cd::Vec4f::Zero();
+		cd::Vec4f dividLine = cd::Vec4f::Zero();
+		cd::Vec4f specular = cd::Vec4f::Zero();
+		cd::Vec3f rimLightColor = cd::Vec3f::Zero();
+	};
+
 public:
 	MaterialComponent() = default;
 	MaterialComponent(const MaterialComponent&) = default;
@@ -157,30 +170,13 @@ public:
 	cd::BlendMode& GetBlendMode() { return m_blendMode; }
 	cd::BlendMode GetBlendMode() const { return m_blendMode; }
 
-	//OutLine parameters
-	void SetIsOpenOutLine(bool value) { m_isOpenOutLine = value; }
-	bool& GetIsOpenOutLine() { return m_isOpenOutLine; }
-	bool GetIsOpenOutLine() const { return m_isOpenOutLine; }
-
-	cd::Vec3f& GetOutLineColor() { return m_outLineColor; }
-	float& GetOutLineSize() { return m_outLineSize; }
-
 	void SetAlphaCutOff(float value) { m_alphaCutOff = value; }
 	float& GetAlphaCutOff() { return m_alphaCutOff; }
 	float GetAlphaCutOff() const { return m_alphaCutOff; }
 
-	cd::Vec4f& GetDividLine() { return m_dividLine; }
-	cd::Vec4f GetDividLine() const { return m_dividLine; }
-
-	cd::Vec4f& GetSpecular() { return m_specular; }
-	cd::Vec4f GetSpecular() const { return m_specular; }
-
-	cd::Vec3f& GetBaseColor() { return m_baseColor; }
-	cd::Vec3f& GetFirstShadowColor() { return m_firstShadowColor; }
-	cd::Vec3f& GetSecondShadowColor() { return m_SecondShadowColor; }
-
-	cd::Vec3f& GetRimColor() { return m_rimLightColor; }
-	cd::Vec4f& GetRimLight() { return m_rimLight; }
+	void SetToonParameters(ToonParameters toonParameters) { m_toonParameters = toonParameters; }
+	ToonParameters& GetToonParameters() { return m_toonParameters; }
+	ToonParameters GetToonParameters() const { return m_toonParameters; }
 private:
 	// Input
 	const cd::Material* m_pMaterialData = nullptr;
@@ -210,6 +206,7 @@ private:
 
 	// Output
 	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
+	ToonParameters m_toonParameters;
 };
 
 }

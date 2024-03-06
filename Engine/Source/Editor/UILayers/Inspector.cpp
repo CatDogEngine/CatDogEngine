@@ -275,25 +275,36 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 			ImGui::PopStyleVar();
 		}
 
-			ImGuiUtils::ImGuiBoolProperty("OutLine", pMaterialComponent->GetIsOpenOutLine());
-			ImGuiUtils::ColorPickerProperty("OutLineColor", pMaterialComponent->GetOutLineColor());
-			ImGuiUtils::ImGuiFloatProperty("OutLineSize", pMaterialComponent->GetOutLineSize(), cd::Unit::None, 0.0f, 100.0f, false, 0.1f);
-			ImGuiUtils::ColorPickerProperty("First Shadow Color", pMaterialComponent->GetFirstShadowColor());
-			ImGuiUtils::ColorPickerProperty("Second Color", pMaterialComponent->GetSecondShadowColor());
-			ImGuiUtils::ImGuiFloatProperty("FirsrShadow", pMaterialComponent->GetDividLine().x(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("FirstShadow Feather", pMaterialComponent->GetDividLine().y(), cd::Unit::None, 0.0001f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("SecondShadow", pMaterialComponent->GetDividLine().z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("SecondShadow Feather", pMaterialComponent->GetDividLine().w(), cd::Unit::None, 0.01f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("Specular Size", pMaterialComponent->GetSpecular().x(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("Specular Power", pMaterialComponent->GetSpecular().y(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("Specular Mask", pMaterialComponent->GetSpecular().z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("High Light Halo", pMaterialComponent->GetSpecular().w(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ColorPickerProperty("Rim Light Color", pMaterialComponent->GetRimColor());
-			ImGuiUtils::ImGuiFloatProperty("Rim Light Range", pMaterialComponent->GetRimLight().x(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("Rim Light Feather", pMaterialComponent->GetRimLight().y(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("Rim Light Itensity", pMaterialComponent->GetRimLight().z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			ImGuiUtils::ImGuiFloatProperty("Rim Light Mask", pMaterialComponent->GetRimLight().w(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+		// Cartoon
+		{
+			bool isOpen = ImGui::CollapsingHeader("Cartoon Material", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Selected);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+			ImGui::Separator();
+			if (isOpen)
+			{
+				ImGuiUtils::ImGuiBoolProperty("OutLine", pMaterialComponent->GetToonParameters().isOpenOutLine);
+				ImGuiUtils::ColorPickerProperty("OutLineColor", pMaterialComponent->GetToonParameters().outLineColor);
+				ImGuiUtils::ImGuiFloatProperty("OutLineSize", pMaterialComponent->GetToonParameters().outLineSize, cd::Unit::None, 0.0f, 100.0f, false, 0.1f);
+				ImGuiUtils::ColorPickerProperty("First Shadow Color", pMaterialComponent->GetToonParameters().firstShadowColor);
+				ImGuiUtils::ColorPickerProperty("Second Color", pMaterialComponent->GetToonParameters().secondShadowColor);
+				ImGuiUtils::ImGuiFloatProperty("FirsrShadow", pMaterialComponent->GetToonParameters().dividLine.x(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("FirstShadow Feather", pMaterialComponent->GetToonParameters().dividLine.y(), cd::Unit::None, 0.0001f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("SecondShadow", pMaterialComponent->GetToonParameters().dividLine.z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("SecondShadow Feather", pMaterialComponent->GetToonParameters().dividLine.w(), cd::Unit::None, 0.01f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("Specular Size", pMaterialComponent->GetToonParameters().specular.x(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("Specular Power", pMaterialComponent->GetToonParameters().specular.y(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("Specular Mask", pMaterialComponent->GetToonParameters().specular.z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("High Light Halo", pMaterialComponent->GetToonParameters().specular.w(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ColorPickerProperty("Rim Light Color", pMaterialComponent->GetToonParameters().rimLightColor);
+				ImGuiUtils::ImGuiFloatProperty("Rim Light Range", pMaterialComponent->GetToonParameters().rimLight.x(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("Rim Light Feather", pMaterialComponent->GetToonParameters().rimLight.y(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("Rim Light Itensity", pMaterialComponent->GetToonParameters().rimLight.z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+				ImGuiUtils::ImGuiFloatProperty("Rim Light Mask", pMaterialComponent->GetToonParameters().rimLight.w(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+			}
 
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+		}
 
 			// Shaders
 			{

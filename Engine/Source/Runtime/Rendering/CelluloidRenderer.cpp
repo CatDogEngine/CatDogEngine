@@ -99,25 +99,25 @@ namespace engine
 			textureSlotBindTable[textureInfo.slot] = true;
 			bgfx::setTexture(textureInfo.slot, bgfx::UniformHandle{ pTextureResource->GetSamplerHandle() }, bgfx::TextureHandle{ pTextureResource->GetTextureHandle() });
 		}
-			constexpr StringCrc dividLineCrc(dividLine);
-			GetRenderContext()->FillUniform(dividLineCrc, pMaterialComponent->GetDividLine().begin(), 1);
+		constexpr StringCrc dividLineCrc(dividLine);
+		GetRenderContext()->FillUniform(dividLineCrc, pMaterialComponent->GetToonParameters().dividLine.begin(), 1);
 
-			constexpr StringCrc specularCrc(specular);
-			GetRenderContext()->FillUniform(specularCrc, pMaterialComponent->GetSpecular().begin(), 1);
+		constexpr StringCrc specularCrc(specular);
+		GetRenderContext()->FillUniform(specularCrc, pMaterialComponent->GetToonParameters().specular.begin(), 1);
 
-			constexpr StringCrc firstShadowColorCrc(firstShadowColor);
-			GetRenderContext()->FillUniform(firstShadowColorCrc, pMaterialComponent->GetFirstShadowColor().begin(), 1);
+		constexpr StringCrc firstShadowColorCrc(firstShadowColor);
+		GetRenderContext()->FillUniform(firstShadowColorCrc, pMaterialComponent->GetToonParameters().firstShadowColor.begin(), 1);
 
-			constexpr StringCrc secondShadowColorCrc(secondShadowColor);
-			GetRenderContext()->FillUniform(secondShadowColorCrc, pMaterialComponent->GetSecondShadowColor().begin(), 1);
+		constexpr StringCrc secondShadowColorCrc(secondShadowColor);
+		GetRenderContext()->FillUniform(secondShadowColorCrc, pMaterialComponent->GetToonParameters().secondShadowColor.begin(), 1);
 
-			constexpr StringCrc rimLightColorCrc(rimLightColor);
-			GetRenderContext()->FillUniform(rimLightColorCrc, pMaterialComponent->GetRimColor().begin(), 1);
+		constexpr StringCrc rimLightColorCrc(rimLightColor);
+		GetRenderContext()->FillUniform(rimLightColorCrc, pMaterialComponent->GetToonParameters().rimLightColor.begin(), 1);
 
-			constexpr StringCrc rimLightCrc(rimLight);
-			GetRenderContext()->FillUniform(rimLightCrc, pMaterialComponent->GetRimLight().begin(), 1);
+		constexpr StringCrc rimLightCrc(rimLight);
+		GetRenderContext()->FillUniform(rimLightCrc, pMaterialComponent->GetToonParameters().rimLight.begin(), 1);
 
-			GetRenderContext()->Submit(GetViewID(), pMaterialComponent->GetShaderProgramName(), pMaterialComponent->GetFeaturesCombine());
+		GetRenderContext()->Submit(GetViewID(), pMaterialComponent->GetShaderProgramName(), pMaterialComponent->GetFeaturesCombine());
 		}
 	}
 

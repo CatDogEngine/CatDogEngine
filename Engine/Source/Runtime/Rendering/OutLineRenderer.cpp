@@ -57,7 +57,7 @@ void OutLineRenderer::Render(float deltaTime)
 		}
 
 		MaterialComponent* pMaterialComponent = m_pCurrentSceneWorld->GetMaterialComponent(entity);
-		if (!pMaterialComponent->GetIsOpenOutLine())
+		if (!pMaterialComponent->GetToonParameters().isOpenOutLine)
 		{
 			continue;
 		}
@@ -68,10 +68,10 @@ void OutLineRenderer::Render(float deltaTime)
 		}
 
 		constexpr StringCrc outLineColorCrc(outLineColor);
-		GetRenderContext()->FillUniform(outLineColorCrc, pMaterialComponent->GetOutLineColor().begin(), 1);
+		GetRenderContext()->FillUniform(outLineColorCrc, pMaterialComponent->GetToonParameters().outLineColor.begin(), 1);
 
 		constexpr StringCrc outLineSizeCrc(outLineSize);
-		GetRenderContext()->FillUniform(outLineSizeCrc, &pMaterialComponent->GetOutLineSize(), 1);
+		GetRenderContext()->FillUniform(outLineSizeCrc, &pMaterialComponent->GetToonParameters().outLineSize, 1);
 
 		constexpr uint64_t state = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CW;
 		bgfx::setState(state);
