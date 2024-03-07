@@ -279,7 +279,9 @@ void MeshResource::SubmitIndexBuffer()
 void MeshResource::FreeMeshData()
 {
 	m_vertexBuffer.clear();
+	VertexBuffer().swap(m_vertexBuffer);
 	m_indexBuffers.clear();
+	std::vector<IndexBuffer>().swap(m_indexBuffers);
 }
 
 void MeshResource::DestroyVertexBufferHandle()

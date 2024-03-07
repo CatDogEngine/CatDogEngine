@@ -32,6 +32,7 @@ namespace engine
 
 class MaterialType;
 class RenderContext;
+class ShaderResource;
 class TextureResource;
 
 class MaterialComponent final
@@ -99,7 +100,7 @@ public:
 	std::set<ShaderFeature>& GetShaderFeatures() { return m_shaderFeatures; }
 	const std::set<ShaderFeature>& GetShaderFeatures() const { return m_shaderFeatures; }
 	const std::string& GetFeaturesCombine();
-
+	
 	// Texture data.
 	TextureResource* GetTextureResource(cd::MaterialTextureType textureType) const;
 	void SetTextureResource(cd::MaterialTextureType textureType, cd::Vec2f uvOffset, cd::Vec2f uvScale, TextureResource* pTextureResource);
@@ -178,6 +179,7 @@ private:
 	std::vector<TextureBlob> m_cacheTextureBlobs;
 
 	// Output
+	ShaderResource* pShaderResource = nullptr;
 	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
 };
 

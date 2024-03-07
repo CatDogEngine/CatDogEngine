@@ -216,6 +216,7 @@ void TextureResource::BuildTextureHandle()
 void TextureResource::FreeTextureData()
 {
 	m_textureRawData.clear();
+	TextureRawData().swap(m_textureRawData);
 
 	if (m_textureImageData)
 	{

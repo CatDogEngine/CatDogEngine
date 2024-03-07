@@ -15,6 +15,13 @@ enum class ShaderType
 	Fragment
 };
 
+enum class ShaderProgramType
+{
+	None,
+	Standard,
+	Compute,
+};
+
 inline const ShaderType GetShaderType(const std::string& fileName)
 {
 	if (fileName._Starts_with("vs_") || fileName._Starts_with("VS_"))

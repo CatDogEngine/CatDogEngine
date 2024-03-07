@@ -26,6 +26,7 @@
 #include "Rendering/PostProcessRenderer.h"
 #include "Rendering/RenderContext.h"
 #include "Rendering/Resources/MeshResource.h"
+#include "Rendering/Resources/ShaderResource.h"
 #include "Rendering/Resources/ResourceContext.h"
 #include "Rendering/SkeletonRenderer.h"
 #include "Rendering/SkyboxRenderer.h"
@@ -272,6 +273,26 @@ void EditorApp::InitMaterialType()
 	m_pRenderContext->RegisterShaderProgram(AnimationProgramCrc, { "vs_animation", "fs_animation" });
 	m_pRenderContext->RegisterShaderProgram(TerrainProgramCrc, { "vs_terrain", "fs_terrain" });
 	m_pRenderContext->RegisterShaderProgram(ParticleProgramCrc, { "vs_particle","fs_particle" });
+
+	engine::ShaderResource* pWorldProgramShaderResource = m_pResourceContext->AddShaderResource(WorldProgramCrc);
+	pWorldProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
+	pWorldProgramShaderResource->GetVertexShaderInfo().name = "vs_PBR";
+	pWorldProgramShaderResource->GetFragmentShaderInfo().name = "fs_PBR";
+
+	engine::ShaderResource* pAnimationProgramShaderResource = m_pResourceContext->AddShaderResource(AnimationProgramCrc);
+	pAnimationProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
+	pAnimationProgramShaderResource->GetVertexShaderInfo().name = "vs_animation";
+	pAnimationProgramShaderResource->GetFragmentShaderInfo().name = "fs_animation";
+
+	engine::ShaderResource* pTerrainProgramShaderResource = m_pResourceContext->AddShaderResource(TerrainProgramCrc);
+	pTerrainProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
+	pTerrainProgramShaderResource->GetVertexShaderInfo().name = "vs_terrain";
+	pTerrainProgramShaderResource->GetFragmentShaderInfo().name = "fs_terrain";
+
+	engine::ShaderResource* pParticleProgramShaderResource = m_pResourceContext->AddShaderResource(ParticleProgramCrc);
+	pParticleProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
+	pParticleProgramShaderResource->GetVertexShaderInfo().name = "vs_particle";
+	pParticleProgramShaderResource->GetFragmentShaderInfo().name = "fs_particle";
 
 	m_pSceneWorld = std::make_unique<engine::SceneWorld>();
 	m_pSceneWorld->CreatePBRMaterialType(WorldProgram, IsAtmosphericScatteringEnable());
