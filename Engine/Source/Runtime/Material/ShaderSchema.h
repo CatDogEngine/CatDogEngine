@@ -50,7 +50,7 @@ public:
 	void CleanBuild();
 	void CleanAll();
 
-	const ShaderFeatureSet GetConflictFeatureSet(const ShaderFeature feature) const;
+	std::optional<ShaderFeatureSet> GetConflictFeatureSet(const ShaderFeature feature) const;
 
 	std::string GetFeaturesCombine(const ShaderFeatureSet& featureSet) const;
 	StringCrc GetFeaturesCombineCrc(const ShaderFeatureSet& featureSet) const;

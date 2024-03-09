@@ -26,7 +26,7 @@ void ShaderResource::Update()
 			// Read bin shader file
 
 			auto& shader = m_shaders[0];
-			if (shader.blob.empty())
+			if (shader.binBlob.empty())
 			{
 				auto& shaderBinPath = shader.binPath;
 				if (shaderBinPath.empty())
@@ -34,14 +34,14 @@ void ShaderResource::Update()
 					shaderBinPath = Path::GetShaderOutputPath(shader.name.c_str());
 				}
 
-				shader.blob = engine::ResourceLoader::LoadFile(shaderBinPath.c_str());
+				shader.binBlob = engine::ResourceLoader::LoadFile(shaderBinPath.c_str());
 				SetStatus(ResourceStatus::Loaded);
 			}
 
 			if (ShaderProgramType::Standard == m_type)
 			{
 				auto& fragmentShader = m_shaders[1];
-				if (fragmentShader.blob.empty())
+				if (fragmentShader.binBlob.empty())
 				{
 					auto& fragmentShaderBinPath = fragmentShader.binPath;
 					if (fragmentShaderBinPath.empty())
@@ -49,7 +49,7 @@ void ShaderResource::Update()
 						fragmentShaderBinPath = Path::GetShaderOutputPath(fragmentShader.name.c_str());
 					}
 
-					fragmentShader.blob = engine::ResourceLoader::LoadFile(fragmentShaderBinPath.c_str());
+					fragmentShader.binBlob = engine::ResourceLoader::LoadFile(fragmentShaderBinPath.c_str());
 				}
 			}
 
@@ -59,7 +59,7 @@ void ShaderResource::Update()
 		{
 			// Check something
 
-			if (!(ShaderProgramType::Standard == m_type && m_shaders[1].blob.empty()))
+			if (!m_shaders[0].binBlob.empty() && !(ShaderProgramType::Standard == m_type && m_shaders[1].binBlob.empty()))
 			{
 				SetStatus(ResourceStatus::Building);
 			}
@@ -180,13 +180,13 @@ void ShaderResource::SetComputeShaderInfo(ShaderInfo info)
 
 bool ShaderResource::BuildShaderHandle()
 {
-	if (m_shaders[0].blob.empty())
+	if (m_shaders[0].binBlob.empty())
 	{
 		return false;
 	}
 
 	assert(!bgfx::isValid(bgfx::ShaderHandle{ m_shaders[0].handle }));
-	bgfx::ShaderHandle handle = bgfx::createShader(bgfx::makeRef(m_shaders[0].blob.data(), static_cast<uint32_t>(m_shaders[0].blob.size())));
+	bgfx::ShaderHandle handle = bgfx::createShader(bgfx::makeRef(m_shaders[0].binBlob.data(), static_cast<uint32_t>(m_shaders[0].binBlob.size())));
 	if (!bgfx::isValid(handle))
 	{
 		FreeShaderData(0);
@@ -196,13 +196,13 @@ bool ShaderResource::BuildShaderHandle()
 
 	if (ShaderProgramType::Standard == m_type)
 	{
-		if (m_shaders[1].blob.empty())
+		if (m_shaders[1].binBlob.empty())
 		{
 			return false;
 		}
 
 		assert(!bgfx::isValid(bgfx::ShaderHandle{ m_shaders[1].handle }));
-		bgfx::ShaderHandle fragmentShaderHandle = bgfx::createShader(bgfx::makeRef(m_shaders[1].blob.data(), static_cast<uint32_t>(m_shaders[1].blob.size())));
+		bgfx::ShaderHandle fragmentShaderHandle = bgfx::createShader(bgfx::makeRef(m_shaders[1].binBlob.data(), static_cast<uint32_t>(m_shaders[1].binBlob.size())));
 		if (!bgfx::isValid(fragmentShaderHandle))
 		{
 			FreeShaderData(1);
@@ -241,8 +241,8 @@ bool ShaderResource::BuildProgramHandle()
 
 void ShaderResource::FreeShaderData(size_t index)
 {
-	m_shaders[index].blob.clear();
-	ShaderBlob().swap(m_shaders[index].blob);
+	m_shaders[index].binBlob.clear();
+	ShaderBlob().swap(m_shaders[index].binBlob);
 }
 
 void ShaderResource::DistoryShaderHandle(size_t index)

@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-// The granularity of the ShaderResource is "per Uber Shader Program".
-
 namespace engine
 {
 
@@ -23,7 +21,7 @@ public:
 		std::string name;
 		std::string binPath;
 
-		ShaderBlob blob;
+		ShaderBlob binBlob;
 		uint16_t handle = UINT16_MAX;
 	};
 
@@ -78,6 +76,7 @@ private:
 	uint16_t m_programHandle = UINT16_MAX;
 
 	// TODO : Uber Shader
+	// TODO : Hot compile and reload
 };
 
 }

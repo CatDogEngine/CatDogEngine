@@ -303,13 +303,15 @@ void ParticleEmitterComponent::ActivateShaderFeature(ShaderFeature feature)
 		return;
 	}
 
-	for (const auto& conflict : m_pParticleMaterialType->GetShaderSchema().GetConflictFeatureSet(feature))
+	if (const auto& optConflictFeatureSet = m_pParticleMaterialType->GetShaderSchema().GetConflictFeatureSet(feature); optConflictFeatureSet.has_value())
 	{
-		m_shaderFeatures.erase(conflict);
+		for (const auto& conflictFeature : optConflictFeatureSet.value())
+		{
+			m_shaderFeatures.erase(conflictFeature);
+		}
 	}
 
 	m_shaderFeatures.insert(cd::MoveTemp(feature));
-
 	m_isShaderFeatureDirty = true;
 }
 

@@ -82,13 +82,15 @@ void MaterialComponent::ActivateShaderFeature(ShaderFeature feature)
 		return;
 	}
 
-	for (const auto& conflict : m_pMaterialType->GetShaderSchema().GetConflictFeatureSet(feature))
+	if (const auto& optConflictFeatureSet = m_pMaterialType->GetShaderSchema().GetConflictFeatureSet(feature); optConflictFeatureSet.has_value())
 	{
-		m_shaderFeatures.erase(conflict);
+		for (const auto& conflictFeature : optConflictFeatureSet.value())
+		{
+			m_shaderFeatures.erase(conflictFeature);
+		}
 	}
 
 	m_shaderFeatures.insert(cd::MoveTemp(feature));
-
 	m_isShaderFeatureDirty = true;
 }
 
