@@ -177,6 +177,11 @@ public:
 	void SetToonParameters(ToonParameters toonParameters) { m_toonParameters = toonParameters; }
 	ToonParameters& GetToonParameters() { return m_toonParameters; }
 	ToonParameters GetToonParameters() const { return m_toonParameters; }
+
+	void SetIblStrengeth(float strength) { m_iblStrength = strength; }
+	float& GetIblStrengeth() { return m_iblStrength; }
+	float GetIblStrengeth() const { return m_iblStrength; }
+
 private:
 	// Input
 	std::string m_name;
@@ -193,8 +198,9 @@ private:
 	std::string m_featureCombine;
 
 	// Output
-	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
+	float m_iblStrength = 0.5f;
 	ToonParameters m_toonParameters;
+	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
 };
 
 }
