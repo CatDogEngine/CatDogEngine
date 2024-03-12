@@ -23,13 +23,12 @@ namespace
 {
 
 constexpr const char* albedoUVOffsetAndScale = "u_albedoUVOffsetAndScale";
-constexpr const char* dividLine = "u_dividLine";
-constexpr const char* specular = "u_specular";
-constexpr const char* rimLight = "u_rimLight";
-
-constexpr const char* firstShadowColor = "u_firstShadowColor";
-constexpr const char* secondShadowColor = "u_secondShadowColor";
-constexpr const char* rimLightColor = "u_rimLightColor";
+constexpr const char* dividLine              = "u_dividLine";
+constexpr const char* specular               = "u_specular";
+constexpr const char* rimLight               = "u_rimLight";
+constexpr const char* firstShadowColor       = "u_firstShadowColor";
+constexpr const char* secondShadowColor      = "u_secondShadowColor";
+constexpr const char* rimLightColor          = "u_rimLightColor";
 
 constexpr uint64_t samplerFlags = BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP;
 constexpr uint64_t defaultRenderingState = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS;
