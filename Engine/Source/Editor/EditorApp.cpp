@@ -15,6 +15,7 @@
 #include "Rendering/AnimationRenderer.h"
 #include "Rendering/BlendShapeRenderer.h"
 #include "Rendering/BlitRenderTargetPass.h"
+#include "Rendering/CelluloidRenderer.h"
 #ifdef ENABLE_DDGI
 #include "Rendering/DDGIRenderer.h"
 #endif
@@ -35,6 +36,7 @@
 #include "Rendering/TerrainRenderer.h"
 #include "Rendering/WorldRenderer.h"
 #include "Rendering/ParticleForceFieldRenderer.h"
+#include "Rendering/OutLineRenderer.h"
 #include "Rendering/ParticleRenderer.h"
 #include "Resources/FileWatcher.h"
 #include "Resources/ResourceBuilder.h"
@@ -263,16 +265,19 @@ void EditorApp::InitMaterialType()
 	constexpr const char* AnimationProgram = "AnimationProgram";
 	constexpr const char* TerrainProgram = "TerrainProgram";
 	constexpr const char* ParticleProgram = "ParticleProgram";
+	constexpr const char* CelluloidProgram = "CelluloidProgram";
 
 	constexpr engine::StringCrc WorldProgramCrc{ WorldProgram };
 	constexpr engine::StringCrc AnimationProgramCrc{ AnimationProgram };
 	constexpr engine::StringCrc TerrainProgramCrc{ TerrainProgram };
 	constexpr engine::StringCrc ParticleProgramCrc{ ParticleProgram};
+	constexpr engine::StringCrc CelluloidProgramCrc{ CelluloidProgram };
 
 	m_pRenderContext->RegisterShaderProgram(WorldProgramCrc, { "vs_PBR", "fs_PBR" });
 	m_pRenderContext->RegisterShaderProgram(AnimationProgramCrc, { "vs_animation", "fs_animation" });
 	m_pRenderContext->RegisterShaderProgram(TerrainProgramCrc, { "vs_terrain", "fs_terrain" });
 	m_pRenderContext->RegisterShaderProgram(ParticleProgramCrc, { "vs_particle","fs_particle" });
+	m_pRenderContext->RegisterShaderProgram(CelluloidProgramCrc, { "vs_celluloid", "fs_celluloid" });
 
 	engine::ShaderResource* pWorldProgramShaderResource = m_pResourceContext->AddShaderResource(WorldProgramCrc);
 	pWorldProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
@@ -299,6 +304,7 @@ void EditorApp::InitMaterialType()
 	m_pSceneWorld->CreateAnimationMaterialType(AnimationProgram);
 	m_pSceneWorld->CreateTerrainMaterialType(TerrainProgram);
 	m_pSceneWorld->CreateParticleMaterialType(ParticleProgram);
+	m_pSceneWorld->CreateCelluloidMaterialType(CelluloidProgram);
 }
 
 void EditorApp::InitEditorCameraEntity()
@@ -552,6 +558,16 @@ void EditorApp::InitEngineRenderers()
 	m_pSceneRenderer = pSceneRenderer.get();
 	pSceneRenderer->SetSceneWorld(m_pSceneWorld.get());
 	AddEngineRenderer(cd::MoveTemp(pSceneRenderer));
+
+	auto pCelluloidRenderer = std::make_unique<engine::CelluloidRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	m_pCelluloidRenderer = pCelluloidRenderer.get();
+	pCelluloidRenderer->SetSceneWorld(m_pSceneWorld.get());
+	AddEngineRenderer(cd::MoveTemp(pCelluloidRenderer));
+
+	auto pOutLineRenderer = std::make_unique<engine::OutLineRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	m_pOutLineRenderer = pOutLineRenderer.get();
+	pOutLineRenderer->SetSceneWorld(m_pSceneWorld.get());
+	AddEngineRenderer(cd::MoveTemp(pOutLineRenderer));
 
 	auto pBlendShapeRenderer = std::make_unique<engine::BlendShapeRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
 	pBlendShapeRenderer->SetSceneWorld(m_pSceneWorld.get());
