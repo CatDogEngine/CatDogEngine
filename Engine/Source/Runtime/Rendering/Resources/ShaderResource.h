@@ -39,9 +39,9 @@ public:
 	ShaderProgramType GetType() const { return m_type; }
 	void SetType(ShaderProgramType type) { m_type = type; }
 
-	std::string& GetName() { return m_programName; }
-	const std::string& GetName() const { return m_programName; }
-	void SetName(std::string name) { m_programName = cd::MoveTemp(name); }
+	std::string& GetName() { return m_name; }
+	const std::string& GetName() const { return m_name; }
+	void SetName(std::string name) { m_name = cd::MoveTemp(name); }
 
 	ShaderInfo& GetVertexShaderInfo();
 	const ShaderInfo& GetVertexShaderInfo() const;
@@ -61,6 +61,7 @@ private:
 	bool BuildShaderHandle();
 	bool BuildProgramHandle();
 
+	void ClearShaderData(size_t index);
 	void FreeShaderData(size_t index);
 	void DistoryShaderHandle(size_t index);
 	void DistoryProgramHandle();
@@ -69,7 +70,7 @@ private:
 
 	// Runtime
 	ShaderProgramType m_type = ShaderProgramType::None;
-	std::string m_programName;
+	std::string m_name;
 	uint32_t m_recycleCount = 0;
 
 	// GPU

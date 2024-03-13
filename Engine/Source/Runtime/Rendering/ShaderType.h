@@ -10,19 +10,20 @@ namespace engine
 enum class ShaderType
 {
 	None,
-	Compute,
 	Vertex,
-	Fragment
+	Fragment,
+	Compute,
 };
 
 enum class ShaderProgramType
 {
 	None,
 	Standard,
+	VertexOnly,
 	Compute,
 };
 
-inline const ShaderType GetShaderType(const std::string& fileName)
+inline ShaderType GetShaderType(const std::string& fileName)
 {
 	if (fileName._Starts_with("vs_") || fileName._Starts_with("VS_"))
 	{

@@ -116,8 +116,8 @@ void ShaderResource::Update()
 void ShaderResource::Reset()
 {
 	// Clear everything
-	FreeShaderData(0);
-	FreeShaderData(1);
+	ClearShaderData(0);
+	ClearShaderData(1);
 	DistoryShaderHandle(0);
 	DistoryShaderHandle(1);
 	DistoryProgramHandle();
@@ -126,19 +126,19 @@ void ShaderResource::Reset()
 
 ShaderResource::ShaderInfo& ShaderResource::GetVertexShaderInfo()
 {
-	assert(ShaderProgramType::Standard == m_type);
+	assert(ShaderProgramType::Standard == m_type || ShaderProgramType::VertexOnly == m_type);
 	return m_shaders[0];
 }
 
 const ShaderResource::ShaderInfo& ShaderResource::GetVertexShaderInfo() const
 {
-	assert(ShaderProgramType::Standard == m_type);
+	assert(ShaderProgramType::Standard == m_type || ShaderProgramType::VertexOnly == m_type);
 	return m_shaders[0];
 }
 
 void ShaderResource::SetVertexShaderInfo(ShaderInfo info)
 {
-	assert(ShaderProgramType::Standard == m_type);
+	assert(ShaderProgramType::Standard == m_type || ShaderProgramType::VertexOnly == m_type);
 	m_shaders[0] = cd::MoveTemp(info);
 }
 
@@ -189,7 +189,7 @@ bool ShaderResource::BuildShaderHandle()
 	bgfx::ShaderHandle handle = bgfx::createShader(bgfx::makeRef(m_shaders[0].binBlob.data(), static_cast<uint32_t>(m_shaders[0].binBlob.size())));
 	if (!bgfx::isValid(handle))
 	{
-		FreeShaderData(0);
+		ClearShaderData(0);
 		return false;
 	}
 	m_shaders[0].handle = handle.idx;
@@ -198,6 +198,8 @@ bool ShaderResource::BuildShaderHandle()
 	{
 		if (m_shaders[1].binBlob.empty())
 		{
+			ClearShaderData(0);
+			DistoryShaderHandle(0);
 			return false;
 		}
 
@@ -205,7 +207,9 @@ bool ShaderResource::BuildShaderHandle()
 		bgfx::ShaderHandle fragmentShaderHandle = bgfx::createShader(bgfx::makeRef(m_shaders[1].binBlob.data(), static_cast<uint32_t>(m_shaders[1].binBlob.size())));
 		if (!bgfx::isValid(fragmentShaderHandle))
 		{
-			FreeShaderData(1);
+			ClearShaderData(0);
+			ClearShaderData(1);
+			DistoryShaderHandle(0);
 			return false;
 		}
 		m_shaders[1].handle = fragmentShaderHandle.idx;
@@ -222,13 +226,13 @@ bool ShaderResource::BuildProgramHandle()
 	{
 		m_programHandle = bgfx::createProgram(bgfx::ShaderHandle{ m_shaders[0].handle }, bgfx::ShaderHandle{ m_shaders[1].handle }).idx;
 	}
-	else if (ShaderProgramType::Compute == m_type)
+	else if (ShaderProgramType::Compute == m_type || ShaderProgramType::VertexOnly == m_type)
 	{
 		m_programHandle = bgfx::createProgram(bgfx::ShaderHandle{ m_shaders[0].handle }).idx;
 	}
 	else
 	{
-		CD_WARN("Unknow shader program type of {}!", m_programName);
+		CD_WARN("Unknow shader program type of {}!", m_name);
 	}
 
 	if (!bgfx::isValid(bgfx::ProgramHandle{ m_programHandle }))
@@ -239,9 +243,14 @@ bool ShaderResource::BuildProgramHandle()
 	return true;
 }
 
-void ShaderResource::FreeShaderData(size_t index)
+void ShaderResource::ClearShaderData(size_t index)
 {
 	m_shaders[index].binBlob.clear();
+}
+
+void ShaderResource::FreeShaderData(size_t index)
+{
+	ClearShaderData(index);
 	ShaderBlob().swap(m_shaders[index].binBlob);
 }
 
