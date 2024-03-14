@@ -273,31 +273,23 @@ void EditorApp::InitMaterialType()
 	constexpr engine::StringCrc ParticleProgramCrc{ ParticleProgram};
 	constexpr engine::StringCrc CelluloidProgramCrc{ CelluloidProgram };
 
-	m_pRenderContext->RegisterShaderProgram(WorldProgramCrc, { "vs_PBR", "fs_PBR" });
-	m_pRenderContext->RegisterShaderProgram(AnimationProgramCrc, { "vs_animation", "fs_animation" });
-	m_pRenderContext->RegisterShaderProgram(TerrainProgramCrc, { "vs_terrain", "fs_terrain" });
-	m_pRenderContext->RegisterShaderProgram(ParticleProgramCrc, { "vs_particle","fs_particle" });
-	m_pRenderContext->RegisterShaderProgram(CelluloidProgramCrc, { "vs_celluloid", "fs_celluloid" });
+	// Init shader without features.
+	auto InitStandard = [&](const char* programName, engine::StringCrc programNameCrc, const char* vsName, const char* fsName)
+	{
+		m_pRenderContext->RegisterShaderProgram(programNameCrc, { vsName, fsName });
+		engine::ShaderResource* pShaderResource = m_pResourceContext->AddShaderResource(programNameCrc);
+		pShaderResource->SetName(programName);
+		pShaderResource->SetType(engine::ShaderProgramType::Standard);
+		pShaderResource->SetShaders(vsName, fsName);
 
-	engine::ShaderResource* pWorldProgramShaderResource = m_pResourceContext->AddShaderResource(WorldProgramCrc);
-	pWorldProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
-	pWorldProgramShaderResource->GetVertexShaderInfo().name = "vs_PBR";
-	pWorldProgramShaderResource->GetFragmentShaderInfo().name = "fs_PBR";
+		m_pRenderContext->AddShaderResource(programNameCrc, pShaderResource);
+	};
 
-	engine::ShaderResource* pAnimationProgramShaderResource = m_pResourceContext->AddShaderResource(AnimationProgramCrc);
-	pAnimationProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
-	pAnimationProgramShaderResource->GetVertexShaderInfo().name = "vs_animation";
-	pAnimationProgramShaderResource->GetFragmentShaderInfo().name = "fs_animation";
-
-	engine::ShaderResource* pTerrainProgramShaderResource = m_pResourceContext->AddShaderResource(TerrainProgramCrc);
-	pTerrainProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
-	pTerrainProgramShaderResource->GetVertexShaderInfo().name = "vs_terrain";
-	pTerrainProgramShaderResource->GetFragmentShaderInfo().name = "fs_terrain";
-
-	engine::ShaderResource* pParticleProgramShaderResource = m_pResourceContext->AddShaderResource(ParticleProgramCrc);
-	pParticleProgramShaderResource->SetType(engine::ShaderProgramType::Standard);
-	pParticleProgramShaderResource->GetVertexShaderInfo().name = "vs_particle";
-	pParticleProgramShaderResource->GetFragmentShaderInfo().name = "fs_particle";
+	InitStandard(WorldProgram, WorldProgramCrc, "vs_PBR", "fs_PBR");
+	InitStandard(AnimationProgram, AnimationProgramCrc, "vs_animation", "fs_animation" );
+	InitStandard(TerrainProgram, TerrainProgramCrc, "vs_terrain", "fs_terrain" );
+	InitStandard(ParticleProgram, ParticleProgramCrc, "vs_particle","fs_particle" );
+	InitStandard(CelluloidProgram, CelluloidProgramCrc, "vs_celluloid", "fs_celluloid");
 
 	m_pSceneWorld = std::make_unique<engine::SceneWorld>();
 	m_pSceneWorld->CreatePBRMaterialType(WorldProgram, IsAtmosphericScatteringEnable());
@@ -429,6 +421,9 @@ void EditorApp::UpdateMaterials()
 			continue;
 		}
 
+		// Now we hive this and this, its enougth to:
+		//   1. Create a new ShaderResource
+		//   2. Add it to MaterialComponent
 		const std::string& programName = pMaterialComponent->GetShaderProgramName();
 		const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
 

@@ -7,6 +7,7 @@
 #include "Rendering/ShaderCollections.h"
 #include "Rendering/ShaderType.h"
 #include "Rendering/Utility/VertexLayoutUtility.h"
+#include "Rendering/Resources/ShaderResource.h"
 #include "Resources/ResourceLoader.h"
 
 #include <bgfx/bgfx.h>
@@ -177,6 +178,27 @@ uint16_t RenderContext::CreateView()
 {
 	assert(m_currentViewCount < MaxViewCount && "Overflow the max count of views.");
 	return m_currentViewCount++;
+}
+
+void RenderContext::AddShaderResource(StringCrc name, ShaderResource* pShaderResource)
+{
+	m_shaderResources[name] = pShaderResource;
+}
+
+void RenderContext::DeleteShaderResource(StringCrc name)
+{
+	m_shaderResources.erase(name);
+}
+
+ShaderResource* RenderContext::GetShaderResource(StringCrc name)
+{
+	const auto& it = m_shaderResources.find(name);
+	if (it != m_shaderResources.end())
+	{
+		return it->second;
+	}
+
+	return nullptr;
 }
 
 void RenderContext::RegisterShaderProgram(StringCrc programNameCrc, std::initializer_list<std::string> names)

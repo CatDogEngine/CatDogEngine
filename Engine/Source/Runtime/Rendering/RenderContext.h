@@ -24,6 +24,7 @@ class Camera;
 class Renderer;
 class ResourceContext;
 class ShaderCollections;
+class ShaderResource;
 
 static constexpr uint8_t MaxViewCount = 255;
 static constexpr uint8_t MaxRenderTargetCount = 255;
@@ -62,9 +63,14 @@ public:
 	void ResetViewCount() { m_currentViewCount = 0; }
 	uint16_t GetCurrentViewCount() const { return m_currentViewCount; }
 
-	/////////////////////////////////////////////////////////////////////
-	// Shader collections apis
-	/////////////////////////////////////////////////////////////////////
+	// Shader collections
+	void AddShaderResource(StringCrc name, ShaderResource* pShaderResource);
+	void DeleteShaderResource(StringCrc name);
+	ShaderResource* GetShaderResource(StringCrc name);
+	void SetShaderResources(std::map<StringCrc, ShaderResource*> resources) { m_shaderResources = cd::MoveTemp(resources); }
+	std::map<StringCrc, ShaderResource*>& GetShaderResources() { return m_shaderResources; }
+	const std::map<StringCrc, ShaderResource*>& GetShaderResources() const { return m_shaderResources; }
+
 	void SetShaderCollections(ShaderCollections* pShaderCollections) { m_pShaderCollections = pShaderCollections; }
 	const ShaderCollections* GetShaderCollections() const { return m_pShaderCollections; }
 
@@ -92,18 +98,12 @@ public:
 	std::set<uint32_t>& GetCompileFailedEntities() { return m_compileFailedEntities; }
 	const std::set<uint32_t>& GetCompileFailedEntities() const { return m_compileFailedEntities; }
 
-	/////////////////////////////////////////////////////////////////////
-	// Shader blob apis
-	/////////////////////////////////////////////////////////////////////
+	// TODO : Delete these
 	const RenderContext::ShaderBlob& AddShaderBlob(StringCrc shaderNameCrc, ShaderBlob blob);
 	const ShaderBlob& GetShaderBlob(StringCrc shaderNameCrc) const;
 
-	/////////////////////////////////////////////////////////////////////
-	// Resource related apis
-	/////////////////////////////////////////////////////////////////////
-
+	// Resources
 	bool IsShaderProgramValid(const std::string& programName, const std::string& featuresCombine = "") const;
-
 	void SetShaderProgramHandle(const std::string& programName, bgfx::ProgramHandle handle, const std::string& featuresCombine = "");
 	bgfx::ProgramHandle GetShaderProgramHandle(const std::string& programName, const std::string& featuresCombine = "") const;
 
@@ -152,11 +152,14 @@ private:
 	std::unordered_map<StringCrc, uint16_t> m_textureHandleCaches;
 	std::unordered_map<StringCrc, uint16_t> m_uniformHandleCaches;
 
-	ShaderCollections* m_pShaderCollections = nullptr;
+	// Key : StringCrc(programName + featuresCombine), Value : ShaderResource pointer
+	// Store ShaderResource for every variant.
+	std::map<StringCrc, ShaderResource*> m_shaderResources;
 
+	// TODO : Delete all these
+	ShaderCollections* m_pShaderCollections = nullptr;
 	// Key : StringCrc(Program name), Value : Shader program handle
 	std::unordered_map<StringCrc, uint16_t> m_shaderProgramHandles;
-
 	// Key : StringCrc(Shader name), Value : Shader handle
 	std::unordered_map<StringCrc, uint16_t> m_shaderHandles;
 	// Key : StringCrc(Shader name), Value : Shader binary data

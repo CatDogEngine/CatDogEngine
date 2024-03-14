@@ -25,34 +25,10 @@ void ShaderResource::Update()
 		{
 			// Read bin shader file
 
-			auto& shader = m_shaders[0];
-			if (shader.binBlob.empty())
+			if (LoadShader())
 			{
-				auto& shaderBinPath = shader.binPath;
-				if (shaderBinPath.empty())
-				{
-					shaderBinPath = Path::GetShaderOutputPath(shader.name.c_str());
-				}
-
-				shader.binBlob = engine::ResourceLoader::LoadFile(shaderBinPath.c_str());
 				SetStatus(ResourceStatus::Loaded);
 			}
-
-			if (ShaderProgramType::Standard == m_type)
-			{
-				auto& fragmentShader = m_shaders[1];
-				if (fragmentShader.binBlob.empty())
-				{
-					auto& fragmentShaderBinPath = fragmentShader.binPath;
-					if (fragmentShaderBinPath.empty())
-					{
-						fragmentShaderBinPath = Path::GetShaderOutputPath(fragmentShader.name.c_str());
-					}
-
-					fragmentShader.binBlob = engine::ResourceLoader::LoadFile(fragmentShaderBinPath.c_str());
-				}
-			}
-
 			break;
 		}
 		case ResourceStatus::Loaded:
@@ -61,16 +37,16 @@ void ShaderResource::Update()
 
 			if (!m_shaders[0].binBlob.empty() && !(ShaderProgramType::Standard == m_type && m_shaders[1].binBlob.empty()))
 			{
-				SetStatus(ResourceStatus::Building);
+				// It seems no Rendering data for shader? Skip Building status.
+
+				SetStatus(ResourceStatus::Built);
 			}
 			break;
 		}
 		case ResourceStatus::Building:
 		{
 			// Build Rendering data
-			// It seems no Rendering data for shader?
 
-			SetStatus(ResourceStatus::Built);
 			break;
 		}
 		case ResourceStatus::Built:
@@ -122,6 +98,20 @@ void ShaderResource::Reset()
 	DistoryShaderHandle(1);
 	DistoryProgramHandle();
 	SetStatus(ResourceStatus::Loading);
+}
+
+void ShaderResource::SetShader(const std::string& name, const std::string& combine)
+{
+	m_shaders[0].name = name;
+	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(name.c_str(), combine);
+}
+
+void ShaderResource::SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine)
+{
+	m_shaders[0].name = vsName;
+	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(vsName.c_str(), combine);
+	m_shaders[1].name = fsName;
+	m_shaders[1].binPath = engine::Path::GetShaderOutputPath(fsName.c_str(), combine);
 }
 
 ShaderResource::ShaderInfo& ShaderResource::GetVertexShaderInfo()
@@ -176,6 +166,29 @@ void ShaderResource::SetComputeShaderInfo(ShaderInfo info)
 {
 	assert(ShaderProgramType::Compute == m_type);
 	m_shaders[0] = cd::MoveTemp(info);
+}
+
+bool ShaderResource::LoadShader()
+{
+	auto& shader = m_shaders[0];
+	if (!Path::FileExists(shader.binPath.c_str()))
+	{
+		return false;
+	}
+	shader.binBlob = engine::ResourceLoader::LoadFile(shader.binPath.c_str());
+
+	if (ShaderProgramType::Standard == m_type)
+	{
+		auto& fragmentShader = m_shaders[1];
+		if (!Path::FileExists(fragmentShader.binPath.c_str()))
+		{
+			ClearShaderData(0);
+			return false;
+		}
+		fragmentShader.binBlob = engine::ResourceLoader::LoadFile(fragmentShader.binPath.c_str());
+	}
+
+	return true;
 }
 
 bool ShaderResource::BuildShaderHandle()

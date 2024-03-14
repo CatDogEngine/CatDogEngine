@@ -18,7 +18,9 @@ public:
 
 	struct ShaderInfo
 	{
+		// Name without shader frature.
 		std::string name;
+		// Should be the path to a specific variant file.
 		std::string binPath;
 
 		ShaderBlob binBlob;
@@ -36,12 +38,15 @@ public:
 	virtual void Update() override;
 	virtual void Reset() override;
 
-	ShaderProgramType GetType() const { return m_type; }
-	void SetType(ShaderProgramType type) { m_type = type; }
-
 	std::string& GetName() { return m_name; }
 	const std::string& GetName() const { return m_name; }
 	void SetName(std::string name) { m_name = cd::MoveTemp(name); }
+
+	ShaderProgramType GetType() const { return m_type; }
+	void SetType(ShaderProgramType type) { m_type = type; }
+
+	void SetShader(const std::string& name, const std::string& combine = "");
+	void SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine = "");
 
 	ShaderInfo& GetVertexShaderInfo();
 	const ShaderInfo& GetVertexShaderInfo() const;
@@ -58,6 +63,7 @@ public:
 	uint16_t GetHandle() const { return m_programHandle; }
 
 private:
+	bool LoadShader();
 	bool BuildShaderHandle();
 	bool BuildProgramHandle();
 
@@ -69,8 +75,8 @@ private:
 	ShaderInfo m_shaders[2];
 
 	// Runtime
-	ShaderProgramType m_type = ShaderProgramType::None;
 	std::string m_name;
+	ShaderProgramType m_type = ShaderProgramType::None;
 	uint32_t m_recycleCount = 0;
 
 	// GPU

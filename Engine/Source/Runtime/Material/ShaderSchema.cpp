@@ -1,6 +1,5 @@
 ﻿#include "ShaderSchema.h"
 
-#include "Base/Template.h"
 #include "Log/Log.h"
 
 #include <algorithm>
@@ -9,29 +8,6 @@
 
 namespace engine
 {
-
-void ShaderSchema::SetShaderProgramName(std::string name)
-{
-	m_shaderProgramName = cd::MoveTemp(name);
-}
-
-void ShaderSchema::AddFeatureSet(ShaderFeatureSet featureSet)
-{
-	for (const auto& existingFeatureSet : m_shaderFeatureSets)
-	{
-		for (const auto& newFeature : featureSet)
-		{
-			if (existingFeatureSet.find(newFeature) != existingFeatureSet.end())
-			{
-				CD_ENGINE_WARN("Shader feature {0} repetitive, skip current feature set adding!", GetFeatureName(newFeature));
-				return;
-			}
-		}
-	}
-
-	m_isDirty = true;
-	m_shaderFeatureSets.insert(cd::MoveTemp(featureSet));
-}
 
 void ShaderSchema::Build()
 {
@@ -94,6 +70,24 @@ void ShaderSchema::CleanAll()
 	m_shaderFeatureSets.clear();
 }
 
+void ShaderSchema::AddFeatureSet(ShaderFeatureSet featureSet)
+{
+	for (const auto& existingFeatureSet : m_shaderFeatureSets)
+	{
+		for (const auto& newFeature : featureSet)
+		{
+			if (existingFeatureSet.find(newFeature) != existingFeatureSet.end())
+			{
+				CD_ENGINE_WARN("Shader feature {0} repetitive, skip current feature set adding!", GetFeatureName(newFeature));
+				return;
+			}
+		}
+	}
+
+	m_isDirty = true;
+	m_shaderFeatureSets.insert(cd::MoveTemp(featureSet));
+}
+
 std::optional<ShaderFeatureSet> ShaderSchema::GetConflictFeatureSet(const ShaderFeature feature) const
 {
 	for (const auto& shaderFeatureSet : m_shaderFeatureSets)
@@ -115,19 +109,21 @@ std::string ShaderSchema::GetFeaturesCombine(const ShaderFeatureSet& featureSet)
 	}
 
 	std::stringstream ss;
-	// Use the option order in m_shaderFeatureSets to ensure that inputs in different orders can get a same StringCrc.
+	// Use the Shader Feature order in m_shaderFeatureSets to ensure that inputs in different orders can get a same StringCrc.
 	for (const auto& registeredSet : m_shaderFeatureSets)
 	{
-		// Ignore option which contain in parameter but not contain in m_shaderFeatureSets.
+		// Ignore Shader Feature which contain in parameter but not contain in m_shaderFeatureSets.
 		for (const auto& registeredFeature : registeredSet)
 		{
 			if (featureSet.find(registeredFeature) != featureSet.end())
 			{
+				// We assume that theres no conflicting Features in the incoming featureSet parameter.
 				ss << GetFeatureName(registeredFeature);
+				continue;
 			}
 		}
-
 	}
+
 	return ss.str();
 }
 

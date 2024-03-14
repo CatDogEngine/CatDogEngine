@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Core/StringCrc.h"
+#include "Base/Template.h"
 #include "Rendering/ShaderFeature.h"
 
 #include <map>
@@ -40,16 +41,15 @@ public:
 	ShaderSchema& operator=(ShaderSchema&&) = default;
 	~ShaderSchema() = default;
 
-	void SetShaderProgramName(std::string name);
+	void SetShaderProgramName(std::string name) { m_shaderProgramName = cd::MoveTemp(name); }
 	std::string& GetShaderProgramName() { return m_shaderProgramName; }
 	const std::string& GetShaderProgramName() const { return m_shaderProgramName; }
-
-	void AddFeatureSet(ShaderFeatureSet featureSet);
 
 	void Build();
 	void CleanBuild();
 	void CleanAll();
 
+	void AddFeatureSet(ShaderFeatureSet featureSet);
 	std::optional<ShaderFeatureSet> GetConflictFeatureSet(const ShaderFeature feature) const;
 
 	std::string GetFeaturesCombine(const ShaderFeatureSet& featureSet) const;
@@ -65,7 +65,7 @@ private:
 	std::string m_shaderProgramName;
 
 	bool m_isDirty = false;
-	// Registration order of shader features.
+	// Registration order of shader feature sets.
 	std::set<ShaderFeatureSet> m_shaderFeatureSets;
 	// All permutations matching the registered shader features.
 	std::set<std::string> m_allFeatureCombines;
