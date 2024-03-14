@@ -154,6 +154,11 @@ void RenderContext::Submit(uint16_t viewID, const std::string& programName, cons
 	bgfx::submit(viewID, GetShaderProgramHandle(programName, featuresCombine));
 }
 
+void RenderContext::Submit(uint16_t viewID, uint16_t programHandle)
+{
+	bgfx::submit(viewID, bgfx::ProgramHandle{ programHandle });
+}
+
 void RenderContext::Dispatch(uint16_t viewID, const std::string& programName, uint32_t numX, uint32_t numY, uint32_t numZ)
 {
 	assert(bgfx::isValid(GetShaderProgramHandle(programName)));
@@ -217,7 +222,7 @@ bool RenderContext::CheckShaderProgram(Entity entity, const std::string& program
 
 	if (m_shaderProgramHandles.find(StringCrc{ programName + featuresCombine }) == m_shaderProgramHandles.end())
 	{
-		// It only represents that we do not hold the shader program GPU handle, 
+		// It only represents that we do not hold the shader program GPU handle,
 		// whether the shader is compiled or not is unknown.
 		// The Combile Task will still be added to the queue and ResourceBuilder ensures that
 		// there is no duplication of compilation behavior.
@@ -232,12 +237,12 @@ bool RenderContext::CheckShaderProgram(Entity entity, const std::string& program
 
 bool RenderContext::OnShaderHotModified(Entity entity, const std::string& programName, const std::string& featuresCombine)
 {
-	assert(m_pShaderCollections->IsProgramValid(StringCrc{ programName }));
-
 	// m_modifiedProgramNameCrcs will be filled by callback function which bound to FileWatcher.
-	if (m_modifiedProgramNameCrcs.find(engine::StringCrc{ programName }) != m_modifiedProgramNameCrcs.end())
+	const StringCrc programNameCrc{ programName };
+	if (m_modifiedProgramNameCrcs.find(programNameCrc) != m_modifiedProgramNameCrcs.end())
 	{
 		AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
+		m_modifiedProgramNameCrcs.erase(programNameCrc);
 
 		return true;
 	}
@@ -299,6 +304,8 @@ void RenderContext::SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks)
 
 void RenderContext::CheckModifiedProgram(std::string modifiedShaderName)
 {
+	// TODO : Adding a reverse index relationship to ProgramName and ShaderName.
+
 	// Find Shader Program name by Shader File Name.
 	// TODO : We could devise a mechanism like unity's meta file for recording dependencies on asset files,
 	// and perhaps both Program and Material information could be retrieved directly from the meta file.

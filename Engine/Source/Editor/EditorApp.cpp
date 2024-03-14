@@ -421,25 +421,46 @@ void EditorApp::UpdateMaterials()
 			continue;
 		}
 
-		// Now we hive this and this, its enougth to:
-		//   1. Create a new ShaderResource
-		//   2. Add it to MaterialComponent
 		const std::string& programName = pMaterialComponent->GetShaderProgramName();
 		const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
 
-		// New shader feature added, need to compile new variants.
-		m_pRenderContext->CheckShaderProgram(entity, programName, featuresCombine);
+		if (pMaterialComponent->IsShaderResourceDirty())
+		{
+			// Now we have programName and featuresCombine, its enough to:
+			//   1. Create a new ShaderResource
+			//   2. Update it to MaterialComponent
+
+			const engine::StringCrc programCrc{ programName + featuresCombine };
+			engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(programCrc);
+			if (!pShaderResource)
+			{
+				// UpdateMaterials is only responsible for updating the ShaderResource
+				// corresponding to the ShaderFeatures held by the MaterialComponent,
+				// not for adding a completely new ShaderResource,
+				// so we assume here that the ResourceContext must hold information about an
+				// original ShaderProgram that does not contain any ShaderFeature.
+
+				engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
+				assert(pOriginShaderSource);
+
+				pShaderResource = m_pResourceContext->AddShaderResource(programCrc);
+				pShaderResource->SetName(pOriginShaderSource->GetName());
+				pShaderResource->SetType(pOriginShaderSource->GetType());
+				engine::ShaderProgramType::Standard == pShaderResource->GetType() ?
+					pShaderResource->SetShaders(pOriginShaderSource->GetShaderInfo(0).name, pOriginShaderSource->GetShaderInfo(1).name, featuresCombine) :
+					pShaderResource->SetShader(pOriginShaderSource->GetShaderInfo(0).name, featuresCombine);
+
+				// Shader Feature changed, need to compile a new variant.
+				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
+			}
+			pMaterialComponent->SetShaderResource(pShaderResource);
+		}
 
 		// Shader source files have been modified, need to re-compile existing variants.
 		if (m_crtInputFocus && !m_preInputFocus)
 		{
 			m_pRenderContext->OnShaderHotModified(entity, programName, featuresCombine);
 		}
-	}
-
-	if (m_crtInputFocus && !m_preInputFocus)
-	{
-		m_pRenderContext->ClearModifiedProgramNameCrcs();
 	}
 }
 

@@ -48,17 +48,9 @@ public:
 	void SetShader(const std::string& name, const std::string& combine = "");
 	void SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine = "");
 
-	ShaderInfo& GetVertexShaderInfo();
-	const ShaderInfo& GetVertexShaderInfo() const;
-	void SetVertexShaderInfo(ShaderInfo info);
-
-	ShaderInfo& GetFragmentShaderInfo();
-	const ShaderInfo& GetFragmentShaderInfo() const;
-	void SetFragmentShaderInfo(ShaderInfo info);
-
-	ShaderInfo& GetComputeShaderInfo();
-	const ShaderInfo& GetComputeShaderInfo() const;
-	void SetComputeShaderInfo(ShaderInfo info);
+	void SetShaderInfo(ShaderInfo info, size_t index);
+	ShaderInfo& GetShaderInfo(size_t index);
+	const ShaderInfo& GetShaderInfo(size_t index) const;
 
 	uint16_t GetHandle() const { return m_programHandle; }
 
@@ -71,6 +63,8 @@ private:
 	void FreeShaderData(size_t index);
 	void DistoryShaderHandle(size_t index);
 	void DistoryProgramHandle();
+
+	void CheckIndex(size_t index) const;
 
 	ShaderInfo m_shaders[2];
 

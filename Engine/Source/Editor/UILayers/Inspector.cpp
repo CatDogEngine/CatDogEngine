@@ -228,7 +228,7 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 					ImGui::SetCursorScreenPos(ImVec2{ currentPos.x, currentPos.y + 66});
 				}
 
-				ImGuiUtils::ImGuiBoolProperty("Use texture", pPropertyGroup->useTexture);
+				bool pPropertyGroupChanded = ImGuiUtils::ImGuiBoolProperty("Use texture", pPropertyGroup->useTexture);
 				ImGui::SameLine(130.0f);
 				if (ImGui::Button("Select..."))
 				{
@@ -239,15 +239,18 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 				ImGuiUtils::ImGuiVectorProperty("UV Offset", textureInfo.GetUVOffset(), cd::Unit::None, cd::Vec2f::Zero(), cd::Vec2f::One(), false, 0.01f);
 				ImGuiUtils::ImGuiVectorProperty("UV Scale", textureInfo.GetUVScale());
 
-				if (pPropertyGroup->useTexture)
+				if (pPropertyGroupChanded)
 				{
-					pMaterialComponent->ActivateShaderFeature(engine::MaterialTextureTypeToShaderFeature.at(textureType));
+					if (pPropertyGroup->useTexture)
+					{
+						pMaterialComponent->ActivateShaderFeature(engine::MaterialTextureTypeToShaderFeature.at(textureType));
+					}
+					else
+					{
+						pMaterialComponent->DeactivateShaderFeature(engine::MaterialTextureTypeToShaderFeature.at(textureType));
+					}
 				}
-				else
-				{
-					pMaterialComponent->DeactivateShaderFeature(engine::MaterialTextureTypeToShaderFeature.at(textureType));
-				}
-
+				
 				if (cd::MaterialTextureType::BaseColor == textureType)
 				{
 					ImGuiUtils::ColorPickerProperty("Factor", *(pMaterialComponent->GetFactor<cd::Vec3f>(textureType)));

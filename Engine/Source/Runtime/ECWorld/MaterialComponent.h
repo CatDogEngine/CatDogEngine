@@ -118,7 +118,7 @@ public:
 
 	bool IsShaderResourceDirty() const { return m_isShaderResourceDirty; }
 	void SetShaderResource(ShaderResource* pShaderResource);
-	ShaderResource* GetShaderResource() const;
+	ShaderResource* GetShaderResource() const { return m_pShaderResource; }
 
 	// Texture data.
 	TextureResource* GetTextureResource(cd::MaterialTextureType textureType) const;

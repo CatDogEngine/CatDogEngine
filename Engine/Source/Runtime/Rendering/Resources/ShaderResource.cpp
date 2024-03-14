@@ -23,7 +23,8 @@ void ShaderResource::Update()
 	{
 		case ResourceStatus::Loading:
 		{
-			// Read bin shader file
+			// TODO : Should integrate the "compiling shader sc file to bin file" process in ShaderResource::Update.
+			// For now, we just read the shader bin file.
 
 			if (LoadShader())
 			{
@@ -102,70 +103,39 @@ void ShaderResource::Reset()
 
 void ShaderResource::SetShader(const std::string& name, const std::string& combine)
 {
+	assert(ShaderProgramType::Standard != m_type);
+
 	m_shaders[0].name = name;
 	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(name.c_str(), combine);
 }
 
 void ShaderResource::SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine)
 {
+	assert(ShaderProgramType::Standard == m_type);
+
 	m_shaders[0].name = vsName;
-	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(vsName.c_str(), combine);
+	// TODO : Uber Vertex Shader
+	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(vsName.c_str());
 	m_shaders[1].name = fsName;
 	m_shaders[1].binPath = engine::Path::GetShaderOutputPath(fsName.c_str(), combine);
 }
 
-ShaderResource::ShaderInfo& ShaderResource::GetVertexShaderInfo()
+void ShaderResource::SetShaderInfo(ShaderInfo info, size_t index)
 {
-	assert(ShaderProgramType::Standard == m_type || ShaderProgramType::VertexOnly == m_type);
-	return m_shaders[0];
+	CheckIndex(index);
+	m_shaders[index] = cd::MoveTemp(info);
 }
 
-const ShaderResource::ShaderInfo& ShaderResource::GetVertexShaderInfo() const
+ShaderResource::ShaderInfo& ShaderResource::GetShaderInfo(size_t index)
 {
-	assert(ShaderProgramType::Standard == m_type || ShaderProgramType::VertexOnly == m_type);
-	return m_shaders[0];
+	CheckIndex(index);
+	return m_shaders[index];
 }
 
-void ShaderResource::SetVertexShaderInfo(ShaderInfo info)
+const ShaderResource::ShaderInfo& ShaderResource::GetShaderInfo(size_t index) const
 {
-	assert(ShaderProgramType::Standard == m_type || ShaderProgramType::VertexOnly == m_type);
-	m_shaders[0] = cd::MoveTemp(info);
-}
-
-ShaderResource::ShaderInfo& ShaderResource::GetFragmentShaderInfo()
-{
-	assert(ShaderProgramType::Standard == m_type);
-	return m_shaders[1];
-}
-
-const ShaderResource::ShaderInfo& ShaderResource::GetFragmentShaderInfo() const
-{
-	assert(ShaderProgramType::Standard == m_type);
-	return m_shaders[1];
-}
-
-void ShaderResource::SetFragmentShaderInfo(ShaderInfo info)
-{
-	assert(ShaderProgramType::Standard == m_type);
-	m_shaders[1] = cd::MoveTemp(info);
-}
-
-ShaderResource::ShaderInfo& ShaderResource::GetComputeShaderInfo()
-{
-	assert(ShaderProgramType::Compute == m_type);
-	return m_shaders[0];
-}
-
-const ShaderResource::ShaderInfo& ShaderResource::GetComputeShaderInfo() const
-{
-	assert(ShaderProgramType::Compute == m_type);
-	return m_shaders[0];
-}
-
-void ShaderResource::SetComputeShaderInfo(ShaderInfo info)
-{
-	assert(ShaderProgramType::Compute == m_type);
-	m_shaders[0] = cd::MoveTemp(info);
+	CheckIndex(index);
+	return m_shaders[index];
 }
 
 bool ShaderResource::LoadShader()
@@ -282,6 +252,18 @@ void ShaderResource::DistoryProgramHandle()
 	{
 		bgfx::destroy(bgfx::ProgramHandle{ m_programHandle });
 		m_programHandle = bgfx::kInvalidHandle;
+	}
+}
+
+void ShaderResource::CheckIndex(size_t index) const
+{
+	if (ShaderProgramType::Standard == m_type)
+	{
+		assert(index <= 1);
+	}
+	else
+	{
+		assert(index == 0);
 	}
 }
 

@@ -155,4 +155,18 @@ void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uin
 	}
 }
 
+void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uint16_t viewID, uint16_t programHandle)
+{
+	const MeshResource* pMeshResource = pMeshComponent->GetMeshResource();
+	assert(ResourceStatus::Ready == pMeshResource->GetStatus() || ResourceStatus::Optimized == pMeshResource->GetStatus());
+	bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pMeshResource->GetVertexBufferHandle() }, pMeshComponent->GetStartVertex(), pMeshComponent->GetVertexCount());
+	for (uint32_t indexBufferIndex = 0U, indexBufferCount = pMeshResource->GetIndexBufferCount(); indexBufferIndex < indexBufferCount; ++indexBufferIndex)
+	{
+		bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pMeshResource->GetIndexBufferHandle(indexBufferIndex) }, pMeshComponent->GetStartIndex(), pMeshComponent->GetIndexCount());
+
+		// TODO : Submit interface requires runtime string construction which may hurt performance.
+		GetRenderContext()->Submit(viewID, programHandle);
+	}
+}
+
 }

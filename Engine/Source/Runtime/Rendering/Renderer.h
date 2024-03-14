@@ -42,6 +42,7 @@ public:
 	virtual bool IsEnable() const { return m_isEnable; }
 
 	void SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uint16_t viewID, const std::string& programName, const std::string& featuresCombine = "");
+	void SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uint16_t viewID, uint16_t programHandle);
 
 public:
 	static void ScreenSpaceQuad(const RenderTarget* pRenderTarget, bool _originBottomLeft = false, float _width = 1.0f, float _height = 1.0f);

@@ -48,6 +48,7 @@ public:
 	void OnResize(uint16_t width, uint16_t height);
 	void BeginFrame();
 	void Submit(uint16_t viewID, const std::string& programName, const std::string& featuresCombine = "");
+	void Submit(uint16_t viewID, uint16_t programHandle);
 	void Dispatch(uint16_t viewID, const std::string& programName, uint32_t numX, uint32_t numY, uint32_t numZ);
 	void EndFrame();
 	void Shutdown();

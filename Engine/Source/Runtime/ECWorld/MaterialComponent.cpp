@@ -124,11 +124,6 @@ void MaterialComponent::SetShaderResource(ShaderResource* pShaderResource)
 	m_pShaderResource = pShaderResource;
 }
 
-ShaderResource* MaterialComponent::GetShaderResource() const
-{
-	return m_pShaderResource;
-}
-
 void MaterialComponent::Reset()
 {
 	m_pMaterialData = nullptr;
@@ -138,6 +133,7 @@ void MaterialComponent::Reset()
 	m_blendMode = cd::BlendMode::Opaque;
 	m_alphaCutOff = 1.0f;
 	m_isShaderFeaturesDirty = false;
+	m_isShaderResourceDirty = false;
 	m_shaderFeatures.clear();
 	m_featureCombine.clear();
 	m_propertyGroups.clear();

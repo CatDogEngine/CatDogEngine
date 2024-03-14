@@ -11,6 +11,7 @@
 #include "Math/Transform.hpp"
 #include "Rendering/RenderContext.h"
 #include "Rendering/Resources/MeshResource.h"
+#include "Rendering/Resources/ShaderResource.h"
 #include "Rendering/Resources/TextureResource.h"
 #include "Scene/Texture.h"
 #include "U_AtmophericScattering.sh"
@@ -180,8 +181,7 @@ void WorldRenderer::Render(float deltaTime)
 	{
 		MaterialComponent* pMaterialComponent = m_pCurrentSceneWorld->GetMaterialComponent(entity);
 		if (!pMaterialComponent ||
-			(pMaterialComponent->GetMaterialType() == m_pCurrentSceneWorld->GetPBRMaterialType() && pMaterialComponent->GetMaterialType() == m_pCurrentSceneWorld->GetCelluloidMaterialType()) ||
-			!GetRenderContext()->IsShaderProgramValid(pMaterialComponent->GetShaderProgramName(), pMaterialComponent->GetFeaturesCombine()))
+			(pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetPBRMaterialType()))
 		{
 			// TODO : improve this condition. As we want to skip some feature-specified entities to render.
 			// For example, terrain/particle/...
@@ -198,6 +198,14 @@ void WorldRenderer::Render(float deltaTime)
 		const MeshResource* pMeshResource = pMeshComponent->GetMeshResource();
 		if (ResourceStatus::Ready != pMeshResource->GetStatus() &&
 			ResourceStatus::Optimized != pMeshResource->GetStatus())
+		{
+			continue;
+		}
+
+		const ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource();
+		auto status = pShaderResource->GetStatus();
+		if (ResourceStatus::Ready != pShaderResource->GetStatus() &&
+			ResourceStatus::Optimized != pShaderResource->GetStatus())
 		{
 			continue;
 		}
@@ -401,7 +409,7 @@ void WorldRenderer::Render(float deltaTime)
 		}
 		else
 		{
-			SubmitStaticMeshDrawCall(pMeshComponent, GetViewID(), pMaterialComponent->GetShaderProgramName(), pMaterialComponent->GetFeaturesCombine());
+			SubmitStaticMeshDrawCall(pMeshComponent, GetViewID(), pMaterialComponent->GetShaderResource()->GetHandle());
 		}
 	}
 }
