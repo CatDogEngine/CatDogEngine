@@ -132,8 +132,8 @@ void MaterialComponent::Reset()
 	m_twoSided = false;
 	m_blendMode = cd::BlendMode::Opaque;
 	m_alphaCutOff = 1.0f;
-	m_isShaderFeaturesDirty = false;
-	m_isShaderResourceDirty = false;
+	m_isShaderFeaturesDirty = true;
+	m_isShaderResourceDirty = true;
 	m_shaderFeatures.clear();
 	m_featureCombine.clear();
 	m_propertyGroups.clear();

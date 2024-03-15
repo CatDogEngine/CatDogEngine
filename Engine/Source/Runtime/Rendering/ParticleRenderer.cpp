@@ -6,10 +6,12 @@
 #include "ECWorld/TransformComponent.h"
 #include "Rendering/RenderContext.h"
 
-namespace engine {
+namespace engine
+{
 
 namespace
 {
+
 constexpr const char* particlePos = "u_particlePos";
 constexpr const char* particleScale = "u_particleScale";
 constexpr const char* shapeRange = "u_shapeRange";
@@ -25,16 +27,13 @@ constexpr const char* ParticleProgram = "ParticleProgram";
 constexpr const char* ParticleEmitterShapeProgram = "ParticleEmitterShapeProgram";
 constexpr const char* WO_BillboardParticleProgram = "WO_BillboardParticleProgram";
 
-constexpr StringCrc ParticleProgramCrc = StringCrc{ "ParticleProgram" };
-constexpr StringCrc ParticleEmitterShapeProgramCrc = StringCrc{ "ParticleEmitterShapeProgram" };
-constexpr StringCrc WO_BillboardParticleProgramCrc = StringCrc{ "WO_BillboardParticleProgram" };
 }
 
 void ParticleRenderer::Init()
 {
-	GetRenderContext()->RegisterShaderProgram(ParticleProgramCrc, { "vs_particle", "fs_particle" });
-	GetRenderContext()->RegisterShaderProgram(ParticleEmitterShapeProgramCrc, {"vs_particleEmitterShape", "fs_particleEmitterShape"});
-	GetRenderContext()->RegisterShaderProgram(WO_BillboardParticleProgramCrc, { "vs_wo_billboardparticle","fs_wo_billboardparticle" });
+	GetRenderContext()->RegisterShaderProgram("ParticleProgram", "vs_particle", "fs_particle");
+	GetRenderContext()->RegisterShaderProgram("ParticleEmitterShapeProgram", "vs_particleEmitterShape", "fs_particleEmitterShape");
+	GetRenderContext()->RegisterShaderProgram("WO_BillboardParticleProgram", "vs_wo_billboardparticle", "fs_wo_billboardparticle");
 
 	bgfx::setViewName(GetViewID(), "ParticleRenderer");
 }

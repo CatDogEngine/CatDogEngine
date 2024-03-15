@@ -15,6 +15,7 @@
 #include "U_IBL.sh"
 #include "U_AtmophericScattering.sh"
 #include "U_BlendShape.sh"
+#include "Rendering/Resources/ShaderResource.h"
 
 namespace engine
 {
@@ -30,19 +31,14 @@ constexpr const char *BlendShapeWeightPosProgram = "BlendShapeWeightPosProgram";
 constexpr const char *BlendShapeFinalPosProgram = "BlendShapeFinalPosProgram";
 constexpr const char *BlendShapeUpdatePosProgram = "BlendShapeUpdatePosProgram";
 
-constexpr StringCrc BlendShapeWeightsProgramCrc = StringCrc("BlendShapeWeightsProgram");
-constexpr StringCrc BlendShapeWeightPosProgramCrc = StringCrc("BlendShapeWeightPosProgram");
-constexpr StringCrc BlendShapeFinalPosProgramCrc = StringCrc("BlendShapeFinalPosProgram");
-constexpr StringCrc BlendShapeUpdatePosProgramCrc = StringCrc("BlendShapeUpdatePosProgram");
-
 }
 
 void BlendShapeRenderer::Init()
 {
-	GetRenderContext()->RegisterShaderProgram(BlendShapeWeightsProgramCrc, { "cs_blendshape_weights" });
-	GetRenderContext()->RegisterShaderProgram(BlendShapeWeightPosProgramCrc, { "cs_blendshape_weight_pos" });
-	GetRenderContext()->RegisterShaderProgram(BlendShapeFinalPosProgramCrc, { "cs_blendshape_final_pos" });
-	GetRenderContext()->RegisterShaderProgram(BlendShapeUpdatePosProgramCrc, { "cs_blendshape_update_pos" });
+	GetRenderContext()->RegisterShaderProgram("BlendShapeWeightsProgram", "cs_blendshape_weights", ShaderProgramType::Compute);
+	GetRenderContext()->RegisterShaderProgram("BlendShapeWeightPosProgram", "cs_blendshape_weight_pos", ShaderProgramType::Compute);
+	GetRenderContext()->RegisterShaderProgram("BlendShapeFinalPosProgram", "cs_blendshape_final_pos", ShaderProgramType::Compute);
+	GetRenderContext()->RegisterShaderProgram("BlendShapeUpdatePosProgram", "cs_blendshape_update_pos", ShaderProgramType::Compute);
 
 	bgfx::setViewName(GetViewID(), "BlendShapeRenderer");
 }

@@ -195,8 +195,8 @@ private:
 	const cd::Material* m_pMaterialData = nullptr;
 	const engine::MaterialType* m_pMaterialType = nullptr;
 
-	bool m_isShaderFeaturesDirty = false;
-	bool m_isShaderResourceDirty = false;
+	bool m_isShaderFeaturesDirty = true;
+	bool m_isShaderResourceDirty = true;
 	std::string m_featureCombine;
 	std::set<ShaderFeature> m_shaderFeatures;
 	ShaderResource* m_pShaderResource = nullptr;

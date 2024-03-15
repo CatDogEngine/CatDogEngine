@@ -10,8 +10,7 @@ namespace engine
 
 void ParticleForceFieldRenderer::Init()
 {
-	constexpr StringCrc programCrc = StringCrc("ParticleForceFieldProgram");
-	GetRenderContext()->RegisterShaderProgram(programCrc, { "vs_particleforcefield", "fs_particleforcefield" });
+	GetRenderContext()->RegisterShaderProgram("ParticleForceFieldProgram", "vs_particleforcefield", "fs_particleforcefield");
 
 	bgfx::setViewName(GetViewID(), "ParticleForceFieldRenderer");
 }

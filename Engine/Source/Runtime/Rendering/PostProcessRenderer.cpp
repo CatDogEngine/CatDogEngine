@@ -9,13 +9,12 @@ namespace
 {
 
 constexpr const char *PostProcessProgram = "PostProcessProgram";
-constexpr StringCrc PostProcessProgramCrc = StringCrc(PostProcessProgram);
 
 }
 
 void PostProcessRenderer::Init()
 {
-	GetRenderContext()->RegisterShaderProgram(PostProcessProgramCrc, { "vs_fullscreen", "fs_PBR_postProcessing" });
+	GetRenderContext()->RegisterShaderProgram("PostProcessProgram", "vs_fullscreen", "fs_PBR_postProcessing");
 
 	bgfx::setViewName(GetViewID(), "PostProcessRenderer");
 }

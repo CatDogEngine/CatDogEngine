@@ -15,8 +15,7 @@ namespace engine
 
 void WireframeRenderer::Init()
 {
-	constexpr StringCrc programCrc = StringCrc("WireframeLineProgram");
-	GetRenderContext()->RegisterShaderProgram(programCrc, { "vs_wireframe_line", "fs_wireframe_line" });
+	GetRenderContext()->RegisterShaderProgram("WireframeLineProgram", "vs_wireframe_line", "fs_wireframe_line");
 
 	bgfx::setViewName(GetViewID(), "WireframeRenderer");
 }

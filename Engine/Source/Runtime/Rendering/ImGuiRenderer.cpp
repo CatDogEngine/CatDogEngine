@@ -10,8 +10,7 @@ namespace engine
 
 void ImGuiRenderer::Init()
 {
-	constexpr StringCrc programCrc = StringCrc("ImGuiProgram");
-	GetRenderContext()->RegisterShaderProgram(programCrc, { "vs_imgui", "fs_imgui" });
+	GetRenderContext()->RegisterShaderProgram("ImGuiProgram", "vs_imgui", "fs_imgui");
 
 	bgfx::setViewName(GetViewID(), "ImGuiRenderer");
 }

@@ -18,8 +18,10 @@ public:
 
 	struct ShaderInfo
 	{
+		ShaderType type;
 		// Name without shader frature.
 		std::string name;
+		std::string scPath;
 		// Should be the path to a specific variant file.
 		std::string binPath;
 
@@ -45,8 +47,8 @@ public:
 	ShaderProgramType GetType() const { return m_type; }
 	void SetType(ShaderProgramType type) { m_type = type; }
 
-	void SetShader(const std::string& name, const std::string& combine = "");
 	void SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine = "");
+	void SetShader(const std::string& name, ShaderType type, const std::string& combine = "");
 
 	void SetShaderInfo(ShaderInfo info, size_t index);
 	ShaderInfo& GetShaderInfo(size_t index);

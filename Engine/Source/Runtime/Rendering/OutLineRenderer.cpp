@@ -20,8 +20,8 @@ constexpr const char* outLineSize  = "u_outLineSize";
 
 void OutLineRenderer::Init()
 {
-	constexpr StringCrc programCrc = StringCrc("OutLineProgram");
-	GetRenderContext()->RegisterShaderProgram(programCrc, { "vs_outline", "fs_outline" });
+	GetRenderContext()->RegisterShaderProgram("OutLineProgram", "vs_outline", "fs_outline");
+
 	bgfx::setViewName(GetViewID(), "OutLineRenderer");
 }
 

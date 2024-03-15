@@ -1,14 +1,14 @@
 ﻿#include "Inspector.h"
 
-#include "Rendering/RenderContext.h"
-#include "Rendering/ShaderCollections.h"
-#include "Resources/ResourceBuilder.h"
-#include "Resources/ResourceLoader.h"
-#include "Rendering/Resources/ResourceContext.h"
-#include "Rendering/Resources/TextureResource.h"
 #include "Graphics/GraphicsBackend.h"
 #include "ImGui/ImGuiUtils.hpp"
 #include "Path/Path.h"
+#include "Rendering/RenderContext.h"
+#include "Rendering/Resources/ResourceContext.h"
+#include "Rendering/Resources/ShaderResource.h"
+#include "Rendering/Resources/TextureResource.h"
+#include "Resources/ResourceBuilder.h"
+#include "Resources/ResourceLoader.h"
 
 #include "ImGui/imfilebrowser.h"
 
@@ -331,13 +331,15 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 
 			if (isOpen)
 			{
-				const auto& shaderProgramName = pMaterialComponent->GetShaderProgramName();
-				ImGuiUtils::ImGuiStringProperty("Shader Program", shaderProgramName);
 
 				engine::RenderContext* pRenderContext = static_cast<engine::RenderContext*>(ImGui::GetIO().BackendRendererUserData);
-				for (const auto& shaderFileName : pRenderContext->GetShaderCollections()->GetShaders(engine::StringCrc{ shaderProgramName }))
+				const engine::ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource();
+
+				ImGuiUtils::ImGuiStringProperty("Shader Program", pShaderResource->GetName());
+				ImGuiUtils::ImGuiStringProperty("Shader", pShaderResource->GetShaderInfo(0).name);
+				if (engine::ShaderProgramType::Standard == pShaderResource->GetType())
 				{
-					ImGuiUtils::ImGuiStringProperty("Shader", shaderFileName);
+					ImGuiUtils::ImGuiStringProperty("Shader", pShaderResource->GetShaderInfo(1).name);
 				}
 				ImGui::Separator();
 

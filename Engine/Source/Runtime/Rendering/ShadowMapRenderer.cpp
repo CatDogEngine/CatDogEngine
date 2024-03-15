@@ -18,18 +18,16 @@ namespace engine
 
 namespace
 {
-// uniform name
-constexpr const char* cameraPos = "u_cameraPos";
-constexpr const char* lightCountAndStride = "u_lightCountAndStride";
-constexpr const char* lightParams = "u_lightParams";
-constexpr const char* lightPosAndFarPlane = "u_lightWorldPos_farPlane";
-constexpr const char* lightDir = "u_LightDir";
+
+constexpr const char* cameraPos                   = "u_cameraPos";
+constexpr const char* lightCountAndStride         = "u_lightCountAndStride";
+constexpr const char* lightParams                 = "u_lightParams";
+constexpr const char* lightPosAndFarPlane         = "u_lightWorldPos_farPlane";
+constexpr const char* lightDir                    = "u_LightDir";
 constexpr const char* heightOffsetAndshadowLength = "u_HeightOffsetAndshadowLength";
 
-//
 constexpr uint64_t samplerFlags = BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP;
-constexpr uint64_t defaultRenderingState = BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z
-| BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS;
+constexpr uint64_t defaultRenderingState = BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z | BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS;
 constexpr uint64_t depthBufferFlags = BGFX_TEXTURE_RT | BGFX_SAMPLER_COMPARE_LEQUAL;
 constexpr uint64_t linearDepthBufferFlags = BGFX_TEXTURE_RT | BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP;
 
@@ -37,10 +35,8 @@ constexpr uint64_t linearDepthBufferFlags = BGFX_TEXTURE_RT | BGFX_SAMPLER_U_CLA
 
 void ShadowMapRenderer::Init()
 {
-	constexpr StringCrc shadowMapProgramCrc = StringCrc("ShadowMapProgram");
-	GetRenderContext()->RegisterShaderProgram(shadowMapProgramCrc, { "vs_shadowMap", "fs_shadowMap" });
-	constexpr StringCrc linearshadowMapProgramCrc = StringCrc("LinearShadowMapProgram");
-	GetRenderContext()->RegisterShaderProgram(linearshadowMapProgramCrc, { "vs_shadowMap", "fs_shadowMap_linear" });
+	GetRenderContext()->RegisterShaderProgram("ShadowMapProgram", "vs_shadowMap", "fs_shadowMap");
+	GetRenderContext()->RegisterShaderProgram("LinearShadowMapProgram", "vs_shadowMap", "fs_shadowMap_linear");
 
 	for (int lightIndex = 0; lightIndex < shadowLightMaxNum; lightIndex++)
 	{

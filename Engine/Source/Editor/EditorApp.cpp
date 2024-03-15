@@ -31,7 +31,6 @@
 #include "Rendering/Resources/ResourceContext.h"
 #include "Rendering/SkeletonRenderer.h"
 #include "Rendering/SkyboxRenderer.h"
-#include "Rendering/ShaderCollections.h"
 #include "Rendering/ShadowMapRenderer.h"
 #include "Rendering/TerrainRenderer.h"
 #include "Rendering/WorldRenderer.h"
@@ -261,42 +260,18 @@ void EditorApp::InitECWorld()
 
 void EditorApp::InitMaterialType()
 {
-	constexpr const char* WorldProgram = "WorldProgram";
-	constexpr const char* AnimationProgram = "AnimationProgram";
-	constexpr const char* TerrainProgram = "TerrainProgram";
-	constexpr const char* ParticleProgram = "ParticleProgram";
-	constexpr const char* CelluloidProgram = "CelluloidProgram";
-
-	constexpr engine::StringCrc WorldProgramCrc{ WorldProgram };
-	constexpr engine::StringCrc AnimationProgramCrc{ AnimationProgram };
-	constexpr engine::StringCrc TerrainProgramCrc{ TerrainProgram };
-	constexpr engine::StringCrc ParticleProgramCrc{ ParticleProgram};
-	constexpr engine::StringCrc CelluloidProgramCrc{ CelluloidProgram };
-
-	// Init shader without features.
-	auto InitStandard = [&](const char* programName, engine::StringCrc programNameCrc, const char* vsName, const char* fsName)
-	{
-		m_pRenderContext->RegisterShaderProgram(programNameCrc, { vsName, fsName });
-		engine::ShaderResource* pShaderResource = m_pResourceContext->AddShaderResource(programNameCrc);
-		pShaderResource->SetName(programName);
-		pShaderResource->SetType(engine::ShaderProgramType::Standard);
-		pShaderResource->SetShaders(vsName, fsName);
-
-		m_pRenderContext->AddShaderResource(programNameCrc, pShaderResource);
-	};
-
-	InitStandard(WorldProgram, WorldProgramCrc, "vs_PBR", "fs_PBR");
-	InitStandard(AnimationProgram, AnimationProgramCrc, "vs_animation", "fs_animation" );
-	InitStandard(TerrainProgram, TerrainProgramCrc, "vs_terrain", "fs_terrain" );
-	InitStandard(ParticleProgram, ParticleProgramCrc, "vs_particle","fs_particle" );
-	InitStandard(CelluloidProgram, CelluloidProgramCrc, "vs_celluloid", "fs_celluloid");
+	m_pRenderContext->RegisterShaderProgram("WorldProgram", "vs_PBR", "fs_PBR");
+	m_pRenderContext->RegisterShaderProgram("AnimationProgram", "vs_animation", "fs_animation");
+	m_pRenderContext->RegisterShaderProgram("TerrainProgram", "vs_terrain", "fs_terrain");
+	m_pRenderContext->RegisterShaderProgram("ParticleProgram", "vs_particle", "fs_particle");
+	m_pRenderContext->RegisterShaderProgram("CelluloidProgram", "vs_celluloid", "fs_celluloid");
 
 	m_pSceneWorld = std::make_unique<engine::SceneWorld>();
-	m_pSceneWorld->CreatePBRMaterialType(WorldProgram, IsAtmosphericScatteringEnable());
-	m_pSceneWorld->CreateAnimationMaterialType(AnimationProgram);
-	m_pSceneWorld->CreateTerrainMaterialType(TerrainProgram);
-	m_pSceneWorld->CreateParticleMaterialType(ParticleProgram);
-	m_pSceneWorld->CreateCelluloidMaterialType(CelluloidProgram);
+	m_pSceneWorld->CreatePBRMaterialType("WorldProgram", IsAtmosphericScatteringEnable());
+	m_pSceneWorld->CreateAnimationMaterialType("AnimationProgram");
+	m_pSceneWorld->CreateTerrainMaterialType("TerrainProgram");
+	m_pSceneWorld->CreateParticleMaterialType("ParticleProgram");
+	m_pSceneWorld->CreateCelluloidMaterialType("CelluloidProgram");
 }
 
 void EditorApp::InitEditorCameraEntity()
@@ -408,7 +383,7 @@ void EditorApp::OnShaderHotModifiedCallback(const char* rootDir, const char* fil
 	    // Do nothing when a non-shader file is detected.
 	    return;
 	}
-	m_pRenderContext->CheckModifiedProgram(engine::Path::GetFileNameWithoutExtension(filePath));
+	m_pRenderContext->CheckModifiedProgram(engine::StringCrc{ engine::Path::GetFileNameWithoutExtension(filePath) });
 }
 
 void EditorApp::UpdateMaterials()
@@ -423,43 +398,52 @@ void EditorApp::UpdateMaterials()
 
 		const std::string& programName = pMaterialComponent->GetShaderProgramName();
 		const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
+		const engine::StringCrc programCrc{ programName + featuresCombine };
+		engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(programCrc);
 
 		if (pMaterialComponent->IsShaderResourceDirty())
 		{
 			// Now we have programName and featuresCombine, its enough to:
-			//   1. Create a new ShaderResource
+			//   1. Create a new ShaderResource / Or find an exists one
 			//   2. Update it to MaterialComponent
 
-			const engine::StringCrc programCrc{ programName + featuresCombine };
-			engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(programCrc);
 			if (!pShaderResource)
 			{
-				// UpdateMaterials is only responsible for updating the ShaderResource
-				// corresponding to the ShaderFeatures held by the MaterialComponent,
-				// not for adding a completely new ShaderResource,
-				// so we assume here that the ResourceContext must hold information about an
+				// We assume here that the ResourceContext hold informations about an
 				// original ShaderProgram that does not contain any ShaderFeature.
 
 				engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
 				assert(pOriginShaderSource);
-
-				pShaderResource = m_pResourceContext->AddShaderResource(programCrc);
-				pShaderResource->SetName(pOriginShaderSource->GetName());
-				pShaderResource->SetType(pOriginShaderSource->GetType());
-				engine::ShaderProgramType::Standard == pShaderResource->GetType() ?
-					pShaderResource->SetShaders(pOriginShaderSource->GetShaderInfo(0).name, pOriginShaderSource->GetShaderInfo(1).name, featuresCombine) :
-					pShaderResource->SetShader(pOriginShaderSource->GetShaderInfo(0).name, featuresCombine);
+				engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
+				if (engine::ShaderProgramType::Standard == programtype)
+				{
+					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
+						pOriginShaderSource->GetShaderInfo(0).name,
+						pOriginShaderSource->GetShaderInfo(1).name,
+						featuresCombine);
+				}
+				else
+				{
+					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
+						pOriginShaderSource->GetShaderInfo(0).name,
+						programtype,
+						featuresCombine);
+				}
 
 				// Shader Feature changed, need to compile a new variant.
 				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
 			}
+			assert(pShaderResource);
 			pMaterialComponent->SetShaderResource(pShaderResource);
 		}
 
 		// Shader source files have been modified, need to re-compile existing variants.
 		if (m_crtInputFocus && !m_preInputFocus)
 		{
-			m_pRenderContext->OnShaderHotModified(entity, programName, featuresCombine);
+			if (m_pRenderContext->OnShaderHotModified(entity, programName, featuresCombine))
+			{
+				pShaderResource->Reset();
+			}
 		}
 	}
 }
@@ -530,9 +514,6 @@ void EditorApp::InitRenderContext(engine::GraphicsBackend backend, void* hwnd)
 
 	m_pResourceContext = std::make_unique<engine::ResourceContext>();
 	m_pRenderContext->SetResourceContext(m_pResourceContext.get());
-
-	m_pShaderCollections = std::make_unique<engine::ShaderCollections>();
-	m_pRenderContext->SetShaderCollections(m_pShaderCollections.get());
 }
 
 void EditorApp::InitEditorRenderers()
@@ -677,24 +658,16 @@ bool EditorApp::IsAtmosphericScatteringEnable() const
 
 void EditorApp::InitShaderPrograms(bool compileAllShaders) const
 {
-	ShaderBuilder::CompileRegisteredNonUberShader(m_pRenderContext.get());
-
 	if (compileAllShaders)
 	{
-		ShaderBuilder::CompileUberShaderAllVariants(m_pRenderContext.get(), m_pSceneWorld->GetPBRMaterialType());
+		ShaderBuilder::RegisterUberShaderAllVariants(m_pRenderContext.get(), m_pSceneWorld->GetPBRMaterialType());
 
 #ifdef ENABLE_DDGI
-		ShaderBuilder::CompileUberShaderAllVariants(m_pRenderContext.get(), m_pSceneWorld->GetDDGIMaterialType());
+		ShaderBuilder::RegisterUberShaderAllVariants(m_pRenderContext.get(), m_pSceneWorld->GetDDGIMaterialType());
 #endif
 	}
-	else
-	{
-		ShaderBuilder::CompileRegisteredUberShader(m_pRenderContext.get(), m_pSceneWorld->GetPBRMaterialType());
 
-#ifdef ENABLE_DDGI
-		ShaderBuilder::CompileRegisteredUberShader(m_pRenderContext.get(), m_pSceneWorld->GetDDGIMaterialType());
-#endif
-	}
+	ShaderBuilder::Build(m_pRenderContext.get());
 }
 
 void EditorApp::InitEditorController()

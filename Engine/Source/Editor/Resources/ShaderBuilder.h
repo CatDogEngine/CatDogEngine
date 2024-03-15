@@ -20,9 +20,8 @@ namespace editor
 class ShaderBuilder
 {
 public:
-	static void CompileRegisteredNonUberShader(engine::RenderContext* pRenderContext);
-	static void CompileRegisteredUberShader(engine::RenderContext* pRenderContext, engine::MaterialType* pMaterialType);
-	static void CompileUberShaderAllVariants(engine::RenderContext* pRenderContext, engine::MaterialType* pMaterialType);
+	static void Build(engine::RenderContext* pRenderContext);
+	static void RegisterUberShaderAllVariants(engine::RenderContext* pRenderContext, engine::MaterialType* pMaterialType);
 
 	// Compile specified shader program/program variant.
 	static void BuildShaderInfos(engine::RenderContext* pRenderContext, TaskOutputCallbacks callbacks = {});

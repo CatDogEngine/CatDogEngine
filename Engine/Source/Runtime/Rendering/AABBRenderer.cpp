@@ -12,8 +12,7 @@ namespace engine
 
 void AABBRenderer::Init()
 {
-	constexpr StringCrc programCrc = StringCrc("AABBProgram");
-	GetRenderContext()->RegisterShaderProgram(programCrc, { "vs_AABB", "fs_AABB" });
+	GetRenderContext()->RegisterShaderProgram("AABBProgram", "vs_AABB", "fs_AABB");
 
 	bgfx::setViewName(GetViewID(), "AABBRenderer");
 }

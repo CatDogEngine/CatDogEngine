@@ -9,7 +9,6 @@ namespace engine
 class Camera;
 class RenderContext;
 class RenderTarget;
-class ShaderCollections;
 class StaticMeshComponent;
 
 class Renderer
