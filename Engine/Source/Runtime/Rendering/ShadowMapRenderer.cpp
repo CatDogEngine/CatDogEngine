@@ -1,15 +1,16 @@
 #include "ShadowMapRenderer.h"
 
 #include "ECWorld/CameraComponent.h"
+#include "ECWorld/LightComponent.h"
 #include "ECWorld/SceneWorld.h"
 #include "ECWorld/StaticMeshComponent.h"
 #include "ECWorld/TransformComponent.h"
-#include "ECWorld/LightComponent.h"
 #include "LightUniforms.h"
 #include "Material/ShaderSchema.h"
 #include "Math/Transform.hpp"
 #include "Rendering/RenderContext.h"
 #include "Rendering/Resources/MeshResource.h"
+#include "Rendering/Resources/ShaderResource.h"
 
 #include <string>
 
@@ -35,8 +36,8 @@ constexpr uint64_t linearDepthBufferFlags = BGFX_TEXTURE_RT | BGFX_SAMPLER_U_CLA
 
 void ShadowMapRenderer::Init()
 {
-	GetRenderContext()->RegisterShaderProgram("ShadowMapProgram", "vs_shadowMap", "fs_shadowMap");
-	GetRenderContext()->RegisterShaderProgram("LinearShadowMapProgram", "vs_shadowMap", "fs_shadowMap_linear");
+	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ShadowMapProgram", "vs_shadowMap", "fs_shadowMap"));
+	AddShaderResource(GetRenderContext()->RegisterShaderProgram("LinearShadowMapProgram", "vs_shadowMap", "fs_shadowMap_linear"));
 
 	for (int lightIndex = 0; lightIndex < shadowLightMaxNum; lightIndex++)
 	{
@@ -46,12 +47,7 @@ void ShadowMapRenderer::Init()
 			bgfx::setViewName(m_renderPassID[lightIndex * shadowTexturePassMaxNum + mapId], "ShadowMapRenderer");
 		}
 	}
-}
 
-void ShadowMapRenderer::Warmup()
-{
-	GetRenderContext()->UploadShaderProgram("ShadowMapProgram");
-	GetRenderContext()->UploadShaderProgram("LinearShadowMapProgram");
 	GetRenderContext()->CreateUniform(lightPosAndFarPlane, bgfx::UniformType::Vec4, 1);
 }
 
@@ -62,6 +58,15 @@ void ShadowMapRenderer::UpdateView(const float* pViewMatrix, const float* pProje
 
 void ShadowMapRenderer::Render(float deltaTime)
 {
+	for (const auto pResource : m_shaderResources)
+	{
+		if (ResourceStatus::Ready != pResource->GetStatus() &&
+			ResourceStatus::Optimized != pResource->GetStatus())
+		{
+			return;
+		}
+	}
+
 	// TODO : Remove it. If every renderer need to submit camera related uniform, it should be done not inside Renderer class.
 	const cd::Transform& cameraTransform = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity())->GetTransform();
 
@@ -202,7 +207,7 @@ void ShadowMapRenderer::Render(float deltaTime)
 					for (const auto& corner : cascadeFrustum)
 					{
 						const auto lightSpaceCorner = lightView * cd::Vec4f(corner.x(), corner.y(), corner.z(), 1.0);
-						minX	= std::min(minX, lightSpaceCorner.x());
+						minX = std::min(minX, lightSpaceCorner.x());
 						maxX = std::max(maxX, lightSpaceCorner.x());
 						minY = std::min(minY, lightSpaceCorner.y());
 						maxY = std::max(maxY, lightSpaceCorner.y());
@@ -225,7 +230,7 @@ void ShadowMapRenderer::Render(float deltaTime)
 					cd::Matrix4x4 lightCSMViewProj = lightProjection * lightView;
 					lightComponent->AddLightViewProjMatrix(lightCSMViewProj);
 
-					// Submit draw call (TODO : one pass MRT 
+					// Submit draw call (TODO : one pass MRT
 					for (Entity entity : m_pCurrentSceneWorld->GetMaterialEntities())
 					{
 						// No mesh attached?
@@ -254,7 +259,8 @@ void ShadowMapRenderer::Render(float deltaTime)
 						}
 
 						// Mesh
-						SubmitStaticMeshDrawCall(pMeshComponent, viewId, "ShadowMapProgram");
+						constexpr StringCrc programHandleIndex{ "ShadowMapProgram" };
+						SubmitStaticMeshDrawCall(pMeshComponent, viewId, programHandleIndex);
 					}
 				}
 			}
@@ -332,7 +338,8 @@ void ShadowMapRenderer::Render(float deltaTime)
 							bgfx::setTransform(pTransformComponent->GetWorldMatrix().begin());
 						}
 
-						SubmitStaticMeshDrawCall(pMeshComponent, viewId, "LinearShadowMapProgram");
+						constexpr StringCrc programHandleIndex{ "LinearShadowMapProgram" };
+						SubmitStaticMeshDrawCall(pMeshComponent, viewId, programHandleIndex);
 					}
 				}
 			}
@@ -399,7 +406,8 @@ void ShadowMapRenderer::Render(float deltaTime)
 					}
 
 					// Mesh
-					SubmitStaticMeshDrawCall(pMeshComponent, viewId, "ShadowMapProgram");
+					constexpr StringCrc programHandleIndex{ "ShadowMapProgram" };
+					SubmitStaticMeshDrawCall(pMeshComponent, viewId, programHandleIndex);
 				}
 			}
 			break;

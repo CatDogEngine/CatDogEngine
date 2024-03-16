@@ -47,9 +47,10 @@ public:
 	void Init(GraphicsBackend backend, void* hwnd = nullptr);
 	void OnResize(uint16_t width, uint16_t height);
 	void BeginFrame();
-	void Submit(uint16_t viewID, const std::string& programName, const std::string& featuresCombine = "");
 	void Submit(uint16_t viewID, uint16_t programHandle);
-	void Dispatch(uint16_t viewID, const std::string& programName, uint32_t numX, uint32_t numY, uint32_t numZ);
+	void Submit(uint16_t viewID, StringCrc programHandleIndex);
+	void Dispatch(uint16_t viewID, uint16_t programHandle, uint32_t numX, uint32_t numY, uint32_t numZ);
+	void Dispatch(uint16_t viewID, StringCrc programHandleIndex, uint32_t numX, uint32_t numY, uint32_t numZ);
 	void EndFrame();
 	void Shutdown();
 
@@ -76,11 +77,7 @@ public:
 	std::map<StringCrc, ShaderResource*>& GetShaderResources() { return m_shaderResources; }
 	const std::map<StringCrc, ShaderResource*>& GetShaderResources() const { return m_shaderResources; }
 
-	bool CheckShaderProgram(Entity entity, const std::string& programName, const std::string& featuresCombine = "");
 	bool OnShaderHotModified(Entity entity, const std::string& programName, const std::string& featuresCombine = "");
-	void UploadShaderProgram(const std::string& programName, const std::string& featuresCombine = "");
-	void DestroyShaderProgram(const std::string& programName, const std::string& featuresCombine = "");
-
 	void AddShaderCompileInfo(ShaderCompileInfo info);
 	void ClearShaderCompileInfos();
 	void SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks);
@@ -97,22 +94,9 @@ public:
 	std::set<uint32_t>& GetCompileFailedEntities() { return m_compileFailedEntities; }
 	const std::set<uint32_t>& GetCompileFailedEntities() const { return m_compileFailedEntities; }
 
-	// TODO : Delete these
-	const RenderContext::ShaderBlob& AddShaderBlob(StringCrc shaderNameCrc, ShaderBlob blob);
-	const ShaderBlob& GetShaderBlob(StringCrc shaderNameCrc) const;
-
-	// Resources
-	bool IsShaderProgramValid(const std::string& programName, const std::string& featuresCombine = "") const;
-	void SetShaderProgramHandle(const std::string& programName, bgfx::ProgramHandle handle, const std::string& featuresCombine = "");
-	bgfx::ProgramHandle GetShaderProgramHandle(const std::string& programName, const std::string& featuresCombine = "") const;
-
 	RenderTarget* CreateRenderTarget(StringCrc resourceCrc, uint16_t width, uint16_t height, std::vector<AttachmentDescriptor> attachmentDescs);
 	RenderTarget* CreateRenderTarget(StringCrc resourceCrc, uint16_t width, uint16_t height, void* pWindowHandle);
 	RenderTarget* CreateRenderTarget(StringCrc resourceCrc, std::unique_ptr<RenderTarget> pRenderTarget);
-
-	bgfx::ShaderHandle CreateShader(const char* filePath, const std::string& combine = "");
-	bgfx::ProgramHandle CreateProgram(const std::string& programName, const std::string& name);
-	bgfx::ProgramHandle CreateProgram(const std::string& programName, const std::string& vsName, const std::string& fsName, const std::string& featuresCombine = "");
 
 	bgfx::TextureHandle CreateTexture(const char* filePath, uint64_t flags = 0UL);
 	bgfx::TextureHandle CreateTexture(const char* pName, uint16_t width, uint16_t height, uint16_t depth, bgfx::TextureFormat::Enum format, uint64_t flags = 0UL, const void* data = nullptr, uint32_t size = 0);
@@ -129,15 +113,12 @@ public:
 
 	RenderTarget* GetRenderTarget(StringCrc resourceCrc) const;
 	const bgfx::VertexLayout& GetVertexAttributeLayouts(StringCrc resourceCrc) const;
-	bgfx::ShaderHandle GetShader(StringCrc resourceCrc) const;
 	bgfx::TextureHandle GetTexture(StringCrc resourceCrc) const;
 	bgfx::UniformHandle GetUniform(StringCrc resourceCrc) const;
 
 	void DestoryRenderTarget(StringCrc resourceCrc);
 	void DestoryTexture(StringCrc resourceCrc);
 	void DestoryUniform(StringCrc resourceCrc);
-	void DestoryShader(StringCrc resourceCrc);
-	void DestoryProgram(StringCrc resourceCrc);
 
 private:
 	ResourceContext* m_pResourceContext = nullptr;
@@ -153,12 +134,6 @@ private:
 
 	// Key : StringCrc(shader name), Value : ShaderResource*
 	std::map<StringCrc, ShaderResource*> m_shaderResources;
-
-	// TODO : Delete all these
-	std::unordered_map<StringCrc, uint16_t> m_shaderProgramHandles;
-	std::unordered_map<StringCrc, uint16_t> m_shaderHandles;
-	std::unordered_map<StringCrc, std::unique_ptr<ShaderBlob>> m_shaderBlobs;
-
 	std::set<ShaderCompileInfo> m_shaderCompileInfos;
 	std::set<StringCrc> m_modifiedProgramNameCrcs;
 	std::set<uint32_t> m_compileFailedEntities;

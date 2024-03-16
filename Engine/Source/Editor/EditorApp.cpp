@@ -99,7 +99,7 @@ void EditorApp::Init(engine::EngineInitArgs initArgs)
 	AddWindow(cd::MoveTemp(pSplashWindow));
 
 	InitEditorRenderers();
-	EditorRenderersWarmup();
+	//EditorRenderersWarmup();
 	InitEditorImGuiContext(m_initArgs.language);
 
 	InitECWorld();
@@ -398,44 +398,39 @@ void EditorApp::UpdateMaterials()
 
 		const std::string& programName = pMaterialComponent->GetShaderProgramName();
 		const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
-		const engine::StringCrc programCrc{ programName + featuresCombine };
-		engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(programCrc);
+		engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName + featuresCombine });
 
-		if (pMaterialComponent->IsShaderResourceDirty())
+		// 1. Create a new ShaderResource / Or find an exists one
+		// 2. Update it to MaterialComponent
+
+		if (!pShaderResource)
 		{
-			// Now we have programName and featuresCombine, its enough to:
-			//   1. Create a new ShaderResource / Or find an exists one
-			//   2. Update it to MaterialComponent
+			// We assume here that the ResourceContext hold informations about an
+			// original ShaderProgram that does not contain any ShaderFeature.
 
-			if (!pShaderResource)
+			engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
+			assert(pOriginShaderSource);
+			engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
+			if (engine::ShaderProgramType::Standard == programtype)
 			{
-				// We assume here that the ResourceContext hold informations about an
-				// original ShaderProgram that does not contain any ShaderFeature.
-
-				engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
-				assert(pOriginShaderSource);
-				engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
-				if (engine::ShaderProgramType::Standard == programtype)
-				{
-					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
-						pOriginShaderSource->GetShaderInfo(0).name,
-						pOriginShaderSource->GetShaderInfo(1).name,
-						featuresCombine);
-				}
-				else
-				{
-					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
-						pOriginShaderSource->GetShaderInfo(0).name,
-						programtype,
-						featuresCombine);
-				}
-
-				// Shader Feature changed, need to compile a new variant.
-				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
+				pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
+					pOriginShaderSource->GetShaderInfo(0).name,
+					pOriginShaderSource->GetShaderInfo(1).name,
+					featuresCombine);
 			}
-			assert(pShaderResource);
-			pMaterialComponent->SetShaderResource(pShaderResource);
+			else
+			{
+				pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
+					pOriginShaderSource->GetShaderInfo(0).name,
+					programtype,
+					featuresCombine);
+			}
+
+			// Shader Feature changed, need to compile a new variant.
+			m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
 		}
+		assert(pShaderResource);
+		pMaterialComponent->SetShaderResource(pShaderResource);
 
 		// Shader source files have been modified, need to re-compile existing variants.
 		if (m_crtInputFocus && !m_preInputFocus)
@@ -472,8 +467,8 @@ void EditorApp::CompileAndLoadShaders()
 				failedEntities.erase(entity);
 			}
 
-			m_pRenderContext->DestroyShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
-			m_pRenderContext->UploadShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
+			// m_pRenderContext->DestroyShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
+			// m_pRenderContext->UploadShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
 		}
 
 		m_pRenderContext->ClearShaderCompileInfos();
@@ -631,21 +626,21 @@ void EditorApp::InitEngineRenderers()
 	AddEngineRenderer(std::make_unique<engine::ImGuiRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget));
 }
 
-void EditorApp::EditorRenderersWarmup()
-{
-	for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEditorRenderers)
-	{
-		pRenderer->Warmup();
-	}
-}
-
-void EditorApp::EngineRenderersWarmup()
-{
-	for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEngineRenderers)
-	{
-		pRenderer->Warmup();
-	}
-}
+// void EditorApp::EditorRenderersWarmup()
+// {
+// 	for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEditorRenderers)
+// 	{
+// 		pRenderer->Warmup();
+// 	}
+// }
+// 
+// void EditorApp::EngineRenderersWarmup()
+// {
+// 	for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEngineRenderers)
+// 	{
+// 		pRenderer->Warmup();
+// 	}
+// }
 
 bool EditorApp::IsAtmosphericScatteringEnable() const
 {
@@ -700,7 +695,7 @@ bool EditorApp::Update(float deltaTime)
 	{
 		m_bInitEditor = true;
 
-		EngineRenderersWarmup();
+		//EngineRenderersWarmup();
 
 		// Phase 2 - Project Manager
 		//		* TODO : Show project selector

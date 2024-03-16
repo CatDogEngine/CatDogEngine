@@ -4,6 +4,8 @@
 #include "Rendering/RenderContext.h"
 #include "Rendering/RenderTarget.h"
 #include "Rendering/Resources/MeshResource.h"
+#include "Rendering/Resources/ResourceContext.h"
+#include "Rendering/Resources/ShaderResource.h"
 
 #include <bgfx/bgfx.h>
 
@@ -141,20 +143,6 @@ void Renderer::ScreenSpaceQuad(const RenderTarget* pRenderTarget, bool _originBo
 	}
 }
 
-void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uint16_t viewID, const std::string& programName, const std::string& featuresCombine)
-{
-	const MeshResource* pMeshResource = pMeshComponent->GetMeshResource();
-	assert(ResourceStatus::Ready == pMeshResource->GetStatus() || ResourceStatus::Optimized == pMeshResource->GetStatus());
-	bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pMeshResource->GetVertexBufferHandle() }, pMeshComponent->GetStartVertex(), pMeshComponent->GetVertexCount());
-	for (uint32_t indexBufferIndex = 0U, indexBufferCount = pMeshResource->GetIndexBufferCount(); indexBufferIndex < indexBufferCount; ++indexBufferIndex)
-	{
-		bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pMeshResource->GetIndexBufferHandle(indexBufferIndex) }, pMeshComponent->GetStartIndex(), pMeshComponent->GetIndexCount());
-
-		// TODO : Submit interface requires runtime string construction which may hurt performance.
-		GetRenderContext()->Submit(viewID, programName, featuresCombine);
-	}
-}
-
 void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uint16_t viewID, uint16_t programHandle)
 {
 	const MeshResource* pMeshResource = pMeshComponent->GetMeshResource();
@@ -167,6 +155,16 @@ void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uin
 		// TODO : Submit interface requires runtime string construction which may hurt performance.
 		GetRenderContext()->Submit(viewID, programHandle);
 	}
+}
+
+void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uint16_t viewID, StringCrc programHandleIndex)
+{
+	SubmitStaticMeshDrawCall(pMeshComponent, viewID, m_pRenderContext->GetResourceContext()->GetShaderResource(programHandleIndex)->GetHandle());
+}
+
+void Renderer::AddShaderResource(ShaderResource* shaderResource)
+{
+	m_shaderResources.insert(shaderResource);
 }
 
 }

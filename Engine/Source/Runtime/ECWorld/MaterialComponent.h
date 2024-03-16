@@ -90,6 +90,7 @@ public:
 	~MaterialComponent() = default;
 
 	void Init();
+	void Reset();
 
 	void SetMaterialData(const cd::Material* pMaterialData);
 	cd::Material* GetMaterialData() { return const_cast<cd::Material*>(m_pMaterialData); }
@@ -97,8 +98,6 @@ public:
 
 	void SetMaterialType(const engine::MaterialType* pMaterialType) { m_pMaterialType = pMaterialType; }
 	const engine::MaterialType* GetMaterialType() const { return m_pMaterialType; }
-
-	void Reset();
 
 	// Basic data.
 	void SetName(std::string name) { m_name = cd::MoveTemp(name); }
@@ -116,8 +115,7 @@ public:
 	std::set<ShaderFeature>& GetShaderFeatures() { return m_shaderFeatures; }
 	const std::set<ShaderFeature>& GetShaderFeatures() const { return m_shaderFeatures; }
 
-	bool IsShaderResourceDirty() const { return m_isShaderResourceDirty; }
-	void SetShaderResource(ShaderResource* pShaderResource);
+	void SetShaderResource(ShaderResource* pShaderResource) { m_pShaderResource = pShaderResource; }
 	ShaderResource* GetShaderResource() const { return m_pShaderResource; }
 
 	// Texture data.
@@ -196,16 +194,14 @@ private:
 	const engine::MaterialType* m_pMaterialType = nullptr;
 
 	bool m_isShaderFeaturesDirty = true;
-	bool m_isShaderResourceDirty = true;
 	std::string m_featureCombine;
 	std::set<ShaderFeature> m_shaderFeatures;
 	ShaderResource* m_pShaderResource = nullptr;
 
+	// Output
 	bool m_twoSided;
 	cd::BlendMode m_blendMode;
 	float m_alphaCutOff;
-
-	// Output
 	float m_iblStrength = 0.5f;
 	ToonParameters m_toonParameters;
 	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
