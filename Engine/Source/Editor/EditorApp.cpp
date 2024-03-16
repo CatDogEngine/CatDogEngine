@@ -99,7 +99,6 @@ void EditorApp::Init(engine::EngineInitArgs initArgs)
 	AddWindow(cd::MoveTemp(pSplashWindow));
 
 	InitEditorRenderers();
-	//EditorRenderersWarmup();
 	InitEditorImGuiContext(m_initArgs.language);
 
 	InitECWorld();
@@ -466,9 +465,6 @@ void EditorApp::CompileAndLoadShaders()
 				pMaterialComponent->SetFactor(cd::MaterialPropertyGroup::BaseColor, cd::Vec3f{ 1.0f, 1.0f, 1.0f });
 				failedEntities.erase(entity);
 			}
-
-			// m_pRenderContext->DestroyShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
-			// m_pRenderContext->UploadShaderProgram(info.GetProgramName(), info.GetFeaturesCombine());
 		}
 
 		m_pRenderContext->ClearShaderCompileInfos();
@@ -626,22 +622,6 @@ void EditorApp::InitEngineRenderers()
 	AddEngineRenderer(std::make_unique<engine::ImGuiRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget));
 }
 
-// void EditorApp::EditorRenderersWarmup()
-// {
-// 	for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEditorRenderers)
-// 	{
-// 		pRenderer->Warmup();
-// 	}
-// }
-// 
-// void EditorApp::EngineRenderersWarmup()
-// {
-// 	for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEngineRenderers)
-// 	{
-// 		pRenderer->Warmup();
-// 	}
-// }
-
 bool EditorApp::IsAtmosphericScatteringEnable() const
 {
 	engine::GraphicsBackend backend = engine::Path::GetGraphicsBackend();
@@ -694,8 +674,6 @@ bool EditorApp::Update(float deltaTime)
 	if (!m_bInitEditor && ResourceBuilder::Get().IsIdle())
 	{
 		m_bInitEditor = true;
-
-		//EngineRenderersWarmup();
 
 		// Phase 2 - Project Manager
 		//		* TODO : Show project selector
