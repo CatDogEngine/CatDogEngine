@@ -51,15 +51,13 @@ public:
 
 	void AddFeatureSet(ShaderFeatureSet featureSet);
 	std::optional<ShaderFeatureSet> GetConflictFeatureSet(const ShaderFeature feature) const;
-
 	std::string GetFeaturesCombine(const ShaderFeatureSet& featureSet) const;
-	StringCrc GetFeaturesCombineCrc(const ShaderFeatureSet& featureSet) const;
 
-	std::set<ShaderFeatureSet>& GetFeatures() { return m_shaderFeatureSets; }
-	const std::set<ShaderFeatureSet>& GetFeatures() const { return m_shaderFeatureSets; }
+	std::set<ShaderFeatureSet>& GetFeatureSets() { return m_shaderFeatureSets; }
+	const std::set<ShaderFeatureSet>& GetFeatureSets() const { return m_shaderFeatureSets; }
 
-	std::set<std::string>& GetAllFeatureCombines() { return m_allFeatureCombines; }
-	const std::set<std::string>& GetAllFeatureCombines() const { return m_allFeatureCombines; }
+	std::set<std::string>& GetAllFeatureCombines();
+	const std::set<std::string>& GetAllFeatureCombines() const;
 
 private:
 	std::string m_shaderProgramName;

@@ -54,7 +54,7 @@ protected:
 	uint16_t m_viewID = 0;
 	RenderTarget* m_pRenderTarget = nullptr;
 
-	// TODO : Need a convenient and non MaterialComponent way to manage ShaderResources, improve it.
+	// TODO : Need a generic way to manage the Renderer's dependency on shader resources, improve it.
 	std::set<ShaderResource*> m_shaderResources;
 };
 

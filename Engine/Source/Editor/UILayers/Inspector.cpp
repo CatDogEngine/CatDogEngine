@@ -228,7 +228,7 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 					ImGui::SetCursorScreenPos(ImVec2{ currentPos.x, currentPos.y + 66});
 				}
 
-				bool pPropertyGroupChanded = ImGuiUtils::ImGuiBoolProperty("Use texture", pPropertyGroup->useTexture);
+				bool isPropertyGroupChanded = ImGuiUtils::ImGuiBoolProperty("Use texture", pPropertyGroup->useTexture);
 				ImGui::SameLine(130.0f);
 				if (ImGui::Button("Select..."))
 				{
@@ -239,7 +239,7 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 				ImGuiUtils::ImGuiVectorProperty("UV Offset", textureInfo.GetUVOffset(), cd::Unit::None, cd::Vec2f::Zero(), cd::Vec2f::One(), false, 0.01f);
 				ImGuiUtils::ImGuiVectorProperty("UV Scale", textureInfo.GetUVScale());
 
-				if (pPropertyGroupChanded)
+				if (isPropertyGroupChanded)
 				{
 					if (pPropertyGroup->useTexture)
 					{
@@ -331,7 +331,6 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 
 			if (isOpen)
 			{
-
 				engine::RenderContext* pRenderContext = static_cast<engine::RenderContext*>(ImGui::GetIO().BackendRendererUserData);
 				const engine::ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource();
 

@@ -48,7 +48,7 @@ public:
 	void SetType(ShaderProgramType type) { m_type = type; }
 
 	void SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine = "");
-	void SetShader(const std::string& name, ShaderType type, const std::string& combine = "");
+	void SetShader(ShaderType type, const std::string& name, const std::string& combine = "");
 
 	void SetShaderInfo(ShaderInfo info, size_t index);
 	ShaderInfo& GetShaderInfo(size_t index);
@@ -77,9 +77,6 @@ private:
 
 	// GPU
 	uint16_t m_programHandle = UINT16_MAX;
-
-	// TODO : Uber Shader
-	// TODO : Hot compile and reload
 };
 
 }

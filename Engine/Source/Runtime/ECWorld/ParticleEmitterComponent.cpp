@@ -303,6 +303,7 @@ void ParticleEmitterComponent::ActivateShaderFeature(ShaderFeature feature)
 		return;
 	}
 
+	// TODO : Should remove uber shader stuff from ParticleEmitterComponent.
 	if (const auto& optConflictFeatureSet = m_pParticleMaterialType->GetShaderSchema().GetConflictFeatureSet(feature); optConflictFeatureSet.has_value())
 	{
 		for (const auto& conflictFeature : optConflictFeatureSet.value())

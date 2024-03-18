@@ -395,61 +395,60 @@ void EditorApp::UpdateMaterials()
 			continue;
 		}
 
-		const std::string& programName = pMaterialComponent->GetShaderProgramName();
-		const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
-		engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName + featuresCombine });
-
-		// 1. Create a new ShaderResource / Or find an exists one
-		// 2. Update it to MaterialComponent
-
-		if (!pShaderResource)
+		if (pMaterialComponent->IsShaderResourceDirty())
 		{
-			// We assume here that the ResourceContext hold informations about an
-			// original ShaderProgram that does not contain any ShaderFeature.
+			const std::string& programName = pMaterialComponent->GetShaderProgramName();
+			const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
+			engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName + featuresCombine });
 
-			engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
-			assert(pOriginShaderSource);
-			engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
-			if (engine::ShaderProgramType::Standard == programtype)
+			// 1. Create a new ShaderResource / Or find an exists one
+			// 2. Update it to MaterialComponent
+
+			if (!pShaderResource)
 			{
-				pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
-					pOriginShaderSource->GetShaderInfo(0).name,
-					pOriginShaderSource->GetShaderInfo(1).name,
-					featuresCombine);
-			}
-			else
-			{
-				pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
-					pOriginShaderSource->GetShaderInfo(0).name,
-					programtype,
-					featuresCombine);
+				// We assume here that the ResourceContext hold informations about an
+				// original ShaderProgram that does not contain any ShaderFeature.
+
+				engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
+				assert(pOriginShaderSource);
+				engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
+				if (engine::ShaderProgramType::Standard == programtype)
+				{
+					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
+						pOriginShaderSource->GetShaderInfo(0).name,
+						pOriginShaderSource->GetShaderInfo(1).name,
+						featuresCombine);
+				}
+				else
+				{
+					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
+						pOriginShaderSource->GetShaderInfo(0).name,
+						programtype,
+						featuresCombine);
+				}
+
+				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
 			}
 
-			// Shader Feature changed, need to compile a new variant.
-			m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
+			assert(pShaderResource);
+			pMaterialComponent->SetShaderResource(pShaderResource);
 		}
-		assert(pShaderResource);
-		pMaterialComponent->SetShaderResource(pShaderResource);
+		assert(!pMaterialComponent->IsShaderResourceDirty());
 
-		// Shader source files have been modified, need to re-compile existing variants.
-		if (m_crtInputFocus && !m_preInputFocus)
+		// When the window regains focus, check if the shader for each program has been modified.
+		if (m_crtInputFocus && !m_preInputFocus &&
+			m_pRenderContext->OnShaderHotModified(entity, pMaterialComponent->GetShaderProgramName(), pMaterialComponent->GetFeaturesCombine()))
 		{
-			if (m_pRenderContext->OnShaderHotModified(entity, programName, featuresCombine))
-			{
-				pShaderResource->Reset();
-			}
+			pMaterialComponent->GetShaderResource()->Reset();
 		}
 	}
-}
 
-void EditorApp::CompileAndLoadShaders()
-{
 	// 1. Compile
 	TaskOutputCallbacks cb;
 	cb.onErrorOutput.Bind<editor::EditorApp, &editor::EditorApp::OnShaderCompileFailed>(this);
 	ShaderBuilder::BuildShaderInfos(m_pRenderContext.get(), cd::MoveTemp(cb));
 
-	// 2. Load
+	// 2. Check if compile faild
 	if (!m_pRenderContext->GetShaderCompileInfos().empty())
 	{
 		ResourceBuilder::Get().Update(false, true);
@@ -750,8 +749,6 @@ bool EditorApp::Update(float deltaTime)
 		m_pEngineImGuiContext->Update(deltaTime);
 
 		UpdateMaterials();
-		CompileAndLoadShaders();
-
 		for (std::unique_ptr<engine::Renderer>& pRenderer : m_pEngineRenderers)
 		{
 			if (pRenderer->IsEnable())

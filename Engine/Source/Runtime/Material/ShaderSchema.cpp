@@ -18,7 +18,6 @@ void ShaderSchema::Build()
 	}
 
 	CleanBuild();
-	m_isDirty = false;
 
 	for (const auto& featureSet : m_shaderFeatureSets)
 	{
@@ -54,6 +53,7 @@ void ShaderSchema::Build()
 
 	// ShaderScheme also handles case without ShaderFeature.
 	m_allFeatureCombines.insert("");
+	m_isDirty = false;
 }
 
 void ShaderSchema::CleanBuild()
@@ -72,6 +72,7 @@ void ShaderSchema::CleanAll()
 
 void ShaderSchema::AddFeatureSet(ShaderFeatureSet featureSet)
 {
+	// We trate shader features as set to handel mutually exclusive keywords.
 	for (const auto& existingFeatureSet : m_shaderFeatureSets)
 	{
 		for (const auto& newFeature : featureSet)
@@ -127,14 +128,16 @@ std::string ShaderSchema::GetFeaturesCombine(const ShaderFeatureSet& featureSet)
 	return ss.str();
 }
 
-StringCrc ShaderSchema::GetFeaturesCombineCrc(const ShaderFeatureSet& featureSet) const
+std::set<std::string>& ShaderSchema::GetAllFeatureCombines()
 {
-	if (m_shaderFeatureSets.empty() || featureSet.empty())
-	{
-		return DefaultUberShaderCrc;
-	}
+	assert(!m_isDirty);
+	return m_allFeatureCombines;
+}
 
-	return StringCrc(GetFeaturesCombine(featureSet));
+const std::set<std::string>& ShaderSchema::GetAllFeatureCombines() const
+{
+	assert(!m_isDirty);
+	return m_allFeatureCombines;
 }
 
 }

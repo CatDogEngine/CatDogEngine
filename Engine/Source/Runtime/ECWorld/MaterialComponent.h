@@ -111,12 +111,13 @@ public:
 	void DeactivateShaderFeature(ShaderFeature feature);
 	const std::string& GetFeaturesCombine();
 
-	void SetShaderFeatures(std::set<ShaderFeature> options) { m_shaderFeatures = cd::MoveTemp(m_shaderFeatures); }
+	void SetShaderFeatures(std::set<ShaderFeature> features);
 	std::set<ShaderFeature>& GetShaderFeatures() { return m_shaderFeatures; }
 	const std::set<ShaderFeature>& GetShaderFeatures() const { return m_shaderFeatures; }
 
-	void SetShaderResource(ShaderResource* pShaderResource) { m_pShaderResource = pShaderResource; }
-	ShaderResource* GetShaderResource() const { return m_pShaderResource; }
+	bool IsShaderResourceDirty() const { return m_isShaderResourceDirty; }
+	void SetShaderResource(ShaderResource* pShaderResource);
+	ShaderResource* GetShaderResource() const;
 
 	// Texture data.
 	TextureResource* GetTextureResource(cd::MaterialTextureType textureType) const;
@@ -194,6 +195,7 @@ private:
 	const engine::MaterialType* m_pMaterialType = nullptr;
 
 	bool m_isShaderFeaturesDirty = true;
+	bool m_isShaderResourceDirty = true;
 	std::string m_featureCombine;
 	std::set<ShaderFeature> m_shaderFeatures;
 	ShaderResource* m_pShaderResource = nullptr;

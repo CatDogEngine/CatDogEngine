@@ -12,13 +12,7 @@ namespace editor
 
 void ShaderBuilder::Build(engine::RenderContext* pRenderContext)
 {
-	std::set<engine::ShaderResource*> needCompile;
 	for (const auto& [_, pShaderResource] : pRenderContext->GetShaderResources())
-	{
-		needCompile.insert(pShaderResource);
-	}
-
-	for (const auto& pShaderResource : needCompile)
 	{
 		engine::ShaderProgramType programType = pShaderResource->GetType();
 

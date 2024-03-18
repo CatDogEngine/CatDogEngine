@@ -117,7 +117,7 @@ void ShaderResource::SetShaders(const std::string& vsName, const std::string& fs
 	m_shaders[1].binPath = engine::Path::GetShaderOutputPath(fsName.c_str(), combine);
 }
 
-void ShaderResource::SetShader(const std::string& name, ShaderType type, const std::string& combine)
+void ShaderResource::SetShader(ShaderType type, const std::string& name, const std::string& combine)
 {
 	assert(ShaderProgramType::Standard != m_type);
 
@@ -126,6 +126,7 @@ void ShaderResource::SetShader(const std::string& name, ShaderType type, const s
 	m_shaders[0].scPath = engine::Path::GetBuiltinShaderInputPath(name.c_str());
 	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(name.c_str(), combine);
 }
+
 void ShaderResource::SetShaderInfo(ShaderInfo info, size_t index)
 {
 	CheckIndex(index);

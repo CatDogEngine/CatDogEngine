@@ -180,7 +180,7 @@ ShaderResource* RenderContext::RegisterShaderProgram(const std::string& programN
 	ShaderResource* pShaderResource = m_pResourceContext->AddShaderResource(StringCrc{ programName + combine });
 	pShaderResource->SetType(type);
 	pShaderResource->SetName(programName);
-	pShaderResource->SetShader(shaderName, ProgramTypeToSingleShaderType.at(type), combine);
+	pShaderResource->SetShader(ProgramTypeToSingleShaderType.at(type), shaderName, combine);
 
 	AddShaderResource(StringCrc{ shaderName }, pShaderResource);
 
@@ -190,6 +190,7 @@ ShaderResource* RenderContext::RegisterShaderProgram(const std::string& programN
 bool RenderContext::OnShaderHotModified(Entity entity, const std::string& programName, const std::string& featuresCombine)
 {
 	// m_modifiedProgramNameCrcs will be filled by callback function which bound to FileWatcher.
+
 	const StringCrc programNameCrc{ programName };
 	if (m_modifiedProgramNameCrcs.find(programNameCrc) != m_modifiedProgramNameCrcs.end())
 	{
@@ -220,6 +221,7 @@ void RenderContext::SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks)
 
 void RenderContext::CheckModifiedProgram(StringCrc modifiedShaderNameCrc)
 {
+	// Get program name by shader name.
 	const ShaderResource* pShaderResource = m_shaderResources[modifiedShaderNameCrc];
 	m_modifiedProgramNameCrcs.insert(StringCrc{ pShaderResource->GetName() });
 }
