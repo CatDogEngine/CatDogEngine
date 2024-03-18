@@ -186,7 +186,7 @@ vec3 CalculatePointLight(U_Light light, Material material, vec3 worldPos, vec3 v
 	vec3 specularBRDF = Fre * NDF * Vis;
 	
 	vec3 KD = mix(vec3_splat(1.0) - Fre, vec3_splat(0.0), material.metallic);
-	float shadow = CalculatePointShadow(worldPos, light.position, light.range, lightIndex) *  u_castShadowIntensity.x;
+	float shadow = CalculatePointShadow(worldPos, light.position, light.range, lightIndex) * u_castShadowIntensity.x;
 	return (1 - shadow) * (KD * diffuseBRDF + specularBRDF) * radiance * NdotL;
 }
 
@@ -238,7 +238,7 @@ vec3 CalculateSpotLight(U_Light light, Material material, vec3 worldPos, vec3 vi
 	vec3 specularBRDF = Fre * NDF * Vis;
 	
 	vec3 KD = mix(1.0 - Fre, vec3_splat(0.0), material.metallic);
-	float shadow = CalculateSpotShadow(worldPos, material.normal, lightDir, light.lightViewProjOffset, lightIndex) *  u_castShadowIntensity.x;
+	float shadow = CalculateSpotShadow(worldPos, material.normal, lightDir, light.lightViewProjOffset, lightIndex) * u_castShadowIntensity.x;
 	return (1.0 - shadow) * (KD * diffuseBRDF + specularBRDF) * radiance * NdotL;
 }
 
@@ -311,7 +311,7 @@ vec3 CalculateDirectionalLight(U_Light light, Material material, vec3 worldPos, 
 	
 	vec3 KD = mix(1.0 - Fre, vec3_splat(0.0), material.metallic);
 	vec3 irradiance = light.color * light.intensity;
-	float shadow = CalculateCascadedDirectionalShadow(worldPos, material.normal, lightDir, csmDepth, light.lightViewProjOffset, lightIndex) *  u_castShadowIntensity.x;
+	float shadow = CalculateCascadedDirectionalShadow(worldPos, material.normal, lightDir, csmDepth, light.lightViewProjOffset, lightIndex) * u_castShadowIntensity.x;
 	return (1.0 - shadow) * (KD * diffuseBRDF + specularBRDF) * irradiance * NdotL;
 }
 
