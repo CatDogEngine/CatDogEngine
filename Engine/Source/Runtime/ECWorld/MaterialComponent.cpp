@@ -142,7 +142,13 @@ void MaterialComponent::SetShaderFeatures(std::set<ShaderFeature> features)
 
 void MaterialComponent::SetShaderResource(ShaderResource* pShaderResource)
 {
+	if (m_pShaderResource)
+	{
+		m_pShaderResource->SetActive(false);
+	}
 	m_pShaderResource = pShaderResource;
+	m_pShaderResource->SetActive(true);
+
 	m_isShaderResourceDirty = false;
 }
 

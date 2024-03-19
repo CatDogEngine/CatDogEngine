@@ -200,28 +200,22 @@ void RenderContext::OnShaderHotModified(StringCrc modifiedShaderNameCrc)
 void RenderContext::OnShaderRecompile()
 {
 	// m_modifiedShaderResources will be filled by callback function which bound to FileWatcher.
-	for (auto& pShaderResource : m_modifiedShaderResources)
+	auto it = m_modifiedShaderResources.begin();
+	while (it != m_modifiedShaderResources.end())
 	{
-		AddShaderCompileInfo(engine::ShaderCompileInfo{ pShaderResource->GetName(), pShaderResource->GetFeaturesCombine()});
-		pShaderResource->Reset();
+		ShaderResource* pShaderResource = *it;
+		if (pShaderResource->IsActive())
+		{
+			pShaderResource->Reset();
+			AddRecompileShaderResource(pShaderResource);
+
+			it = m_modifiedShaderResources.erase(it);
+		}
+		else
+		{
+			++it;
+		}
 	}
-	m_modifiedShaderResources.clear();
-}
-
-void RenderContext::AddShaderCompileInfo(ShaderCompileInfo info)
-{
-	CD_ENGINE_INFO("Shader compile task added for {0} with shader features : [{1}]", info.GetProgramName(), info.GetFeaturesCombine());
-	m_shaderCompileInfos.insert(cd::MoveTemp(info));
-}
-
-void RenderContext::ClearShaderCompileInfos()
-{
-	m_shaderCompileInfos.clear();
-}
-
-void RenderContext::SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks)
-{
-	m_shaderCompileInfos = cd::MoveTemp(tasks);
 }
 
 void RenderContext::AddCompileFailedEntity(uint32_t entity)

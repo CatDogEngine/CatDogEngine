@@ -3,7 +3,6 @@
 #include "Core/StringCrc.h"
 #include "Graphics/GraphicsBackend.h"
 #include "Math/Matrix.hpp"
-#include "Rendering/ShaderCompileInfo.h"
 #include "Rendering/ShaderType.h"
 #include "RenderTarget.h"
 #include "Scene/VertexAttribute.h"
@@ -83,11 +82,12 @@ public:
 	const std::set<ShaderResource*>& GetModifiedShaderResources() const { return m_modifiedShaderResources; }
 
 	void OnShaderRecompile();
-	void AddShaderCompileInfo(ShaderCompileInfo info);
-	void ClearShaderCompileInfos();
-	void SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks);
-	std::set<ShaderCompileInfo>& GetShaderCompileInfos() { return m_shaderCompileInfos; }
-	const std::set<ShaderCompileInfo>& GetShaderCompileInfos() const { return m_shaderCompileInfos; }
+	void AddRecompileShaderResource(ShaderResource* pShaderResource) { m_recompileShaderResources.insert(pShaderResource); }
+	void DeleteRecompileShaderResource(ShaderResource* pShaderResource) { m_recompileShaderResources.erase(pShaderResource); }
+	void ClearRecompileShaderResources() { m_recompileShaderResources.clear(); }
+	void SetRecompileShaderResources(std::set<ShaderResource*> recompileShaderResources) { m_recompileShaderResources = cd::MoveTemp(recompileShaderResources); }
+	std::set<ShaderResource*> GetRecompileShaderResources() { return m_recompileShaderResources; }
+	const std::set<ShaderResource*> GetRecompileShaderResources() const { return m_recompileShaderResources; }
 
 	void AddCompileFailedEntity(uint32_t entity);
 	void ClearCompileFailedEntity();
@@ -135,7 +135,7 @@ private:
 	// Key : StringCrc(shader name), Value : ShaderResource*
 	std::multimap<StringCrc, ShaderResource*> m_shaderResources;
 	std::set<ShaderResource*> m_modifiedShaderResources;
-	std::set<ShaderCompileInfo> m_shaderCompileInfos;
+	std::set<ShaderResource*> m_recompileShaderResources;
 	std::set<uint32_t> m_compileFailedEntities;
 };
 

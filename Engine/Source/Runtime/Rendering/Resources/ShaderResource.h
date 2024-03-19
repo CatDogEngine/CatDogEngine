@@ -47,9 +47,12 @@ public:
 	ShaderInfo& GetShaderInfo(size_t index);
 	const ShaderInfo& GetShaderInfo(size_t index) const;
 
+	void SetActive(bool active) { m_active = active; }
+	bool IsActive() const { return m_active; }
+
+	void SetName(std::string name) { m_name = cd::MoveTemp(name); }
 	std::string& GetName() { return m_name; }
 	const std::string& GetName() const { return m_name; }
-	void SetName(std::string name) { m_name = cd::MoveTemp(name); }
 
 	ShaderProgramType GetType() const { return m_type; }
 	void SetType(ShaderProgramType type) { m_type = type; }
@@ -75,6 +78,7 @@ private:
 	ShaderInfo m_shaders[2];
 
 	// Runtime
+	bool m_active = false;
 	std::string m_name;
 	ShaderProgramType m_type = ShaderProgramType::None;
 	std::string m_featuresCombine;

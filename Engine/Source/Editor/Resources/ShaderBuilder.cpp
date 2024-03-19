@@ -5,7 +5,6 @@
 #include "Path/Path.h"
 #include "Rendering/RenderContext.h"
 #include "Rendering/Resources/ResourceContext.h"
-#include "Rendering/Resources/ShaderResource.h"
 
 namespace editor
 {
@@ -66,32 +65,31 @@ void ShaderBuilder::RegisterUberShaderAllVariants(engine::RenderContext* pRender
 	CD_ENGINE_INFO("Compiling program {0} all variants with count : {1}", programName, combines.size());
 }
 
-void ShaderBuilder::BuildShaderInfos(engine::RenderContext* pRenderContext, TaskOutputCallbacks callbacks)
+void ShaderBuilder::BuildShaderResources(engine::RenderContext* pRenderContext, TaskOutputCallbacks callbacks)
 {
-	for (auto info : pRenderContext->GetShaderCompileInfos())
+	for (auto pShaderResource : pRenderContext->GetRecompileShaderResources())
 	{
-		const auto* pShaderResource = pRenderContext->GetResourceContext()->GetShaderResource(engine::StringCrc{ info.GetProgramName() + info.GetFeaturesCombine()});
-		engine::ShaderProgramType programType = pShaderResource->GetType();
-		if (engine::ShaderProgramType::Standard == programType)
-		{
-			const auto& vs = pShaderResource->GetShaderInfo(0);
-			const auto& fs = pShaderResource->GetShaderInfo(1);
+		BuildShaderResource(pRenderContext, pShaderResource, callbacks);
+	}
+}
 
-			TaskHandle vsTaskHandle = ResourceBuilder::Get().AddShaderBuildTask(vs.type,
-				vs.scPath.c_str(), vs.binPath.c_str(), info.GetFeaturesCombine().c_str(), callbacks);
-			TaskHandle fsTaskHandle = ResourceBuilder::Get().AddShaderBuildTask(fs.type,
-				fs.scPath.c_str(), fs.binPath.c_str(), info.GetFeaturesCombine().c_str(), callbacks);
+void ShaderBuilder::BuildShaderResource(engine::RenderContext* pRenderContext, engine::ShaderResource* pShaderResource, TaskOutputCallbacks callbacks)
+{
+	if (engine::ShaderProgramType::Standard == pShaderResource->GetType())
+	{
+		const auto& vs = pShaderResource->GetShaderInfo(0);
+		const auto& fs = pShaderResource->GetShaderInfo(1);
 
-			info.AddTaskHandle(vsTaskHandle);
-			info.AddTaskHandle(fsTaskHandle);
-		}
-		else
-		{
-			const auto& shader = pShaderResource->GetShaderInfo(0);
-			TaskHandle taskHandle = ResourceBuilder::Get().AddShaderBuildTask(shader.type,
-				shader.scPath.c_str(), shader.binPath.c_str(), info.GetFeaturesCombine().c_str(), callbacks);
-			info.AddTaskHandle(taskHandle);
-		}
+		TaskHandle vsTaskHandle = ResourceBuilder::Get().AddShaderBuildTask(vs.type,
+			vs.scPath.c_str(), vs.binPath.c_str(), pShaderResource->GetFeaturesCombine().c_str(), callbacks);
+		TaskHandle fsTaskHandle = ResourceBuilder::Get().AddShaderBuildTask(fs.type,
+			fs.scPath.c_str(), fs.binPath.c_str(), pShaderResource->GetFeaturesCombine().c_str(), callbacks);
+	}
+	else
+	{
+		const auto& shader = pShaderResource->GetShaderInfo(0);
+		TaskHandle taskHandle = ResourceBuilder::Get().AddShaderBuildTask(shader.type,
+			shader.scPath.c_str(), shader.binPath.c_str(), pShaderResource->GetFeaturesCombine().c_str(), callbacks);
 	}
 }
 

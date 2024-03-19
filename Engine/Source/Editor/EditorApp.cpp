@@ -427,7 +427,7 @@ void EditorApp::UpdateMaterials()
 						featuresCombine);
 				}
 
-				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ programName, featuresCombine });
+				m_pRenderContext->AddRecompileShaderResource(pShaderResource);
 			}
 
 			assert(pShaderResource);
@@ -436,17 +436,17 @@ void EditorApp::UpdateMaterials()
 		assert(!pMaterialComponent->IsShaderResourceDirty());
 	}
 
-	// When the window regains focus, check if the shader for each program has been modified.
-	if (m_crtInputFocus && !m_preInputFocus)
+	// When the window gains focus, check if the shader for each program has been modified.
+	if (m_crtInputFocus)
 	{
 		m_pRenderContext->OnShaderRecompile();
 	}
 
-	ShaderBuilder::BuildShaderInfos(m_pRenderContext.get());
-	if (!m_pRenderContext->GetShaderCompileInfos().empty())
+	ShaderBuilder::BuildShaderResources(m_pRenderContext.get());
+	if (!m_pRenderContext->GetRecompileShaderResources().empty())
 	{
 		ResourceBuilder::Get().Update(false, true);
-		m_pRenderContext->ClearShaderCompileInfos();
+		m_pRenderContext->ClearRecompileShaderResources();
 	}
 }
 
