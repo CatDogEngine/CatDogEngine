@@ -440,13 +440,7 @@ void EditorApp::UpdateMaterials()
 	if (m_crtInputFocus)
 	{
 		m_pRenderContext->OnShaderRecompile();
-	}
-
-	ShaderBuilder::BuildRecompileShaderResources(m_pRenderContext.get());
-	if (!m_pRenderContext->GetRecompileShaderResources().empty())
-	{
-		ResourceBuilder::Get().Update(false, true);
-		m_pRenderContext->ClearRecompileShaderResources();
+		ShaderBuilder::BuildRecompileShaderResources(m_pRenderContext.get());
 	}
 }
 

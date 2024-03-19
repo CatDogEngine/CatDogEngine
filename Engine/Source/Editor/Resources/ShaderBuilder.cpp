@@ -53,6 +53,9 @@ void ShaderBuilder::BuildRecompileShaderResources(engine::RenderContext* pRender
 	{
 		BuildShaderResource(pRenderContext, pShaderResource, callbacks);
 	}
+
+	ResourceBuilder::Get().Update();
+	pRenderContext->ClearRecompileShaderResources();
 }
 
 void ShaderBuilder::BuildShaderResource(engine::RenderContext* pRenderContext, engine::ShaderResource* pShaderResource, TaskOutputCallbacks callbacks)
