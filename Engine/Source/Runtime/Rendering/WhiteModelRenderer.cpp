@@ -14,7 +14,7 @@ namespace engine
 
 void WhiteModelRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("WhiteModelProgram", "vs_whiteModel", "fs_whiteModel"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("WhiteModelProgram", "vs_whiteModel", "fs_whiteModel"));
 
 	bgfx::setViewName(GetViewID(), "WhiteModelRenderer");
 }
@@ -27,7 +27,7 @@ void WhiteModelRenderer::UpdateView(const float* pViewMatrix, const float* pProj
 
 void WhiteModelRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

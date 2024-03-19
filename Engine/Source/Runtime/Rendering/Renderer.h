@@ -47,7 +47,7 @@ public:
 
 public:
 	static void ScreenSpaceQuad(const RenderTarget* pRenderTarget, bool _originBottomLeft = false, float _width = 1.0f, float _height = 1.0f);
-	void AddShaderResource(ShaderResource* shaderResource);
+	void AddDependentShaderResource(ShaderResource *shaderResource) { m_dependentShaderResources.insert(shaderResource); }
 
 protected:
 	bool m_isEnable = true;
@@ -55,7 +55,7 @@ protected:
 	RenderTarget* m_pRenderTarget = nullptr;
 
 	// TODO : Need a generic way to manage the Renderer's dependency on shader resources, improve it.
-	std::set<ShaderResource*> m_shaderResources;
+	std::set<ShaderResource*> m_dependentShaderResources;
 };
 
 }

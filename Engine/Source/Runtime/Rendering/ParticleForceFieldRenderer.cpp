@@ -11,7 +11,7 @@ namespace engine
 
 void ParticleForceFieldRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ParticleForceFieldProgram", "vs_particleforcefield", "fs_particleforcefield"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ParticleForceFieldProgram", "vs_particleforcefield", "fs_particleforcefield"));
 
 	bgfx::setViewName(GetViewID(), "ParticleForceFieldRenderer");
 }
@@ -24,7 +24,7 @@ void ParticleForceFieldRenderer::UpdateView(const float* pViewMatrix, const floa
 
 void ParticleForceFieldRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

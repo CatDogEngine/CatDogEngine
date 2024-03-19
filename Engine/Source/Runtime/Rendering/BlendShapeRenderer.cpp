@@ -40,10 +40,10 @@ constexpr StringCrc BlendShapeUpdatePosProgramCrc{ BlendShapeUpdatePosProgram };
 
 void BlendShapeRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeWeightsProgram", "cs_blendshape_weights", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeWeightPosProgram", "cs_blendshape_weight_pos", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeFinalPosProgram", "cs_blendshape_final_pos", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeUpdatePosProgram", "cs_blendshape_update_pos", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeWeightsProgram", "cs_blendshape_weights", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeWeightPosProgram", "cs_blendshape_weight_pos", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeFinalPosProgram", "cs_blendshape_final_pos", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("BlendShapeUpdatePosProgram", "cs_blendshape_update_pos", ShaderProgramType::Compute));
 
 	GetRenderContext()->CreateUniform(morphCountVertexCount, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(changedWeight, bgfx::UniformType::Vec4, 1);
@@ -59,7 +59,7 @@ void BlendShapeRenderer::UpdateView(const float* pViewMatrix, const float* pProj
 
 void BlendShapeRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

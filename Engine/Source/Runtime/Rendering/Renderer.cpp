@@ -161,9 +161,4 @@ void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uin
 	SubmitStaticMeshDrawCall(pMeshComponent, viewID, m_pRenderContext->GetResourceContext()->GetShaderResource(programHandleIndex)->GetHandle());
 }
 
-void Renderer::AddShaderResource(ShaderResource* shaderResource)
-{
-	m_shaderResources.insert(shaderResource);
-}
-
 }

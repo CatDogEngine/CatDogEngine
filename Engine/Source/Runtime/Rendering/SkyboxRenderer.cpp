@@ -24,7 +24,7 @@ constexpr uint64_t renderState = BGFX_STATE_WRITE_MASK | BGFX_STATE_CULL_CCW | B
 
 void SkyboxRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("skyboxProgram", "vs_skybox", "fs_skybox"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("skyboxProgram", "vs_skybox", "fs_skybox"));
 
 	GetRenderContext()->CreateUniform("s_texSkybox", bgfx::UniformType::Sampler);
 	GetRenderContext()->CreateUniform(skyboxStrength, bgfx::UniformType::Vec4, 1);
@@ -62,7 +62,7 @@ void SkyboxRenderer::Render(float deltaTime)
 		return;
 	}
 
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

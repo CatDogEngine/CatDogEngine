@@ -12,7 +12,7 @@ namespace engine
 
 void ImGuiRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ImGuiProgram", "vs_imgui", "fs_imgui"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ImGuiProgram", "vs_imgui", "fs_imgui"));
 
 	constexpr StringCrc imguiVertexLayoutName("imgui_vertex_layout");
 	if (0 == GetRenderContext()->GetVertexAttributeLayouts(imguiVertexLayoutName).m_stride)
@@ -76,7 +76,7 @@ void ImGuiRenderer::UpdateView(const float* pViewMatrix, const float* pProjectio
 
 void ImGuiRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

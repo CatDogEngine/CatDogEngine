@@ -30,9 +30,9 @@ BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA
 void ParticleRenderer::Init()
 {
 	// TODO : ParticleRenderer should use material to manage ShaderResource instead of Renderer::AddShaderResource.
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ParticleProgram", "vs_particle", "fs_particle"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("WO_BillboardParticleProgram", "vs_wo_billboardparticle", "fs_wo_billboardparticle"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ParticleEmitterShapeProgram", "vs_particleEmitterShape", "fs_particleEmitterShape"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ParticleProgram", "vs_particle", "fs_particle"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("WO_BillboardParticleProgram", "vs_wo_billboardparticle", "fs_wo_billboardparticle"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ParticleEmitterShapeProgram", "vs_particleEmitterShape", "fs_particleEmitterShape"));
 
 	constexpr const char* particleTexture = "Textures/textures/Particle.png";
 	m_particleTextureHandle = GetRenderContext()->CreateTexture(particleTexture);
@@ -53,7 +53,7 @@ void ParticleRenderer::UpdateView(const float* pViewMatrix, const float* pProjec
 
 void ParticleRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

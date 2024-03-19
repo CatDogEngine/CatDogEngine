@@ -21,7 +21,7 @@ constexpr const char* outLineSize  = "u_outLineSize";
 
 void OutLineRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("OutLineProgram", "vs_outline", "fs_outline"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("OutLineProgram", "vs_outline", "fs_outline"));
 
 	GetRenderContext()->CreateUniform(outLineColor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(outLineSize, bgfx::UniformType::Vec4, 1);
@@ -37,7 +37,7 @@ void OutLineRenderer::UpdateView(const float* pViewMatrix, const float* pProject
 
 void OutLineRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

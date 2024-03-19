@@ -13,7 +13,7 @@ namespace engine
 
 void AABBRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("AABBProgram", "vs_AABB", "fs_AABB"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("AABBProgram", "vs_AABB", "fs_AABB"));
 
 	bgfx::setViewName(GetViewID(), "AABBRenderer");
 }
@@ -26,7 +26,7 @@ void AABBRenderer::UpdateView(const float* pViewMatrix, const float* pProjection
 
 void AABBRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

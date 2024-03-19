@@ -36,8 +36,8 @@ constexpr uint64_t linearDepthBufferFlags = BGFX_TEXTURE_RT | BGFX_SAMPLER_U_CLA
 
 void ShadowMapRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ShadowMapProgram", "vs_shadowMap", "fs_shadowMap"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("LinearShadowMapProgram", "vs_shadowMap", "fs_shadowMap_linear"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ShadowMapProgram", "vs_shadowMap", "fs_shadowMap"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("LinearShadowMapProgram", "vs_shadowMap", "fs_shadowMap_linear"));
 
 	for (int lightIndex = 0; lightIndex < shadowLightMaxNum; lightIndex++)
 	{
@@ -58,7 +58,7 @@ void ShadowMapRenderer::UpdateView(const float* pViewMatrix, const float* pProje
 
 void ShadowMapRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

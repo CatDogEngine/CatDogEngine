@@ -57,7 +57,7 @@ void TraverseBone(const cd::Bone& bone, const cd::SceneDatabase* pSceneDatabase,
 
 void SkeletonRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("SkeletonProgram", "vs_AABB", "fs_AABB"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("SkeletonProgram", "vs_AABB", "fs_AABB"));
 
 	bgfx::setViewName(GetViewID(), "SkeletonRenderer");
 }
@@ -109,7 +109,7 @@ void SkeletonRenderer::Build()
 
 void SkeletonRenderer::Render(float delataTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

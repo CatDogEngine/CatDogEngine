@@ -16,7 +16,7 @@ namespace engine
 
 void WireframeRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("WireframeLineProgram", "vs_wireframe_line", "fs_wireframe_line"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("WireframeLineProgram", "vs_wireframe_line", "fs_wireframe_line"));
 
 	bgfx::setViewName(GetViewID(), "WireframeRenderer");
 }
@@ -29,7 +29,7 @@ void WireframeRenderer::UpdateView(const float* pViewMatrix, const float* pProje
 
 void WireframeRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

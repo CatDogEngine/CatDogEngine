@@ -60,14 +60,14 @@ constexpr uint16_t ScatteringOrders                      = 6;
 
 void PBRSkyRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramAtmosphericScatteringLUT", "vs_atmSkyBox", "fs_PrecomputedAtmosphericScattering_LUT"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramSingleScatteringRayMarching", "vs_atmSkyBox", "fs_SingleScattering_RayMarching"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeTransmittance", "cs_ComputeTransmittance", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeDirectIrradiance", "cs_ComputeDirectIrradiance", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeSingleScattering", "cs_ComputeSingleScattering", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeScatteringDensity", "cs_ComputeScatteringDensity", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeIndirectIrradiance", "cs_ComputeIndirectIrradiance", ShaderProgramType::Compute));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeMultipleScattering", "cs_ComputeMultipleScattering", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramAtmosphericScatteringLUT", "vs_atmSkyBox", "fs_PrecomputedAtmosphericScattering_LUT"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramSingleScatteringRayMarching", "vs_atmSkyBox", "fs_SingleScattering_RayMarching"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeTransmittance", "cs_ComputeTransmittance", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeDirectIrradiance", "cs_ComputeDirectIrradiance", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeSingleScattering", "cs_ComputeSingleScattering", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeScatteringDensity", "cs_ComputeScatteringDensity", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeIndirectIrradiance", "cs_ComputeIndirectIrradiance", ShaderProgramType::Compute));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("ProgramComputeMultipleScattering", "cs_ComputeMultipleScattering", ShaderProgramType::Compute));
 
 	GetRenderContext()->CreateTexture(TextureTransmittance, TRANSMITTANCE_TEXTURE_WIDTH, TRANSMITTANCE_TEXTURE_HEIGHT, 1,
 		bgfx::TextureFormat::RGBA32F, FlagTexture2D);
@@ -117,7 +117,7 @@ void PBRSkyRenderer::UpdateView(const float* pViewMatrix, const float* pProjecti
 
 void PBRSkyRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())

@@ -31,13 +31,13 @@ constexpr StringCrc CombineProgramCrc{ CombineProgram };
 
 void BloomRenderer::Init()
 {
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(CapTureBrightnessProgram, "vs_fullscreen", "fs_captureBrightness"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(DownSampleProgram, "vs_fullscreen", "fs_dowmsample"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(BlurVerticalProgram, "vs_fullscreen", "fs_blurvertical"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(BlurHorizontalProgram, "vs_fullscreen", "fs_blurhorizontal"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(UpSampleProgram, "vs_fullscreen", "fs_upsample"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(KawaseBlurProgram, "vs_fullscreen", "fs_kawaseblur"));
-	AddShaderResource(GetRenderContext()->RegisterShaderProgram(CombineProgram, "vs_fullscreen", "fs_bloom"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(CapTureBrightnessProgram, "vs_fullscreen", "fs_captureBrightness"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(DownSampleProgram, "vs_fullscreen", "fs_dowmsample"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(BlurVerticalProgram, "vs_fullscreen", "fs_blurvertical"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(BlurHorizontalProgram, "vs_fullscreen", "fs_blurhorizontal"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(UpSampleProgram, "vs_fullscreen", "fs_upsample"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(KawaseBlurProgram, "vs_fullscreen", "fs_kawaseblur"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram(CombineProgram, "vs_fullscreen", "fs_bloom"));
 
 	GetRenderContext()->CreateUniform("s_texture", bgfx::UniformType::Sampler);
 	GetRenderContext()->CreateUniform("s_bloom", bgfx::UniformType::Sampler);
@@ -151,7 +151,7 @@ void BloomRenderer::UpdateView(const float* pViewMatrix, const float* pProjectio
 
 void BloomRenderer::Render(float deltaTime)
 {
-	for (const auto pResource : m_shaderResources)
+	for (const auto pResource : m_dependentShaderResources)
 	{
 		if (ResourceStatus::Ready != pResource->GetStatus() &&
 			ResourceStatus::Optimized != pResource->GetStatus())
