@@ -442,7 +442,7 @@ void EditorApp::UpdateMaterials()
 		m_pRenderContext->OnShaderRecompile();
 	}
 
-	ShaderBuilder::BuildShaderResources(m_pRenderContext.get());
+	ShaderBuilder::BuildRecompileShaderResources(m_pRenderContext.get());
 	if (!m_pRenderContext->GetRecompileShaderResources().empty())
 	{
 		ResourceBuilder::Get().Update(false, true);
@@ -598,7 +598,7 @@ void EditorApp::InitShaderPrograms(bool compileAllShaders) const
 #endif
 	}
 
-	ShaderBuilder::Build(m_pRenderContext.get());
+	ShaderBuilder::BuildRegisteredShaderResources(m_pRenderContext.get());
 }
 
 void EditorApp::InitEditorController()
