@@ -152,7 +152,6 @@ void Renderer::SubmitStaticMeshDrawCall(StaticMeshComponent* pMeshComponent, uin
 	{
 		bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pMeshResource->GetIndexBufferHandle(indexBufferIndex) }, pMeshComponent->GetStartIndex(), pMeshComponent->GetIndexCount());
 
-		// TODO : Submit interface requires runtime string construction which may hurt performance.
 		GetRenderContext()->Submit(viewID, programHandle);
 	}
 }
