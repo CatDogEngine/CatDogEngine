@@ -187,20 +187,25 @@ ShaderResource* RenderContext::RegisterShaderProgram(const std::string& programN
 	return pShaderResource;
 }
 
-bool RenderContext::OnShaderHotModified(Entity entity, const std::string& programName, const std::string& featuresCombine)
+void RenderContext::OnShaderHotModified(StringCrc modifiedShaderNameCrc)
 {
-	// m_modifiedProgramNameCrcs will be filled by callback function which bound to FileWatcher.
-
-	const StringCrc programNameCrc{ programName };
-	if (m_modifiedProgramNameCrcs.find(programNameCrc) != m_modifiedProgramNameCrcs.end())
+	// Get all ShaderResource variants by shader name.
+	auto range = m_shaderResources.equal_range(modifiedShaderNameCrc);
+	for (auto it = range.first; it != range.second; ++it)
 	{
-		AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
-		m_modifiedProgramNameCrcs.erase(programNameCrc);
-
-		return true;
+		m_modifiedShaderResources.insert(it->second);
 	}
+}
 
-	return false;
+void RenderContext::OnShaderRecompile()
+{
+	// m_modifiedShaderResources will be filled by callback function which bound to FileWatcher.
+	for (auto& pShaderResource : m_modifiedShaderResources)
+	{
+		AddShaderCompileInfo(engine::ShaderCompileInfo{ pShaderResource->GetName(), pShaderResource->GetFeaturesCombine()});
+		pShaderResource->Reset();
+	}
+	m_modifiedShaderResources.clear();
 }
 
 void RenderContext::AddShaderCompileInfo(ShaderCompileInfo info)
@@ -217,18 +222,6 @@ void RenderContext::ClearShaderCompileInfos()
 void RenderContext::SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks)
 {
 	m_shaderCompileInfos = cd::MoveTemp(tasks);
-}
-
-void RenderContext::CheckModifiedProgram(StringCrc modifiedShaderNameCrc)
-{
-	// Get program name by shader name.
-	const ShaderResource* pShaderResource = m_shaderResources[modifiedShaderNameCrc];
-	m_modifiedProgramNameCrcs.insert(StringCrc{ pShaderResource->GetName() });
-}
-
-void RenderContext::ClearModifiedProgramNameCrcs()
-{
-	m_modifiedProgramNameCrcs.clear();
 }
 
 void RenderContext::AddCompileFailedEntity(uint32_t entity)

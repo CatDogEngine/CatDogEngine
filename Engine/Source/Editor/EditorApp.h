@@ -83,9 +83,7 @@ private:
 
 	void InitFileWatcher();
 	void OnShaderHotModifiedCallback(const char* rootDir, const char* filePath);
-
 	void UpdateMaterials();
-	void OnShaderCompileFailed(uint32_t handle, std::span<const char> str);
 
 	bool m_crtInputFocus = true;
 	bool m_preInputFocus = true;

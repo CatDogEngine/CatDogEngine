@@ -70,15 +70,13 @@ void ShaderBuilder::BuildShaderInfos(engine::RenderContext* pRenderContext, Task
 {
 	for (auto info : pRenderContext->GetShaderCompileInfos())
 	{
-		const auto& programName = info.GetProgramName();
-		const auto* pShaderResource = pRenderContext->GetResourceContext()->GetShaderResource(engine::StringCrc{ programName + info.GetFeaturesCombine()});
+		const auto* pShaderResource = pRenderContext->GetResourceContext()->GetShaderResource(engine::StringCrc{ info.GetProgramName() + info.GetFeaturesCombine()});
 		engine::ShaderProgramType programType = pShaderResource->GetType();
 		if (engine::ShaderProgramType::Standard == programType)
 		{
 			const auto& vs = pShaderResource->GetShaderInfo(0);
 			const auto& fs = pShaderResource->GetShaderInfo(1);
 
-			// TODO : Maybe we should store feature combine in ShaderResource?
 			TaskHandle vsTaskHandle = ResourceBuilder::Get().AddShaderBuildTask(vs.type,
 				vs.scPath.c_str(), vs.binPath.c_str(), info.GetFeaturesCombine().c_str(), callbacks);
 			TaskHandle fsTaskHandle = ResourceBuilder::Get().AddShaderBuildTask(fs.type,

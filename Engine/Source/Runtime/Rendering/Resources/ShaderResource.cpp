@@ -92,7 +92,6 @@ void ShaderResource::Update()
 }
 void ShaderResource::Reset()
 {
-	// Clear everything
 	ClearShaderData(0);
 	ClearShaderData(1);
 	DistoryShaderHandle(0);
@@ -115,6 +114,8 @@ void ShaderResource::SetShaders(const std::string& vsName, const std::string& fs
 	m_shaders[1].name = fsName;
 	m_shaders[1].scPath = engine::Path::GetBuiltinShaderInputPath(fsName.c_str());
 	m_shaders[1].binPath = engine::Path::GetShaderOutputPath(fsName.c_str(), combine);
+
+	m_featuresCombine = combine;
 }
 
 void ShaderResource::SetShader(ShaderType type, const std::string& name, const std::string& combine)
@@ -125,6 +126,8 @@ void ShaderResource::SetShader(ShaderType type, const std::string& name, const s
 	m_shaders[0].name = name;
 	m_shaders[0].scPath = engine::Path::GetBuiltinShaderInputPath(name.c_str());
 	m_shaders[0].binPath = engine::Path::GetShaderOutputPath(name.c_str(), combine);
+
+	m_featuresCombine = combine;
 }
 
 void ShaderResource::SetShaderInfo(ShaderInfo info, size_t index)

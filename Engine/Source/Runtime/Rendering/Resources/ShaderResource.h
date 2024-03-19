@@ -40,6 +40,13 @@ public:
 	virtual void Update() override;
 	virtual void Reset() override;
 
+	void SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine = "");
+	void SetShader(ShaderType type, const std::string& name, const std::string& combine = "");
+
+	void SetShaderInfo(ShaderInfo info, size_t index);
+	ShaderInfo& GetShaderInfo(size_t index);
+	const ShaderInfo& GetShaderInfo(size_t index) const;
+
 	std::string& GetName() { return m_name; }
 	const std::string& GetName() const { return m_name; }
 	void SetName(std::string name) { m_name = cd::MoveTemp(name); }
@@ -47,12 +54,9 @@ public:
 	ShaderProgramType GetType() const { return m_type; }
 	void SetType(ShaderProgramType type) { m_type = type; }
 
-	void SetShaders(const std::string& vsName, const std::string& fsName, const std::string& combine = "");
-	void SetShader(ShaderType type, const std::string& name, const std::string& combine = "");
-
-	void SetShaderInfo(ShaderInfo info, size_t index);
-	ShaderInfo& GetShaderInfo(size_t index);
-	const ShaderInfo& GetShaderInfo(size_t index) const;
+	void SetFeaturesCombine(std::string combine) { m_featuresCombine = cd::MoveTemp(combine); }
+	std::string& GetFeaturesCombine() { return m_featuresCombine; }
+	const std::string& GetFeaturesCombine() const { return m_featuresCombine; }
 
 	uint16_t GetHandle() const { return m_programHandle; }
 
@@ -73,6 +77,7 @@ private:
 	// Runtime
 	std::string m_name;
 	ShaderProgramType m_type = ShaderProgramType::None;
+	std::string m_featuresCombine;
 	uint32_t m_recycleCount = 0;
 
 	// GPU

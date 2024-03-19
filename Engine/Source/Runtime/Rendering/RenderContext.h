@@ -70,24 +70,24 @@ public:
 	// For non-Standard ShaderProgramType
 	ShaderResource* RegisterShaderProgram(const std::string& programName, const std::string& shaderName, ShaderProgramType type, const std::string& combine = "");
 
-	void AddShaderResource(StringCrc name, ShaderResource* resource) { m_shaderResources[name] = resource; }
-	void DeleteShaderResource(StringCrc name) { m_shaderResources.erase(name); }
-	ShaderResource* GetShaderResource(StringCrc name) { return m_shaderResources[name]; }
-	void SetShaderResources(std::map<StringCrc, ShaderResource*> cache) { m_shaderResources = cd::MoveTemp(cache); }
-	std::map<StringCrc, ShaderResource*>& GetShaderResources() { return m_shaderResources; }
-	const std::map<StringCrc, ShaderResource*>& GetShaderResources() const { return m_shaderResources; }
+	void AddShaderResource(StringCrc shaderName, ShaderResource* resource) { m_shaderResources.insert({ shaderName, resource }); }
+	void DeleteShaderResource(StringCrc shaderName) { m_shaderResources.erase(shaderName); }
+	void SetShaderResources(std::multimap<StringCrc, ShaderResource*> resources) { m_shaderResources = cd::MoveTemp(resources); }
+	std::multimap<StringCrc, ShaderResource*>& GetShaderResources() { return m_shaderResources; }
+	const std::multimap<StringCrc, ShaderResource*>& GetShaderResources() const { return m_shaderResources; }
 
-	bool OnShaderHotModified(Entity entity, const std::string& programName, const std::string& featuresCombine = "");
+	// Call back function bind to file watcher.
+	void OnShaderHotModified(StringCrc modifiedShaderNameCrc);
+	void ClearModifiedShaderResources() { m_modifiedShaderResources.clear(); }
+	std::set<ShaderResource*>& GetModifiedShaderResources() { return m_modifiedShaderResources; }
+	const std::set<ShaderResource*>& GetModifiedShaderResources() const { return m_modifiedShaderResources; }
+
+	void OnShaderRecompile();
 	void AddShaderCompileInfo(ShaderCompileInfo info);
 	void ClearShaderCompileInfos();
 	void SetShaderCompileInfos(std::set<ShaderCompileInfo> tasks);
 	std::set<ShaderCompileInfo>& GetShaderCompileInfos() { return m_shaderCompileInfos; }
 	const std::set<ShaderCompileInfo>& GetShaderCompileInfos() const { return m_shaderCompileInfos; }
-
-	void CheckModifiedProgram(StringCrc modifiedShaderNameCrc);
-	void ClearModifiedProgramNameCrcs();
-	std::set<StringCrc>& GetModifiedProgramNameCrcs() { return m_modifiedProgramNameCrcs; }
-	const std::set<StringCrc>& GetModifiedProgramNameCrcs() const { return m_modifiedProgramNameCrcs; }
 
 	void AddCompileFailedEntity(uint32_t entity);
 	void ClearCompileFailedEntity();
@@ -133,9 +133,9 @@ private:
 	std::unordered_map<StringCrc, uint16_t> m_uniformHandleCaches;
 
 	// Key : StringCrc(shader name), Value : ShaderResource*
-	std::map<StringCrc, ShaderResource*> m_shaderResources;
+	std::multimap<StringCrc, ShaderResource*> m_shaderResources;
+	std::set<ShaderResource*> m_modifiedShaderResources;
 	std::set<ShaderCompileInfo> m_shaderCompileInfos;
-	std::set<StringCrc> m_modifiedProgramNameCrcs;
 	std::set<uint32_t> m_compileFailedEntities;
 };
 

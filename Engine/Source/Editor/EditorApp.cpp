@@ -382,7 +382,7 @@ void EditorApp::OnShaderHotModifiedCallback(const char* rootDir, const char* fil
 	    // Do nothing when a non-shader file is detected.
 	    return;
 	}
-	m_pRenderContext->CheckModifiedProgram(engine::StringCrc{ engine::Path::GetFileNameWithoutExtension(filePath) });
+	m_pRenderContext->OnShaderHotModified(engine::StringCrc{ engine::Path::GetFileNameWithoutExtension(filePath) });
 }
 
 void EditorApp::UpdateMaterials()
@@ -408,9 +408,9 @@ void EditorApp::UpdateMaterials()
 			{
 				// We assume here that the ResourceContext hold informations about an
 				// original ShaderProgram that does not contain any ShaderFeature.
-
 				engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
 				assert(pOriginShaderSource);
+				
 				engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
 				if (engine::ShaderProgramType::Standard == programtype)
 				{
@@ -427,69 +427,26 @@ void EditorApp::UpdateMaterials()
 						featuresCombine);
 				}
 
-				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ entity, programName, featuresCombine });
+				m_pRenderContext->AddShaderCompileInfo(engine::ShaderCompileInfo{ programName, featuresCombine });
 			}
 
 			assert(pShaderResource);
 			pMaterialComponent->SetShaderResource(pShaderResource);
 		}
 		assert(!pMaterialComponent->IsShaderResourceDirty());
-
-		// When the window regains focus, check if the shader for each program has been modified.
-		if (m_crtInputFocus && !m_preInputFocus &&
-			m_pRenderContext->OnShaderHotModified(entity, pMaterialComponent->GetShaderProgramName(), pMaterialComponent->GetFeaturesCombine()))
-		{
-			pMaterialComponent->GetShaderResource()->Reset();
-		}
 	}
 
-	// 1. Compile
-	TaskOutputCallbacks cb;
-	cb.onErrorOutput.Bind<editor::EditorApp, &editor::EditorApp::OnShaderCompileFailed>(this);
-	ShaderBuilder::BuildShaderInfos(m_pRenderContext.get(), cd::MoveTemp(cb));
+	// When the window regains focus, check if the shader for each program has been modified.
+	if (m_crtInputFocus && !m_preInputFocus)
+	{
+		m_pRenderContext->OnShaderRecompile();
+	}
 
-	// 2. Check if compile faild
+	ShaderBuilder::BuildShaderInfos(m_pRenderContext.get());
 	if (!m_pRenderContext->GetShaderCompileInfos().empty())
 	{
 		ResourceBuilder::Get().Update(false, true);
-
-		for (const auto& info : m_pRenderContext->GetShaderCompileInfos())
-		{
-			// Info still in RenderContext::m_shaderCompileInfos means compiling is successful.
-			const uint32_t entity = info.GetEntity();
-			auto& failedEntities = m_pRenderContext->GetCompileFailedEntities();
-			if (failedEntities.find(entity) != failedEntities.end())
-			{
-				engine::MaterialComponent* pMaterialComponent = m_pSceneWorld->GetMaterialComponent(entity);
-				pMaterialComponent->SetFactor(cd::MaterialPropertyGroup::BaseColor, cd::Vec3f{ 1.0f, 1.0f, 1.0f });
-				failedEntities.erase(entity);
-			}
-		}
-
 		m_pRenderContext->ClearShaderCompileInfos();
-	}
-}
-
-void EditorApp::OnShaderCompileFailed(uint32_t handle, std::span<const char> str)
-{
-	auto& infos = m_pRenderContext->GetShaderCompileInfos();
-	auto it = infos.begin();
-
-	while (it != infos.end())
-	{
-		const auto& handles = it->GetTaskHandles();
-		if (handles.find(handle) != handles.end())
-		{
-			const uint32_t entity = it->GetEntity();
-			m_pRenderContext->AddCompileFailedEntity(entity);
-			engine::MaterialComponent* pMaterialComponent = m_pSceneWorld->GetMaterialComponent(entity);
-			pMaterialComponent->SetFactor(cd::MaterialPropertyGroup::BaseColor, cd::Vec3f{ 1.0f, 0.0f, 1.0f });
-			it = infos.erase(it);
-		}
-		else
-		{
-			++it;
-		}
 	}
 }
 
