@@ -10,7 +10,6 @@
 namespace engine
 {
 
-// TODO : Template?
 class ShaderResource : public IResource
 {
 public:

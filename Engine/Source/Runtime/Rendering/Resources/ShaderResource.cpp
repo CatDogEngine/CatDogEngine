@@ -34,26 +34,21 @@ void ShaderResource::Update()
 		}
 		case ResourceStatus::Loaded:
 		{
-			// Check something
-
 			if (!m_shaders[0].binBlob.empty() && !(ShaderProgramType::Standard == m_type && m_shaders[1].binBlob.empty()))
 			{
 				// It seems no Rendering data for shader? Skip Building status.
-
 				SetStatus(ResourceStatus::Built);
 			}
 			break;
 		}
 		case ResourceStatus::Building:
 		{
-			// Build Rendering data
-
+			SetStatus(ResourceStatus::Built);
 			break;
 		}
 		case ResourceStatus::Built:
 		{
-			// Build GPU handle
-
+			// Build GPU handles
 			if (BuildShaderHandle() && BuildProgramHandle())
 			{
 				m_recycleCount = 0U;
@@ -64,7 +59,6 @@ void ShaderResource::Update()
 		case ResourceStatus::Ready:
 		{
 			// Delete CPU data delayed
-
 			constexpr uint32_t recycleDelayFrames = 30U;
 			if (m_recycleCount++ >= recycleDelayFrames)
 			{
@@ -78,8 +72,7 @@ void ShaderResource::Update()
 		}
 		case ResourceStatus::Garbage:
 		{
-			// Distory GPU handle
-
+			// Distory GPU handles
 			DistoryShaderHandle(0);
 			DistoryShaderHandle(1);
 			DistoryProgramHandle();

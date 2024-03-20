@@ -118,7 +118,7 @@ void WorldRenderer::Render(float deltaTime)
 	// Blit RTV to SRV to update light shadow map
 	for (int i = 0; i < lightEntityCount; i++)
 	{
-		const auto lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[i]);
+		LightComponent* lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[i]);
 		cd::LightType lightType = lightComponent->GetType();
 		if (cd::LightType::Directional == lightType)
 		{
@@ -177,11 +177,17 @@ void WorldRenderer::Render(float deltaTime)
 	for (Entity entity : m_pCurrentSceneWorld->GetMaterialEntities())
 	{
 		MaterialComponent* pMaterialComponent = m_pCurrentSceneWorld->GetMaterialComponent(entity);
-		if (!pMaterialComponent ||
-			(pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetPBRMaterialType()))
+		if (!pMaterialComponent)
 		{
 			// TODO : improve this condition. As we want to skip some feature-specified entities to render.
 			// For example, terrain/particle/...
+			continue;
+		}
+
+		// TODO : Temporary solution for CelluloidRenderer, remove it.
+		if (pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetPBRMaterialType() &&
+			pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetCelluloidMaterialType())
+		{
 			continue;
 		}
 

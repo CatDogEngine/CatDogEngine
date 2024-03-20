@@ -397,32 +397,32 @@ void EditorApp::UpdateMaterials()
 
 		if (pMaterialComponent->IsShaderResourceDirty())
 		{
-			const std::string& programName = pMaterialComponent->GetShaderProgramName();
-			const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
-			engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName + featuresCombine });
-
 			// 1. Create a new ShaderResource / Or find an exists one
 			// 2. Update it to MaterialComponent
 
+			const std::string& programName = pMaterialComponent->GetShaderProgramName();
+			const std::string& featuresCombine = pMaterialComponent->GetFeaturesCombine();
+
+			engine::ShaderResource* pShaderResource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName + featuresCombine });
 			if (!pShaderResource)
 			{
 				// We assume here that the ResourceContext hold informations about an
 				// original ShaderProgram that does not contain any ShaderFeature.
-				engine::ShaderResource* pOriginShaderSource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
-				assert(pOriginShaderSource);
+				engine::ShaderResource* pOriginShaderResource = m_pResourceContext->GetShaderResource(engine::StringCrc{ programName });
+				assert(pOriginShaderResource);
 				
-				engine::ShaderProgramType programtype = pOriginShaderSource->GetType();
+				engine::ShaderProgramType programtype = pOriginShaderResource->GetType();
 				if (engine::ShaderProgramType::Standard == programtype)
 				{
-					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
-						pOriginShaderSource->GetShaderInfo(0).name,
-						pOriginShaderSource->GetShaderInfo(1).name,
+					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderResource->GetName(),
+						pOriginShaderResource->GetShaderInfo(0).name,
+						pOriginShaderResource->GetShaderInfo(1).name,
 						featuresCombine);
 				}
 				else
 				{
-					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderSource->GetName(),
-						pOriginShaderSource->GetShaderInfo(0).name,
+					pShaderResource = m_pRenderContext->RegisterShaderProgram(pOriginShaderResource->GetName(),
+						pOriginShaderResource->GetShaderInfo(0).name,
 						programtype,
 						featuresCombine);
 				}

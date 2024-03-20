@@ -153,9 +153,9 @@ uint16_t RenderContext::CreateView()
 ShaderResource* RenderContext::RegisterShaderProgram(const std::string& programName, const std::string& vsName, const std::string& fsName, const std::string& combine)
 {
 	const StringCrc programCrc{ programName + combine };
-	if (ShaderResource* pOriginShaderResources = m_pResourceContext->GetShaderResource(programCrc); pOriginShaderResources)
+	if (m_pResourceContext->GetShaderResource(programCrc))
 	{
-		return pOriginShaderResources;
+		return m_pResourceContext->GetShaderResource(programCrc);
 	}
 
 	ShaderResource* pShaderResource = m_pResourceContext->AddShaderResource(programCrc);
