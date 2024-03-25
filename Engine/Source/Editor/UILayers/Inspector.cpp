@@ -398,6 +398,7 @@ void UpdateComponentWidget<engine::CameraComponent>(engine::SceneWorld* pSceneWo
 		ImGuiUtils::ImGuiFloatProperty("Exposure", pCameraComponent->GetExposure(), cd::Unit::None, 0.0f, 30.0f, false, 0.01f);
 		ImGuiUtils::ImGuiEnumProperty("Tone Mapping Mode", pCameraComponent->GetToneMappingMode());
 		ImGuiUtils::ImGuiFloatProperty("Gamma Correction", pCameraComponent->GetGammaCorrection(), cd::Unit::None, 0.0f, 1.0f);
+		ImGuiUtils::ImGuiFloatProperty("Split Lambda", pCameraComponent->GetSplitLambda(), cd::Unit::None, 0.1f, 1.0f);
 		if (ImGui::TreeNode("Bloom"))
 		{
 			ImGuiUtils::ImGuiBoolProperty("Open Bloom", pCameraComponent->GetIsBloomEnable());

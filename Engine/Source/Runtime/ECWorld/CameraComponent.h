@@ -153,6 +153,8 @@ public:
 	int& GetBlurScaling() { return m_blurScaling; }
 	int GetBlurScaling() const { return m_blurScaling; }
 	void SetBlurScaling(int blurscaling) { m_blurScaling = blurscaling; }
+
+	float& GetSplitLambda() { return m_splitLambda; }
 #endif
 
 private:
@@ -188,6 +190,7 @@ private:
 	int m_blurMaxTimes = 20;
 	float m_blurSize;
 	int m_blurScaling;
+	float m_splitLambda = 0.95f;
 #endif
 };
 

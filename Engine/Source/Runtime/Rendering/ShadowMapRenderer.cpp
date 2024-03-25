@@ -79,6 +79,7 @@ void ShadowMapRenderer::Render(float deltaTime)
 		const cd::Matrix4x4 camView = pMainCameraComponent->GetViewMatrix();
 		const cd::Matrix4x4 camProj = pMainCameraComponent->GetProjectionMatrix();
 		const cd::Matrix4x4 invCamViewProj = (camProj * camView).Inverse();
+		cd::Matrix4x4 temp = camProj.Inverse();
 		bool ndcDepthMinusOneToOne = cd::NDCDepth::MinusOneToOne == pMainCameraComponent->GetNDCDepth();
 
 		// lambda : unproject ndc sapce coordinates into world space 
@@ -130,20 +131,20 @@ void ShadowMapRenderer::Render(float deltaTime)
 				else if (CascadePartitionMode::Logarithmic == cascadePatitionMode
 					|| CascadePartitionMode::PSSM == cascadePatitionMode)
 				{
-					float lambda = 1.0f;
+					float lambda = pMainCameraComponent->GetSplitLambda();
 					if (CascadePartitionMode::PSSM == cascadePatitionMode){}
-						lambda = 0.5;// TODO : user edit
 
 					float nearClip = pMainCameraComponent->GetNearPlane();
 					float farClip = pMainCameraComponent->GetFarPlane();
 					float clipRange = farClip - nearClip;
 
-					float minZ = nearClip + MinDistance * clipRange;
-					float maxZ = nearClip + MaxDistance * clipRange;
+					float minZ = nearClip;
+					float maxZ = nearClip + clipRange;
 
 					float range = maxZ - minZ;
 					float ratio = maxZ / minZ;
-
+					// Calculate split depths based on view camera frustum
+					// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
 					for (uint16_t i = 0; i < cascadeNum; ++i)
 					{
 						float p = (i + 1) / static_cast<float>(cascadeNum);
@@ -155,67 +156,70 @@ void ShadowMapRenderer::Render(float deltaTime)
 				}
 
 				// Compute the frustum according to ndc depth of different graphic backends
-				cd::Direction lightDirection = lightComponent->GetDirection();
-				std::vector<cd::Point> frustumCorners = ndcDepthMinusOneToOne ? 
-					std::vector<cd::Point>{		 // Depth [-1, 1]
-						UnProject(cd::Vec4f(-1, -1,  -1, 1)),	UnProject(cd::Vec4f(-1, -1, 1, 1)),	// lower-left near and far 
-						UnProject(cd::Vec4f(-1,  1,  -1, 1)),	UnProject(cd::Vec4f(-1,  1, 1, 1)),	// upper-left near and far 
-						UnProject(cd::Vec4f( 1, -1,  -1, 1)),	UnProject(cd::Vec4f( 1, -1, 1, 1)),	//	lower-right near and far 
-						UnProject(cd::Vec4f( 1,  1,  -1, 1)),	UnProject(cd::Vec4f( 1,  1, 1, 1))		// upper-right near and far
-					} :
-					std::vector<cd::Point>{		// Depth [0, 1]
-						UnProject(cd::Vec4f(-1, -1,  0, 1)),	UnProject(cd::Vec4f(-1, -1, 1, 1)),	// lower-left near and far 
-						UnProject(cd::Vec4f(-1,  1,  0, 1)),	UnProject(cd::Vec4f(-1,  1, 1, 1)),	// upper-left near and far 
-						UnProject(cd::Vec4f( 1, -1,  0, 1)),	UnProject(cd::Vec4f( 1, -1, 1, 1)),	//	lower-right near and far 
-						UnProject(cd::Vec4f( 1,  1,  0, 1)),	UnProject(cd::Vec4f( 1,  1, 1, 1))		// upper-right near and far
-					};
+				cd::Direction lightDirection = lightComponent->GetDirection().Normalize();
 
 				// Set cascade split dividing values for choosing cascade level in world renderer
 				lightComponent->SetComputedCascadeSplit(&CascadeSplits[0]);
 				lightComponent->ClearLightViewProjMatrix();
+				float lastSplitDist = 0.0;
 				for (uint16_t cascadeIndex = 0; cascadeIndex < cascadeNum; ++cascadeIndex)
 				{
+
+					std::vector<cd::Point> frustumCorners = ndcDepthMinusOneToOne ?
+						std::vector<cd::Point>{		 // Depth [-1, 1]
+						UnProject(cd::Vec4f(-1, -1, -1, 1)), UnProject(cd::Vec4f(-1, -1, 1, 1)),	// lower-left near and far 
+							UnProject(cd::Vec4f(-1, 1, -1, 1)), UnProject(cd::Vec4f(-1, 1, 1, 1)),	// upper-left near and far 
+							UnProject(cd::Vec4f(1, -1, -1, 1)), UnProject(cd::Vec4f(1, -1, 1, 1)),	//	lower-right near and far 
+							UnProject(cd::Vec4f(1, 1, -1, 1)), UnProject(cd::Vec4f(1, 1, 1, 1))		// upper-right near and far
+					} :
+					std::vector<cd::Point>{		// Depth [0, 1]
+						UnProject(cd::Vec4f(-1, 1,  0, 1)),	UnProject(cd::Vec4f(1, 1, 0, 1)),	// lower-left near and far 
+						UnProject(cd::Vec4f(1,  -1,  0, 1)),	UnProject(cd::Vec4f(-1,  -1, 0, 1)),	// upper-left near and far 
+						UnProject(cd::Vec4f(-1, 1,  1, 1)),	UnProject(cd::Vec4f(1, 1, 1, 1)),	//	lower-right near and far 
+						UnProject(cd::Vec4f(1,  -1,  1, 1)),	UnProject(cd::Vec4f(-1,  -1, 1, 1))		// upper-right near and far
+					};
+
+					float splitDist = CascadeSplits[cascadeIndex];
 					// Compute every light view and every orthographic projection matrices for each cascade
-					cd::Point cascadeFrustum[8];
 					float nearSplit = cascadeIndex == 0 ? MinDistance : CascadeSplits[cascadeIndex - 1];
 					float farSplit = CascadeSplits[cascadeIndex];
 					for (uint16_t cornerPairIdx = 0; cornerPairIdx < 4; ++cornerPairIdx)
 					{
-						cascadeFrustum[2*cornerPairIdx]		=	frustumCorners[2*cornerPairIdx] * (1 - nearSplit) 
+					/*	cascadeFrustum[2*cornerPairIdx]		=	frustumCorners[2*cornerPairIdx] * (1 - nearSplit) 
 							+ frustumCorners[2*cornerPairIdx+1] * nearSplit;
 						cascadeFrustum[2*cornerPairIdx+1]	=  frustumCorners[2*cornerPairIdx] * (1 - farSplit)		
-							+ frustumCorners[2*cornerPairIdx+1] * farSplit;
+							+ frustumCorners[2*cornerPairIdx+1] * farSplit;*/
+						cd::Vec3f dist = frustumCorners[cornerPairIdx + 4] - frustumCorners[cornerPairIdx];
+						frustumCorners[cornerPairIdx + 4] = frustumCorners[cornerPairIdx] + (dist * splitDist);
+						frustumCorners[cornerPairIdx] = frustumCorners[cornerPairIdx] + (dist * lastSplitDist);
+
 					}
-					
+					// Get frustum center
 					cd::Point cascadeFrustumCenter = cd::Point(0, 0, 0);
-					for (const auto& corner : cascadeFrustum)
+					for (const auto& corner : frustumCorners)
 					{
 						cascadeFrustumCenter += corner;
 					}
 					cascadeFrustumCenter /= 8.0;
+
+					float radius = 0.0f;
+					for (uint16_t frustumPointIdx = 0; frustumPointIdx < 8; frustumPointIdx++)
+					{
+						float distance = (frustumCorners[frustumPointIdx] - cascadeFrustumCenter).Length();
+						radius = std::max(radius, distance);
+					}
 					
+					cd::Point maxExtents = cd::Point(radius);
+					cd::Point minExtents = cd::Point(-radius);
+
 					cd::Matrix4x4 lightView = cd::Matrix4x4::LookAt<cd::Handedness::Left>(cascadeFrustumCenter, 
 						cascadeFrustumCenter + lightDirection, cd::Vec3f(0.0f, 1.0f, 0.0f));
 
-					float minX = std::numeric_limits<float>::max();
-					float maxX = std::numeric_limits<float>::lowest();
-					float minY = std::numeric_limits<float>::max();
-					float maxY = std::numeric_limits<float>::lowest();
-					float minZ = std::numeric_limits<float>::max();
-					float maxZ = std::numeric_limits<float>::lowest();
-					for (const auto& corner : cascadeFrustum)
-					{
-						const auto lightSpaceCorner = lightView * cd::Vec4f(corner.x(), corner.y(), corner.z(), 1.0);
-						minX	= std::min(minX, lightSpaceCorner.x());
-						maxX = std::max(maxX, lightSpaceCorner.x());
-						minY = std::min(minY, lightSpaceCorner.y());
-						maxY = std::max(maxY, lightSpaceCorner.y());
-						minZ = std::min(minZ, lightSpaceCorner.z());
-						maxZ = std::max(maxZ, lightSpaceCorner.z());
-					}
-					cd::Matrix4x4 lightProjection = cd::Matrix4x4::Orthographic(minX, maxX, maxY, minY, minZ, maxZ,
-						0, ndcDepthMinusOneToOne);
+					lightView = cd::Matrix4x4::LookAt<cd::Handedness::Left>(cascadeFrustumCenter - lightDirection * radius, cascadeFrustumCenter, cd::Vec3f(0.0f, 1.0f, 0.0f));
 
+			
+					cd::Matrix4x4 lightProjection = cd::Matrix4x4::Orthographic(-radius, radius, radius, -radius, 0.0f, 2 * radius, 0, ndcDepthMinusOneToOne);
+					lastSplitDist = CascadeSplits[cascadeIndex];
 					// Settings
 					bgfx::setState(defaultRenderingState);
 

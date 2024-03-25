@@ -319,7 +319,7 @@ void SceneView::Update()
 		m_lastContentHeight = regionHeight;
 		if (!pCameraComponent->DoConstrainAspectRatio())
 		{
-			pCameraComponent->SetAspect(static_cast<float>(regionWidth) / static_cast<float>(regionHeight));
+			//pCameraComponent->SetAspect(static_cast<float>(regionWidth) / static_cast<float>(regionHeight));
 		}
 	}
 
