@@ -30,7 +30,7 @@ float Visibility_HighQuality(float NdotV, float NdotL, float rough) {
 float Visibility_LowQuality(float NdotV, float NdotL, float rough) {
 	// BRDF = (F * D * G) / (4 * NdotV * NdotL) = F * D * V
 	// V = G / (4 * NdotV * NdotL)
-	// = 1.0 / (NdotV * (2 - a) + a) * (NdotL * (2 - a) + a)
+	// = 1.0 / ((NdotV * (2 - a) + a) * (NdotL * (2 - a) + a))
 	
 	// rough = (rough + 1) / 2, by Disney
 	// a = rough^2
