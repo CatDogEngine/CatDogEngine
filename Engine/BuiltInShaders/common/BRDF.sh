@@ -20,9 +20,9 @@ float Visibility_HighQuality(float NdotV, float NdotL, float rough) {
 	
 	// rough = (rough + 1) / 2, by Disney
 	// a = rough^2
-	float a2 = pow((rough + 1) / 2, 4);
-	float lambda_v = NdotL * sqrt(a2 + (1 - a2) * NdotV * NdotV);
-	float lambda_l = NdotV * sqrt(a2 + (1 - a2) * NdotL * NdotL);
+	float a2 = pow((rough + 1.0) / 2.0, 4);
+	float lambda_v = NdotL * sqrt(a2 + (1.0 - a2) * NdotV * NdotV);
+	float lambda_l = NdotV * sqrt(a2 + (1.0 - a2) * NdotL * NdotL);
 	
 	return 0.5 / (lambda_v + lambda_l);
 }
@@ -30,13 +30,13 @@ float Visibility_HighQuality(float NdotV, float NdotL, float rough) {
 float Visibility_LowQuality(float NdotV, float NdotL, float rough) {
 	// BRDF = (F * D * G) / (4 * NdotV * NdotL) = F * D * V
 	// V = G / (4 * NdotV * NdotL)
-	// = 1.0 / ((NdotV * (2 - a) + a) * (NdotL * (2 - a) + a))
+	// = 1 / ((NdotV * (2 - a) + a) * (NdotL * (2 - a) + a))
 	
 	// rough = (rough + 1) / 2, by Disney
 	// a = rough^2
-	float a = pow((rough + 1) / 2, 2);
-	float g1_v_inv = NdotV * (2 - a) + a;
-	float g1_l_inv = NdotL * (2 - a) + a;
+	float a = (rough + 1.0) * (rough + 1.0) / 4.0;
+	float g1_v_inv = NdotV * (2.0 - a) + a;
+	float g1_l_inv = NdotL * (2.0 - a) + a;
 	
 	return 1.0 / (g1_v_inv * g1_l_inv);
 }
