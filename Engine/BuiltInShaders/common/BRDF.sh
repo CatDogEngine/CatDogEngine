@@ -20,7 +20,7 @@ float Visibility_HighQuality(float NdotV, float NdotL, float rough) {
 	
 	// rough = (rough + 1) / 2, by Disney
 	// a = rough^2
-	float a2 = pow((rough + 1.0) / 2.0, 4);
+	float a2 = pow((rough + 1.0) * 0.5, 4);
 	float lambda_v = NdotL * sqrt(a2 + (1.0 - a2) * NdotV * NdotV);
 	float lambda_l = NdotV * sqrt(a2 + (1.0 - a2) * NdotL * NdotL);
 	
@@ -34,7 +34,7 @@ float Visibility_LowQuality(float NdotV, float NdotL, float rough) {
 	
 	// rough = (rough + 1) / 2, by Disney
 	// a = rough^2
-	float a = (rough + 1.0) * (rough + 1.0) / 4.0;
+	float a = (rough + 1.0) * (rough + 1.0) * 0.25;
 	float g1_v_inv = NdotV * (2.0 - a) + a;
 	float g1_l_inv = NdotL * (2.0 - a) + a;
 	
