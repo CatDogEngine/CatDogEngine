@@ -382,7 +382,7 @@ void EditorApp::OnShaderHotModifiedCallback(const char* rootDir, const char* fil
 	    // Do nothing when a non-shader file is detected.
 	    return;
 	}
-	m_pRenderContext->OnShaderHotModified(engine::StringCrc{ engine::Path::GetFileNameWithoutExtension(filePath) });
+	m_pRenderContext->OnShaderHotModified(engine::Path::GetFileNameWithoutExtension(filePath));
 }
 
 void EditorApp::UpdateMaterials()
