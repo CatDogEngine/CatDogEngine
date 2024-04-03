@@ -193,7 +193,7 @@ void RenderContext::OnShaderHotModified(std::string modifiedShaderName)
 	// TODO : Need a file system to check is compiled file dirty.
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(Path::GetShaderOutputDirectory()))
 	{
-		if (!entry.is_regular_file() || entry.path().extension() != ".bin")
+		if (!entry.is_regular_file() || entry.path().extension() != Path::ShaderOutputExtension)
 		{
 			continue;
 		}
