@@ -34,7 +34,7 @@ constexpr const char* cameraPos                   = "u_cameraPos";
 constexpr const char* iblStrength                 = "u_iblStrength";
 constexpr const char* albedoColor                 = "u_albedoColor";
 constexpr const char* emissiveColorAndFactor      = "u_emissiveColorAndFactor";
-constexpr const char* metallicRoughnessFactor     = "u_metallicRoughnessFactor";
+constexpr const char* u_metallicRoughnessRefectanceFactor = "u_metallicRoughnessRefectanceFactor";
 											      
 constexpr const char* albedoUVOffsetAndScale      = "u_albedoUVOffsetAndScale";
 constexpr const char* alphaCutOff                 = "u_alphaCutOff";
@@ -78,7 +78,7 @@ void WorldRenderer::Init()
 	GetRenderContext()->CreateUniform(iblStrength, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(albedoColor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(emissiveColorAndFactor, bgfx::UniformType::Vec4, 1);
-	GetRenderContext()->CreateUniform(metallicRoughnessFactor, bgfx::UniformType::Vec4, 1);
+	GetRenderContext()->CreateUniform(u_metallicRoughnessRefectanceFactor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(albedoUVOffsetAndScale, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(alphaCutOff, bgfx::UniformType::Vec4, 1);
 
@@ -310,12 +310,13 @@ void WorldRenderer::Render(float deltaTime)
 		constexpr StringCrc albedoColorCrc(albedoColor);
 		GetRenderContext()->FillUniform(albedoColorCrc, pMaterialComponent->GetFactor<cd::Vec3f>(cd::MaterialPropertyGroup::BaseColor), 1);
 
-		cd::Vec4f metallicRoughnessFactorData(
+		cd::Vec4f u_metallicRoughnessRefectanceFactorData(
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Metallic)),
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Roughness)),
-			1.0f, 1.0f);
-		constexpr StringCrc mrFactorCrc(metallicRoughnessFactor);
-		GetRenderContext()->FillUniform(mrFactorCrc, metallicRoughnessFactorData.begin(), 1);
+			pMaterialComponent->GetReflectance(),
+			1.0f);
+		constexpr StringCrc mrFactorCrc(u_metallicRoughnessRefectanceFactor);
+		GetRenderContext()->FillUniform(mrFactorCrc, u_metallicRoughnessRefectanceFactorData.begin(), 1);
 
 		constexpr StringCrc emissiveColorCrc(emissiveColorAndFactor);
 		GetRenderContext()->FillUniform(emissiveColorCrc, pMaterialComponent->GetFactor<cd::Vec4f>(cd::MaterialPropertyGroup::Emissive), 1);

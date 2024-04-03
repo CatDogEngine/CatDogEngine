@@ -184,6 +184,10 @@ public:
 	float& GetIblStrengeth() { return m_iblStrength; }
 	float GetIblStrengeth() const { return m_iblStrength; }
 
+	void SetReflectance(float reflectance) { m_reflectance = reflectance; }
+	float& GetReflectance() { return m_reflectance; }
+	float GetReflectance() const { return m_reflectance; }
+
 	void SetToonParameters(ToonParameters toonParameters) { m_toonParameters = toonParameters; }
 	ToonParameters& GetToonParameters() { return m_toonParameters; }
 	ToonParameters GetToonParameters() const { return m_toonParameters; }
@@ -205,6 +209,7 @@ private:
 	cd::BlendMode m_blendMode;
 	float m_alphaCutOff;
 	float m_iblStrength = 0.5f;
+	float m_reflectance = 0.5f;
 	ToonParameters m_toonParameters;
 	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
 };

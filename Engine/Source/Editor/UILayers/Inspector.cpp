@@ -278,6 +278,21 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 			ImGui::PopStyleVar();
 		}
 
+		// PBR
+		{
+			bool isOpen = ImGui::CollapsingHeader("PBR", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+			ImGui::Separator();
+			if (isOpen)
+			{
+				ImGuiUtils::ImGuiFloatProperty("iblStrength", pMaterialComponent->GetIblStrengeth(), cd::Unit::None, 0.01f, 10.0f, false, 0.02f);
+				ImGuiUtils::ImGuiFloatProperty("Reflectance", pMaterialComponent->GetReflectance(), cd::Unit::None, 0.0f, 1.0f);
+			}
+
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+		}
+
 		// Cartoon
 		{
 			bool isOpen = ImGui::CollapsingHeader("Cartoon Material", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Selected);
@@ -303,20 +318,6 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 				ImGuiUtils::ImGuiFloatProperty("Rim Light Feather", pMaterialComponent->GetToonParameters().rimLight.y(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
 				ImGuiUtils::ImGuiFloatProperty("Rim Light Itensity", pMaterialComponent->GetToonParameters().rimLight.z(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
 				ImGuiUtils::ImGuiFloatProperty("Rim Light Mask", pMaterialComponent->GetToonParameters().rimLight.w(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
-			}
-
-			ImGui::Separator();
-			ImGui::PopStyleVar();
-		}
-
-		// Ambient
-		{
-			bool isOpen = ImGui::CollapsingHeader("Ambient", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-			ImGui::Separator();
-			if (isOpen)
-			{
-				ImGuiUtils::ImGuiFloatProperty("iblStrength", pMaterialComponent->GetIblStrengeth(), cd::Unit::None, 0.01f, 10.0f, false, 0.02f);
 			}
 
 			ImGui::Separator();
