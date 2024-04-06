@@ -24,37 +24,37 @@ namespace engine
 namespace
 {
 
-constexpr const char* lutSampler                  = "s_texLUT";
-constexpr const char* cubeIrradianceSampler       = "s_texCubeIrr";
-constexpr const char* cubeRadianceSampler         = "s_texCubeRad";
+constexpr const char* lutSampler                        = "s_texLUT";
+constexpr const char* cubeIrradianceSampler             = "s_texCubeIrr";
+constexpr const char* cubeRadianceSampler               = "s_texCubeRad";
+											            
+constexpr const char* lutTexture                        = "Textures/lut/ibl_brdf_lut.dds";
+											            
+constexpr const char* cameraPos                         = "u_cameraPos";
+constexpr const char* iblStrength                       = "u_iblStrength";
+constexpr const char* albedoColor                       = "u_albedoColor";
+constexpr const char* emissiveColorAndFactor            = "u_emissiveColorAndFactor";
+constexpr const char* metallicRoughnessRefectanceFactor = "u_metallicRoughnessRefectanceFactor";
 											      
-constexpr const char* lutTexture                  = "Textures/lut/ibl_brdf_lut.dds";
-											      
-constexpr const char* cameraPos                   = "u_cameraPos";
-constexpr const char* iblStrength                 = "u_iblStrength";
-constexpr const char* albedoColor                 = "u_albedoColor";
-constexpr const char* emissiveColorAndFactor      = "u_emissiveColorAndFactor";
-constexpr const char* u_metallicRoughnessRefectanceFactor = "u_metallicRoughnessRefectanceFactor";
-											      
-constexpr const char* albedoUVOffsetAndScale      = "u_albedoUVOffsetAndScale";
-constexpr const char* alphaCutOff                 = "u_alphaCutOff";
-											      
-constexpr const char* lightCountAndStride         = "u_lightCountAndStride";
-constexpr const char* lightParams                 = "u_lightParams";
-											      
-constexpr const char* LightDir                    = "u_LightDir";
-constexpr const char* HeightOffsetAndshadowLength = "u_HeightOffsetAndshadowLength";
-
-constexpr const char* lightViewProjs              = "u_lightViewProjs";
-constexpr const char* cubeShadowMapSamplers[3]    = { "s_texCubeShadowMap_1", "s_texCubeShadowMap_2" ,  "s_texCubeShadowMap_3" };
-
-constexpr const char* cameraNearFarPlane          = "u_cameraNearFarPlane";
-constexpr const char* cameraLookAt                = "u_cameraLookAt";
-constexpr const char* clipFrustumDepth            = "u_clipFrustumDepth";
-
-constexpr const char* directionShadowMapTexture   = "DirectionShadowMapTexture";
-constexpr const char* pointShadowMapTexture       = "PointShadowMapTexture";
-constexpr const char* spotShadowMapTexture        = "SpotShadowMapTexture";
+constexpr const char* albedoUVOffsetAndScale            = "u_albedoUVOffsetAndScale";
+constexpr const char* alphaCutOff                       = "u_alphaCutOff";
+											            
+constexpr const char* lightCountAndStride               = "u_lightCountAndStride";
+constexpr const char* lightParams                       = "u_lightParams";
+											            
+constexpr const char* LightDir                          = "u_LightDir";
+constexpr const char* HeightOffsetAndshadowLength       = "u_HeightOffsetAndshadowLength";
+												        
+constexpr const char* lightViewProjs                    = "u_lightViewProjs";
+constexpr const char* cubeShadowMapSamplers[3]          = { "s_texCubeShadowMap_1", "s_texCubeShadowMap_2" ,  "s_texCubeShadowMap_3" };
+												        
+constexpr const char* cameraNearFarPlane                = "u_cameraNearFarPlane";
+constexpr const char* cameraLookAt                      = "u_cameraLookAt";
+constexpr const char* clipFrustumDepth                  = "u_clipFrustumDepth";
+												        
+constexpr const char* directionShadowMapTexture         = "DirectionShadowMapTexture";
+constexpr const char* pointShadowMapTexture             = "PointShadowMapTexture";
+constexpr const char* spotShadowMapTexture              = "SpotShadowMapTexture";
 
 constexpr uint64_t samplerFlags          = BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP;
 constexpr uint64_t defaultRenderingState = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS;
@@ -78,7 +78,7 @@ void WorldRenderer::Init()
 	GetRenderContext()->CreateUniform(iblStrength, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(albedoColor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(emissiveColorAndFactor, bgfx::UniformType::Vec4, 1);
-	GetRenderContext()->CreateUniform(u_metallicRoughnessRefectanceFactor, bgfx::UniformType::Vec4, 1);
+	GetRenderContext()->CreateUniform(metallicRoughnessRefectanceFactor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(albedoUVOffsetAndScale, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(alphaCutOff, bgfx::UniformType::Vec4, 1);
 
@@ -310,13 +310,13 @@ void WorldRenderer::Render(float deltaTime)
 		constexpr StringCrc albedoColorCrc(albedoColor);
 		GetRenderContext()->FillUniform(albedoColorCrc, pMaterialComponent->GetFactor<cd::Vec3f>(cd::MaterialPropertyGroup::BaseColor), 1);
 
-		cd::Vec4f u_metallicRoughnessRefectanceFactorData(
+		cd::Vec4f metallicRoughnessRefectanceFactorData(
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Metallic)),
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Roughness)),
 			pMaterialComponent->GetReflectance(),
 			1.0f);
-		constexpr StringCrc mrFactorCrc(u_metallicRoughnessRefectanceFactor);
-		GetRenderContext()->FillUniform(mrFactorCrc, u_metallicRoughnessRefectanceFactorData.begin(), 1);
+		constexpr StringCrc mrrFactorCrc(metallicRoughnessRefectanceFactor);
+		GetRenderContext()->FillUniform(mrrFactorCrc, metallicRoughnessRefectanceFactorData.begin(), 1);
 
 		constexpr StringCrc emissiveColorCrc(emissiveColorAndFactor);
 		GetRenderContext()->FillUniform(emissiveColorCrc, pMaterialComponent->GetFactor<cd::Vec4f>(cd::MaterialPropertyGroup::Emissive), 1);

@@ -43,7 +43,7 @@ constexpr const char* cameraPos = "u_cameraPos";
 constexpr const char* cameraNearFarPlane = "u_cameraNearFarPlane";
 
 constexpr const char* albedoColor = "u_albedoColor";
-constexpr const char* u_metallicRoughnessRefectanceFactor = "u_metallicRoughnessRefectanceFactor";
+constexpr const char* metallicRoughnessRefectanceFactor = "u_metallicRoughnessRefectanceFactor";
 constexpr const char* albedoUVOffsetAndScale = "u_albedoUVOffsetAndScale";
 constexpr const char* alphaCutOff = "u_alphaCutOff";
 constexpr const char* emissiveColor = "u_emissiveColor";
@@ -80,7 +80,7 @@ void TerrainRenderer::Init()
 
 	GetRenderContext()->CreateUniform(albedoColor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(emissiveColor, bgfx::UniformType::Vec4, 1);
-	GetRenderContext()->CreateUniform(u_metallicRoughnessRefectanceFactor, bgfx::UniformType::Vec4, 1);
+	GetRenderContext()->CreateUniform(metallicRoughnessRefectanceFactor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(albedoUVOffsetAndScale, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(alphaCutOff, bgfx::UniformType::Vec4, 1);
 
@@ -205,8 +205,8 @@ void TerrainRenderer::Render(float deltaTime)
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Roughness)),
 			pMaterialComponent->GetReflectance(),
 			1.0f);
-		constexpr StringCrc mrFactorCrc(u_metallicRoughnessRefectanceFactor);
-		GetRenderContext()->FillUniform(mrFactorCrc, u_metallicRoughnessRefectanceFactorData.begin(), 1);
+		constexpr StringCrc mrrFactorCrc(metallicRoughnessRefectanceFactor);
+		GetRenderContext()->FillUniform(mrrFactorCrc, u_metallicRoughnessRefectanceFactorData.begin(), 1);
 
 		constexpr StringCrc emissiveColorCrc(emissiveColor);
 		GetRenderContext()->FillUniform(emissiveColorCrc, pMaterialComponent->GetFactor<cd::Vec4f>(cd::MaterialPropertyGroup::Emissive), 1);
