@@ -31,7 +31,6 @@ private:
 
 // Engine log macros.
 #define CD_ENGINE_TRACE(...) ::engine::Log::GetEngineLogger()->trace(__VA_ARGS__)
-#define CD_ENGINE_DEBUG(...) ::engine::Log::GetEngineLogger()->debug(__VA_ARGS__)
 #define CD_ENGINE_INFO(...)  ::engine::Log::GetEngineLogger()->info(__VA_ARGS__)
 #define CD_ENGINE_WARN(...)  ::engine::Log::GetEngineLogger()->warn(__VA_ARGS__)
 #define CD_ENGINE_ERROR(...) ::engine::Log::GetEngineLogger()->error(__VA_ARGS__)
@@ -39,7 +38,6 @@ private:
 
 // Application log macros.
 #define CD_TRACE(...) ::engine::Log::GetApplicationLogger()->trace(__VA_ARGS__)
-#define CD_DEBUG(...) ::engine::Log::GetApplicationLogger()->debug(__VA_ARGS__)
 #define CD_INFO(...)  ::engine::Log::GetApplicationLogger()->info(__VA_ARGS__)
 #define CD_WARN(...)  ::engine::Log::GetApplicationLogger()->warn(__VA_ARGS__)
 #define CD_ERROR(...) ::engine::Log::GetApplicationLogger()->error(__VA_ARGS__)
@@ -97,13 +95,11 @@ public:
 }
 
 #define CD_ENGINE_TRACE(...)
-#define CD_ENGINE_DEBUG(...)
 #define CD_ENGINE_INFO(...) 
 #define CD_ENGINE_WARN(...) 
 #define CD_ENGINE_ERROR(...)
 #define CD_ENGINE_FATAL(...)
 #define CD_TRACE(...)
-#define CD_DEBUG(...)
 #define CD_INFO(...) 
 #define CD_WARN(...) 
 #define CD_ERROR(...)
