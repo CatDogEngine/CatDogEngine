@@ -186,7 +186,8 @@ void WorldRenderer::Render(float deltaTime)
 
 		// TODO : Temporary solution for CelluloidRenderer, remove it.
 		if (pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetPBRMaterialType() &&
-			pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetCelluloidMaterialType())
+			pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetCelluloidMaterialType()&&
+			pMaterialComponent->GetMaterialType() != m_pCurrentSceneWorld->GetAnimationMaterialType())
 		{
 			continue;
 		}
@@ -215,7 +216,7 @@ void WorldRenderer::Render(float deltaTime)
 		// SkinMesh
 		if(m_pCurrentSceneWorld->GetAnimationComponent(entity))
 		{
-			continue;
+			//continue;
 		}
 
 		// Transform

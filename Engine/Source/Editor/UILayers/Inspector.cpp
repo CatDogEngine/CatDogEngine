@@ -715,6 +715,32 @@ void UpdateComponentWidget<engine::ParticleForceFieldComponent>(engine::SceneWor
 	ImGui::PopStyleVar();
 }
 
+template<>
+void UpdateComponentWidget<engine::AnimationComponent>(engine::SceneWorld* pSceneWorld, engine::Entity entity)
+{
+	auto* pAnimationComponent = pSceneWorld->GetAnimationComponent(entity);
+	if (!pAnimationComponent)
+	{
+		return;
+	}
+
+	bool isOpen = ImGui::CollapsingHeader("Animation Component", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Separator();
+
+	if (isOpen)
+	{
+		ImGui::Separator();
+		ImGuiUtils::ImGuiBoolProperty("play", pAnimationComponent->GetIsPlaying());
+		ImGuiUtils::ImGuiEnumProperty("AnimationClip", pAnimationComponent->GetAnimationClip());
+		ImGuiUtils::ImGuiFloatProperty("Factor", pAnimationComponent->GetBlendFactor(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+		ImGuiUtils::ImGuiFloatProperty("Time", pAnimationComponent->GetAnimationPlayTime(), cd::Unit::None);
+		ImGuiUtils::ImGuiFloatProperty("PlayBackSpeed", pAnimationComponent->GetPlayBackSpeed(), cd::Unit::None, 0.0f, 10.0f, false, 0.01f);
+	}
+	ImGui::Separator();
+	ImGui::PopStyleVar();
+}
+
 }
 
 namespace editor
@@ -766,6 +792,7 @@ void Inspector::Update()
 	details::UpdateComponentWidget<engine::ParticleForceFieldComponent>(pSceneWorld, m_lastSelectedEntity);
 	details::UpdateComponentWidget<engine::CollisionMeshComponent>(pSceneWorld, m_lastSelectedEntity);
 	details::UpdateComponentWidget<engine::BlendShapeComponent>(pSceneWorld, m_lastSelectedEntity);
+	details::UpdateComponentWidget<engine::AnimationComponent>(pSceneWorld, m_lastSelectedEntity);
 
 	if (IsOpenFileBrowser())
 	{

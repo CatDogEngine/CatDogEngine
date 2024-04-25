@@ -38,6 +38,8 @@ class SceneWorld
 	DEFINE_COMPONENT_STORAGE_WITH_APIS(Light);
 	DEFINE_COMPONENT_STORAGE_WITH_APIS(Material);
 	DEFINE_COMPONENT_STORAGE_WITH_APIS(Name);
+	DEFINE_COMPONENT_STORAGE_WITH_APIS(Skeleton);
+	DEFINE_COMPONENT_STORAGE_WITH_APIS(SkinMesh);
 	DEFINE_COMPONENT_STORAGE_WITH_APIS(Sky);
 	DEFINE_COMPONENT_STORAGE_WITH_APIS(StaticMesh);
 	DEFINE_COMPONENT_STORAGE_WITH_APIS(ParticleEmitter);
@@ -96,6 +98,8 @@ public:
 		DeleteLightComponent(entity);
 		DeleteMaterialComponent(entity);
 		DeleteNameComponent(entity);
+		DeleteSkeletonComponent(entity);
+		DeleteSkinMeshComponent(entity);
 		DeleteSkyComponent(entity);
 		DeleteStaticMeshComponent(entity);
 		DeleteParticleEmitterComponent(entity);

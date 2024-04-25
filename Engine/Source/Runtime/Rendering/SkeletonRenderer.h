@@ -25,7 +25,6 @@ private:
 	std::vector<std::byte> m_indexBuffer;
 	uint16_t m_boneVBH = UINT16_MAX;
 	uint16_t m_boneIBH = UINT16_MAX;
-
 	bool hasBuilt = false;
 };
 

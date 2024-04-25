@@ -3,6 +3,7 @@
 #include "Base/NameOf.h"
 #include "MeshResource.h"
 #include "ShaderResource.h"
+#include "SkeletonResource.h"
 #include "TextureResource.h"
 
 namespace engine
@@ -35,6 +36,11 @@ MeshResource* ResourceContext::AddMeshResource(StringCrc nameCrc)
 ShaderResource* ResourceContext::AddShaderResource(StringCrc nameCrc)
 {
 	return static_cast<ShaderResource*>(AddResourceImpl<ResourceType::Shader>(nameCrc));
+}
+
+SkeletonResource* ResourceContext::AddSkeletonResource(StringCrc nameCrc)
+{
+	return static_cast<SkeletonResource*>(AddResourceImpl<ResourceType::Skeleton>(nameCrc));
 }
 
 TextureResource* ResourceContext::AddTextureResource(StringCrc nameCrc)
@@ -78,6 +84,10 @@ IResource* ResourceContext::AddResourceImpl(StringCrc nameCrc)
 	else if constexpr (ResourceType::Texture == RT)
 	{
 		m_resources[resourceCrc] = std::make_unique<TextureResource>();
+	}
+	else if constexpr (ResourceType::Skeleton == RT)
+	{
+		m_resources[resourceCrc] = std::make_unique<SkeletonResource>();
 	}
 
 	auto* pResource = m_resources[resourceCrc].get();

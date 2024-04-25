@@ -997,7 +997,6 @@ void AssetBrowser::ImportModelFile(const char* pFilePath)
 	// Step 2 : Process generated cd::SceneDatabase
 	ProcessSceneDatabase(pSceneDatabase, m_importOptions.ImportMesh, m_importOptions.ImportMaterial, m_importOptions.ImportTexture,
 		m_importOptions.ImportCamera, m_importOptions.ImportLight);
-
 	// Step 3 : Convert cd::SceneDatabase to entities and components
 	{
 		ECWorldConsumer ecConsumer(pSceneWorld, pCurrentRenderContext);

@@ -21,6 +21,7 @@ enum class ResourceType
 {
 	Mesh,
 	Shader,
+	Skeleton,
 	Texture,
 };
 

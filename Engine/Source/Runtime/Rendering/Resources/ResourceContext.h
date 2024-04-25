@@ -12,6 +12,7 @@ enum class ResourceType;
 class IResource;
 class MeshResource;
 class ShaderResource;
+class SkeletonResource;
 class TextureResource;
 
 class ResourceContext
@@ -30,6 +31,7 @@ public:
 
 	MeshResource* AddMeshResource(StringCrc nameCrc);
 	ShaderResource* AddShaderResource(StringCrc nameCrc);
+	SkeletonResource* AddSkeletonResource(StringCrc nameCrc);
 	TextureResource* AddTextureResource(StringCrc nameCrc);
 	MeshResource* GetMeshResource(StringCrc nameCrc);
 	ShaderResource* GetShaderResource(StringCrc nameCrc);
