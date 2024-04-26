@@ -208,7 +208,7 @@ private:
 	bool m_twoSided;
 	cd::BlendMode m_blendMode;
 	float m_alphaCutOff;
-	float m_iblStrength = 0.5f;
+	float m_iblStrength = 0.25f;
 	float m_reflectance = 0.5f;
 	ToonParameters m_toonParameters;
 	std::map<cd::MaterialTextureType, PropertyGroup> m_propertyGroups;
