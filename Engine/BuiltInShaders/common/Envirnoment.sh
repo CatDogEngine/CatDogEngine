@@ -27,16 +27,14 @@ SAMPLER2D(s_texLUT, BRDF_LUT_SLOT);
 
 uniform vec4 u_iblStrength;
 
-vec3 SampleEnvIrradiance(vec3 normal, float mip) {
+vec3 SampleEnvIrradiance(vec3 normal) {
 	// We use the HDR texture which in linear space.
-	vec3 cubeNormalDir = normalize(fixCubeLookup(normal, mip, 256.0));
-	return textureCube(s_texCubeIrr, cubeNormalDir).xyz;
+	return textureCube(s_texCubeIrr, normal).xyz;
 }
 
 vec3 SampleEnvRadiance(vec3 reflectDir, float mip) {
 	// We use the HDR texture which in linear space.
-	vec3 cubeReflectDir = normalize(fixCubeLookup(reflectDir, mip, 256.0));
-	return textureCubeLod(s_texCubeRad, cubeReflectDir, mip).xyz;
+	return textureCubeLod(s_texCubeRad, reflectDir, mip).xyz;
 }
 
 vec2 SampleIBLSpecularBRDFLUT(float NdotV, float roughness) {
@@ -57,11 +55,10 @@ vec3 GetIBL(Material material, vec3 vertexNormal, vec3 viewDir) {
 	horizonOcclusion *= horizonOcclusion;
 	float finalSpecularOcclusion = min(specularOcclusion, horizonOcclusion);
 	
-	float mip = clamp(6.0 * material.roughness, 0.1, 6.0);
-	
 	// Environment Prefiltered Irradiance
-	vec3 envIrradiance = SampleEnvIrradiance(material.normal, 0.0);
+	vec3 envIrradiance = SampleEnvIrradiance(material.normal);
 	// Environment Specular Radiance
+	float mip = material.roughness * 6.0;
 	vec3 envRadiance = SampleEnvRadiance(reflectDir, mip);
 	
 	// Environment Specular BRDF
