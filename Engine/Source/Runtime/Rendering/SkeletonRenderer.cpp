@@ -392,7 +392,12 @@ void SkeletonRenderer::Render(float deltaTime)
 			clipName = pSceneDatabase->GetAnimation(1).GetName();
 			duration = pSceneDatabase->GetAnimation(1).GetDuration();
 			ticksPerSecond = pSceneDatabase->GetAnimation(1).GetTicksPerSecond();
+
 			float animationTime = details::CustomFMod(animationRunningTime, duration);
+			pAnimationComponent->SetAnimationPlayTime(animationTime);
+
+			cd::Matrix4x4 curGlobalDeltaMatrix = cd::Matrix4x4::Identity();
+			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->GetIsPlaying());
 		}
 		else if (engine::AnimationClip::Running == pAnimationComponent->GetAnimationClip())
 		{
@@ -434,7 +439,8 @@ void SkeletonRenderer::Render(float deltaTime)
 		bgfx::setState(state);
 
 		constexpr StringCrc programHandleIndex{ "SkeletonProgram" };
-		GetRenderContext()->Submit(GetViewID(), programHandleIndex);
+
+		//GetRenderContext()->Submit(GetViewID(), programHandleIndex);
 	}
 }
 }
