@@ -330,11 +330,8 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 			ImGui::Separator();
 
-			if (isOpen)
+			if (const engine::ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource(); pShaderResource && isOpen)
 			{
-				engine::RenderContext* pRenderContext = static_cast<engine::RenderContext*>(ImGui::GetIO().BackendRendererUserData);
-				const engine::ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource();
-
 				ImGuiUtils::ImGuiStringProperty("Shader Program", pShaderResource->GetName());
 				ImGuiUtils::ImGuiStringProperty("Shader", pShaderResource->GetShaderInfo(0).name);
 				if (engine::ShaderProgramType::Standard == pShaderResource->GetType())
