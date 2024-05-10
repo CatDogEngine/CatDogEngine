@@ -59,17 +59,10 @@ void ECWorldConsumer::Execute(const cd::SceneDatabase* pSceneDatabase)
 		bool hasSkin = mesh.GetSkinIDCount() > 0U;
 		if (hasSkin)
 		{
-			//engine::MaterialType* pMaterialType = m_pSceneWorld->GetAnimationMaterialType();
-			//AddSkinMesh(meshEntity, mesh, pMaterialType->GetRequiredVertexFormat(), pSceneDatabase);
-
 			// TODO : Use a standalone .cdanim file to play animation.
 			// Currently, we assume that imported SkinMesh will play animation automatically for testing.
 			//TODO : depens on skeleton to match animation
-			if (pSceneDatabase->GetAnimationCount() > 1)
-			{
-				
-			}
-			else
+			if (pSceneDatabase->GetAnimationCount() <= 1U)
 			{
 				engine::MaterialType* pMaterialType = m_pSceneWorld->GetAnimationMaterialType();
 				AddSkinMesh(meshEntity, mesh, pMaterialType->GetRequiredVertexFormat(), pSceneDatabase);
@@ -77,16 +70,13 @@ void ECWorldConsumer::Execute(const cd::SceneDatabase* pSceneDatabase)
 				AddMaterial(meshEntity, nullptr, pMaterialType, pSceneDatabase);
 				AddSkeleton(meshEntity, pSceneDatabase);
 			}
-			//AddAnimation(meshEntity, pSceneDatabase->GetAnimation(0), pSceneDatabase);
-			//AddMaterial(meshEntity, nullptr, pMaterialType, pSceneDatabase);
-			//AddSkeleton(meshEntity, pSceneDatabase);
 		}
 		else
 		{
-			//AddStaticMesh(meshEntity, mesh, m_pDefaultMaterialType->GetRequiredVertexFormat());
+			AddStaticMesh(meshEntity, mesh, m_pDefaultMaterialType->GetRequiredVertexFormat());
 
-			//cd::MaterialID meshMaterialID = mesh.GetMaterialID(0U);
-			//AddMaterial(meshEntity, meshMaterialID.IsValid() ? &pSceneDatabase->GetMaterial(meshMaterialID.Data()) : nullptr, m_pDefaultMaterialType, pSceneDatabase);
+			cd::MaterialID meshMaterialID = mesh.GetMaterialID(0U);
+			AddMaterial(meshEntity, meshMaterialID.IsValid() ? &pSceneDatabase->GetMaterial(meshMaterialID.Data()) : nullptr, m_pDefaultMaterialType, pSceneDatabase);
 		}
 	};
 
