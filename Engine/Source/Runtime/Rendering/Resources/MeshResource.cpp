@@ -186,7 +186,7 @@ bool MeshResource::BuildVertexBuffer()
 {
 	assert(m_pMeshAsset && m_vertexCount > 3U);
 	std::optional<cd::VertexBuffer> optVertexBuffer;
-	if (m_pSkinAsset.size())
+	if (!m_pSkinAsset.empty())
 	{
 		optVertexBuffer = cd::BuildVertexBufferForSkeletalMesh(*m_pMeshAsset, m_currentVertexFormat, *m_pSkinAsset[0], m_pBonesAsset);
 	}
@@ -257,8 +257,6 @@ void MeshResource::SubmitVertexBuffer()
 	{
 		return;
 	}
-	bool weight = m_currentVertexFormat.Contains(cd::VertexAttributeType::BoneWeight);
-	bool index = m_currentVertexFormat.Contains(cd::VertexAttributeType::BoneIndex);
 	m_vertexBufferHandle = details::SubmitVertexBuffer(m_vertexBuffer, m_currentVertexFormat);
 }
 

@@ -44,7 +44,6 @@ public:
 	void SetBoneIBH(uint16_t boneIBH) { m_boneIBH = boneIBH; }
 	uint16_t GetBoneIBH() const { return m_boneIBH; }
 
-	void SetBoneMatricesSize(uint32_t boneCount);
 	void SetBoneGlobalMatrix(uint32_t index, const cd::Matrix4x4& boneChangeMatrix);
 	const cd::Matrix4x4& GetBoneGlobalMatrix(uint32_t index) { return m_boneGlobalMatrices[index]; }
 	const std::vector<cd::Matrix4x4>& GetBoneGlobalMatrices() const { return m_boneGlobalMatrices; }

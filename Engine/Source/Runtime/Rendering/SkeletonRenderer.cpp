@@ -357,7 +357,7 @@ void SkeletonRenderer::Render(float deltaTime)
 			continue;
 		}
 
-		if (pAnimationComponent && pAnimationComponent->GetIsPlaying())
+		if (pAnimationComponent && pAnimationComponent->IsPlaying())
 		{
 			animationRunningTime += deltaTime * pAnimationComponent->GetPlayBackSpeed();
 		}
@@ -371,7 +371,7 @@ void SkeletonRenderer::Render(float deltaTime)
 		globalDeltaBoneMatrix.resize(128, cd::Matrix4x4::Identity());
 		boneMatrixA.resize(128, cd::Matrix4x4::Identity());
 		boneMatrixB.resize(128, cd::Matrix4x4::Identity());
-		if (engine::AnimationClip::Idel == pAnimationComponent->GetAnimationClip())
+		if (engine::AnimationClip::Idle == pAnimationComponent->GetAnimationClip())
 		{
 			cd::Matrix4x4 rootBone = cd::Matrix4x4::Identity();
 
@@ -383,7 +383,7 @@ void SkeletonRenderer::Render(float deltaTime)
 			pAnimationComponent->SetAnimationPlayTime(animationTime);
 	
 			cd::Matrix4x4 curGlobalDeltaMatrix = cd::Matrix4x4::Identity();
-			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->GetIsPlaying());
+			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->IsPlaying());
 			
 		}
 		else if (engine::AnimationClip::Walking == pAnimationComponent->GetAnimationClip())
@@ -397,7 +397,7 @@ void SkeletonRenderer::Render(float deltaTime)
 			pAnimationComponent->SetAnimationPlayTime(animationTime);
 
 			cd::Matrix4x4 curGlobalDeltaMatrix = cd::Matrix4x4::Identity();
-			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->GetIsPlaying());
+			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->IsPlaying());
 		}
 		else if (engine::AnimationClip::Running == pAnimationComponent->GetAnimationClip())
 		{

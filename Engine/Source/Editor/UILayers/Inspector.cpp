@@ -731,7 +731,7 @@ void UpdateComponentWidget<engine::AnimationComponent>(engine::SceneWorld* pScen
 	if (isOpen)
 	{
 		ImGui::Separator();
-		ImGuiUtils::ImGuiBoolProperty("play", pAnimationComponent->GetIsPlaying());
+		ImGuiUtils::ImGuiBoolProperty("play", pAnimationComponent->IsPlaying());
 		ImGuiUtils::ImGuiEnumProperty("AnimationClip", pAnimationComponent->GetAnimationClip());
 		ImGuiUtils::ImGuiFloatProperty("Factor", pAnimationComponent->GetBlendFactor(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
 		ImGuiUtils::ImGuiFloatProperty("Time", pAnimationComponent->GetAnimationPlayTime(), cd::Unit::None);

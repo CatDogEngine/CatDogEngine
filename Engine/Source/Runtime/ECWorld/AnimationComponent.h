@@ -18,7 +18,7 @@ namespace engine
 
 enum class AnimationClip
 {
-	Idel,
+	Idle,
 	Walking,
 	Running,
 
@@ -52,19 +52,24 @@ public:
 	void SetTrackData(const cd::Track* pTrack) { m_pTrack = pTrack; }
 
 	void SetDuration(float duration) { m_duration = duration; }
+	float& GetDuration() { return m_duration; }
 	float GetDuration() const { return m_duration; }
 
 	void SetTicksPerSecond(float ticksPerSecond) { m_ticksPerSecond = ticksPerSecond; }
+	float& GetTicksPerSecond() { return m_ticksPerSecond; }
 	float GetTicksPerSecond() const { return m_ticksPerSecond; }
 
 	void SetBoneMatricesUniform(uint16_t uniform) { m_boneMatricesUniform = uniform; }
+	uint16_t& GetBoneMatrixsUniform() { return m_boneMatricesUniform; }
 	uint16_t GetBoneMatrixsUniform() const { return m_boneMatricesUniform; }
 
 	void SetAnimationPlayTime(float time) { m_animationPlayTime = time; }
 	float& GetAnimationPlayTime() { return m_animationPlayTime; }
+	float GetAnimationPlayTime() const { return m_animationPlayTime; }
 
 	void SetPlayBackSpeed(float time) { m_playBackSpeed = time; }
 	float& GetPlayBackSpeed() { return m_playBackSpeed; }
+	float GetPlayBackSpeed() const { return m_playBackSpeed; }
 
 	void SetAnimationClip(AnimationClip crtClip) { m_clip = crtClip; }
 	AnimationClip& GetAnimationClip() { return m_clip; }
@@ -72,18 +77,18 @@ public:
 
 	void SetBlendFactor(float factor) { m_blendFactor = factor; }
 	float& GetBlendFactor() { return m_blendFactor; }
-	const float GetBlendFactor() const { return m_blendFactor; }
+	float GetBlendFactor() const { return m_blendFactor; }
 
-	bool& GetIsPlaying() { return m_playAnimation; }
+	bool& IsPlaying() { return m_playAnimation; }
 
 private:
-	AnimationClip m_clip = AnimationClip::Idel;
+	AnimationClip m_clip = AnimationClip::Idle;
 	const cd::Animation* m_pAnimation = nullptr;
 	const cd::Track* m_pTrack = nullptr;
 
-	float m_blendFactor = 0.0f;
-	float m_playBackSpeed = 1.0f;
-	bool m_playAnimation = false;
+	float m_blendFactor;
+	float m_playBackSpeed;
+	bool m_playAnimation;
 
 	float m_animationPlayTime;
 	float m_duration;

@@ -8,9 +8,9 @@
 namespace cd
 {
 
+class Bone;
 class Mesh;
 class Skin;
-class Bone;
 
 }
 
