@@ -278,6 +278,21 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 			ImGui::PopStyleVar();
 		}
 
+		// PBR
+		{
+			bool isOpen = ImGui::CollapsingHeader("PBR", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+			ImGui::Separator();
+			if (isOpen)
+			{
+				ImGuiUtils::ImGuiFloatProperty("iblStrength", pMaterialComponent->GetIblStrengeth(), cd::Unit::None, 0.01f, 10.0f, false, 0.02f);
+				ImGuiUtils::ImGuiFloatProperty("Reflectance", pMaterialComponent->GetReflectance(), cd::Unit::None, 0.0f, 1.0f);
+			}
+
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+		}
+
 		// Cartoon
 		{
 			bool isOpen = ImGui::CollapsingHeader("Cartoon Material", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_Selected);
@@ -309,31 +324,14 @@ void UpdateComponentWidget<engine::MaterialComponent>(engine::SceneWorld* pScene
 			ImGui::PopStyleVar();
 		}
 
-		// Ambient
-		{
-			bool isOpen = ImGui::CollapsingHeader("Ambient", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-			ImGui::Separator();
-			if (isOpen)
-			{
-				ImGuiUtils::ImGuiFloatProperty("iblStrength", pMaterialComponent->GetIblStrengeth(), cd::Unit::None, 0.01f, 10.0f, false, 0.02f);
-			}
-
-			ImGui::Separator();
-			ImGui::PopStyleVar();
-		}
-
 		// Shaders
 		{
 			bool isOpen = ImGui::CollapsingHeader("Shader", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 			ImGui::Separator();
 
-			if (isOpen)
+			if (const engine::ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource(); pShaderResource && isOpen)
 			{
-				engine::RenderContext* pRenderContext = static_cast<engine::RenderContext*>(ImGui::GetIO().BackendRendererUserData);
-				const engine::ShaderResource* pShaderResource = pMaterialComponent->GetShaderResource();
-
 				ImGuiUtils::ImGuiStringProperty("Shader Program", pShaderResource->GetName());
 				ImGuiUtils::ImGuiStringProperty("Shader", pShaderResource->GetShaderInfo(0).name);
 				if (engine::ShaderProgramType::Standard == pShaderResource->GetType())
@@ -711,6 +709,32 @@ void UpdateComponentWidget<engine::ParticleForceFieldComponent>(engine::SceneWor
 		ImGuiUtils::ImGuiBoolProperty("RotationForceValue", pParticleForceFieldComponent->GetRotationForce());
 	}
 
+	ImGui::Separator();
+	ImGui::PopStyleVar();
+}
+
+template<>
+void UpdateComponentWidget<engine::AnimationComponent>(engine::SceneWorld* pSceneWorld, engine::Entity entity)
+{
+	auto* pAnimationComponent = pSceneWorld->GetAnimationComponent(entity);
+	if (!pAnimationComponent)
+	{
+		return;
+	}
+
+	bool isOpen = ImGui::CollapsingHeader("Animation Component", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Separator();
+
+	if (isOpen)
+	{
+		ImGui::Separator();
+		ImGuiUtils::ImGuiBoolProperty("play", pAnimationComponent->GetIsPlaying());
+		ImGuiUtils::ImGuiEnumProperty("AnimationClip", pAnimationComponent->GetAnimationClip());
+		ImGuiUtils::ImGuiFloatProperty("Factor", pAnimationComponent->GetBlendFactor(), cd::Unit::None, 0.0f, 1.0f, false, 0.01f);
+		ImGuiUtils::ImGuiFloatProperty("Time", pAnimationComponent->GetAnimationPlayTime(), cd::Unit::None);
+		ImGuiUtils::ImGuiFloatProperty("PlayBackSpeed", pAnimationComponent->GetPlayBackSpeed(), cd::Unit::None, 0.0f, 10.0f, false, 0.01f);
+	}
 	ImGui::Separator();
 	ImGui::PopStyleVar();
 }

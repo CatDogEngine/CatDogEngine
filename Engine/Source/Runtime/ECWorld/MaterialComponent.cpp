@@ -154,8 +154,7 @@ void MaterialComponent::SetShaderResource(ShaderResource* pShaderResource)
 
 ShaderResource* MaterialComponent::GetShaderResource() const
 {
-	assert(!m_isShaderResourceDirty);
-	return m_pShaderResource;
+	return m_isShaderResourceDirty ? nullptr : m_pShaderResource;
 }
 
 TextureResource* MaterialComponent::GetTextureResource(cd::MaterialTextureType textureType) const

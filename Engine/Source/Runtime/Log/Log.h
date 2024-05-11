@@ -5,9 +5,6 @@
 #include "Math/Quaternion.hpp"
 
 #include <spdlog/spdlog.h>
-#include <spdlog/fmt/ostr.h>
-
-#include <sstream>
 
 namespace engine
 {
@@ -16,15 +13,15 @@ class Log
 {
 public:
 	static void Init();
-	static std::shared_ptr<spdlog::logger>& GetEngineLogger();
-	static std::shared_ptr<spdlog::logger>& GetApplicationLogger();
+	static std::shared_ptr<spdlog::logger> GetEngineLogger() { return s_pEngineLogger; }
+	static std::shared_ptr<spdlog::logger> GetApplicationLogger() { return s_pApplicationLogger; }
 
-	static const std::ostringstream& GetSpdOutput();
+	static const std::ostringstream& GetSpdOutput() { return m_oss; }
 	static void ClearBuffer();
 
 private:
-	static std::shared_ptr<spdlog::logger> s_engineLogger;
-	static std::shared_ptr<spdlog::logger> s_applicationLogger;
+	static std::shared_ptr<spdlog::logger> s_pEngineLogger;
+	static std::shared_ptr<spdlog::logger> s_pApplicationLogger;
 
 	// Note that m_oss will be cleared after OutputLog::AddSpdLog be called.
 	static std::ostringstream m_oss;
@@ -47,36 +44,55 @@ private:
 #define CD_FATAL(...) ::engine::Log::GetApplicationLogger()->critical(__VA_ARGS__)
 
 // Runtime assert.
-#define CD_ENGINE_ASSERT(x, ...) { if(!(x)) { ::engine::Log::GetEngineLogger()->error(__VA_ARGS__); } }
-#define CD_ASSERT(x, ...) { if(!(x)) { ::engine::Log::GetApplicationLogger()->error(__VA_ARGS__); } }
+#define CD_ENGINE_ASSERT(x, ...) { if(!(x)) { CD_FATAL(...); __debugbreak(); } }
+#define CD_ASSERT(x, ...) { if(!(x)) { CD_FATAL(...); __debugbreak(); } }
 
-inline std::ostream& operator<<(std::ostream& os, const cd::Vec2f& vec)
+template<>
+struct std::formatter<cd::Vec2f> : std::formatter<std::string>
 {
-	return os << std::format("({0}, {1})", vec.x(), vec.y());
-}
+	auto format(const cd::Vec2f& vec, std::format_context& context) const
+	{
+		return formatter<string>::format(std::format("vec2:({}, {})", vec.x(), vec.y()), context);
+	}
+};
 
-inline std::ostream& operator<<(std::ostream& os, const cd::Vec3f& vec)
+template<>
+struct std::formatter<cd::Vec3f> : std::formatter<std::string>
 {
-	return os << std::format("({0}, {1}, {2})", vec.x(), vec.y(), vec.z());
-}
+	auto format(const cd::Vec3f& vec, std::format_context& context) const
+	{
+		return formatter<string>::format(std::format("vec3:({}, {}, {})", vec.x(), vec.y(), vec.z()), context);
+	}
+};
 
-inline std::ostream& operator<<(std::ostream& os, const cd::Vec4f& vec)
+template<>
+struct std::formatter<cd::Vec4f> : std::formatter<std::string>
 {
-	return os << std::format("({0}, {1}, {2}, {3})", vec.x(), vec.y(), vec.z(), vec.w());
-}
+	auto format(const cd::Vec4f& vec, std::format_context& context) const
+	{
+		return formatter<string>::format(std::format("vec4:({}, {}, {}, {})", vec.x(), vec.y(), vec.z(), vec.w()), context);
+	}
+};
 
-inline std::ostream& operator<<(std::ostream& os, const cd::Quaternion& quaternion)
+template<>
+struct std::formatter<cd::Quaternion> : std::formatter<std::string>
 {
-	return os << std::format("Vector = ({0}, {1}, {2}), Scalar = {3}", quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w());
-}
+	auto format(const cd::Quaternion& qua, std::format_context& context) const
+	{
+		return formatter<string>::format(std::format("Vector = ({}, {}, {}), Scalar = {}", qua.x(), qua.y(), qua.z(), qua.w()), context);
+	}
+};
 
 #else
 
+namespace engine
+{
 class Log
 {
 public:
 	static void Init() {}
 };
+}
 
 #define CD_ENGINE_TRACE(...)
 #define CD_ENGINE_INFO(...) 

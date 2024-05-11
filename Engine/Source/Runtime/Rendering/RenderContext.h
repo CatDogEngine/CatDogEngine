@@ -76,7 +76,7 @@ public:
 	const std::multimap<StringCrc, ShaderResource*>& GetShaderResources() const { return m_shaderResources; }
 
 	// Call back function bind to file watcher.
-	void OnShaderHotModified(StringCrc modifiedShaderNameCrc);
+	void OnShaderHotModified(std::string modifiedShaderName);
 	void ClearModifiedShaderResources() { m_modifiedShaderResources.clear(); }
 	std::set<ShaderResource*>& GetModifiedShaderResources() { return m_modifiedShaderResources; }
 	const std::set<ShaderResource*>& GetModifiedShaderResources() const { return m_modifiedShaderResources; }

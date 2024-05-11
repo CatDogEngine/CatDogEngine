@@ -79,7 +79,7 @@ public:
 
 private:
 	SkyType m_type = SkyType::SkyBox;
-	float m_skyboxStrength = 0.5f;
+	float m_skyboxStrength = 0.75f;
 	bool m_isAtmophericScatteringEnable = false;
 	
 	StringCrc m_ATMTransmittanceCrc;

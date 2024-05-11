@@ -8,7 +8,7 @@ namespace engine
 
 void PostProcessRenderer::Init()
 {
-	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("PostProcessProgram", "vs_fullscreen", "fs_PBR_postProcessing"));
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("PostProcessProgram", "vs_fullscreen", "fs_postProcessing"));
 
 	GetRenderContext()->CreateUniform("s_lightingColor", bgfx::UniformType::Sampler);
 	GetRenderContext()->CreateUniform("u_postProcessingParams", bgfx::UniformType::Vec4);

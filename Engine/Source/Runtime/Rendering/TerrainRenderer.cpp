@@ -43,7 +43,7 @@ constexpr const char* cameraPos = "u_cameraPos";
 constexpr const char* cameraNearFarPlane = "u_cameraNearFarPlane";
 
 constexpr const char* albedoColor = "u_albedoColor";
-constexpr const char* metallicRoughnessFactor = "u_metallicRoughnessFactor";
+constexpr const char* metallicRoughnessRefectanceFactor = "u_metallicRoughnessRefectanceFactor";
 constexpr const char* albedoUVOffsetAndScale = "u_albedoUVOffsetAndScale";
 constexpr const char* alphaCutOff = "u_alphaCutOff";
 constexpr const char* emissiveColor = "u_emissiveColor";
@@ -80,7 +80,7 @@ void TerrainRenderer::Init()
 
 	GetRenderContext()->CreateUniform(albedoColor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(emissiveColor, bgfx::UniformType::Vec4, 1);
-	GetRenderContext()->CreateUniform(metallicRoughnessFactor, bgfx::UniformType::Vec4, 1);
+	GetRenderContext()->CreateUniform(metallicRoughnessRefectanceFactor, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(albedoUVOffsetAndScale, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(alphaCutOff, bgfx::UniformType::Vec4, 1);
 
@@ -200,12 +200,13 @@ void TerrainRenderer::Render(float deltaTime)
 		constexpr StringCrc albedoColorCrc(albedoColor);
 		GetRenderContext()->FillUniform(albedoColorCrc, pMaterialComponent->GetFactor<cd::Vec3f>(cd::MaterialPropertyGroup::BaseColor), 1);
 
-		cd::Vec4f metallicRoughnessFactorData(
+		cd::Vec4f u_metallicRoughnessRefectanceFactorData(
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Metallic)),
 			*(pMaterialComponent->GetFactor<float>(cd::MaterialPropertyGroup::Roughness)),
-			1.0f, 1.0f);
-		constexpr StringCrc mrFactorCrc(metallicRoughnessFactor);
-		GetRenderContext()->FillUniform(mrFactorCrc, metallicRoughnessFactorData.begin(), 1);
+			pMaterialComponent->GetReflectance(),
+			1.0f);
+		constexpr StringCrc mrrFactorCrc(metallicRoughnessRefectanceFactor);
+		GetRenderContext()->FillUniform(mrrFactorCrc, u_metallicRoughnessRefectanceFactorData.begin(), 1);
 
 		constexpr StringCrc emissiveColorCrc(emissiveColor);
 		GetRenderContext()->FillUniform(emissiveColorCrc, pMaterialComponent->GetFactor<cd::Vec4f>(cd::MaterialPropertyGroup::Emissive), 1);

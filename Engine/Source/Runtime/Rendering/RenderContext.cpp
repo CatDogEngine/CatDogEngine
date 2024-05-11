@@ -187,10 +187,27 @@ ShaderResource* RenderContext::RegisterShaderProgram(const std::string& programN
 	return pShaderResource;
 }
 
-void RenderContext::OnShaderHotModified(StringCrc modifiedShaderNameCrc)
+void RenderContext::OnShaderHotModified(std::string modifiedShaderName)
 {
+	// Delete all related compiled uber shader file.
+	// TODO : Need a file system to check is compiled file dirty.
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(Path::GetShaderOutputDirectory()))
+	{
+		if (!entry.is_regular_file() || entry.path().extension() != Path::ShaderOutputExtension)
+		{
+			continue;
+		}
+
+		std::string fileName = entry.path().filename().generic_string();
+		if (fileName.find(modifiedShaderName) != std::string::npos)
+		{
+			std::filesystem::remove(entry.path());
+			CD_ENGINE_TRACE("Delete obsolete file {}", fileName);
+		}
+	}
+
 	// Get all ShaderResource variants by shader name.
-	auto range = m_shaderResources.equal_range(modifiedShaderNameCrc);
+	auto range = m_shaderResources.equal_range(StringCrc{ modifiedShaderName });
 	for (auto it = range.first; it != range.second; ++it)
 	{
 		m_modifiedShaderResources.insert(it->second);
