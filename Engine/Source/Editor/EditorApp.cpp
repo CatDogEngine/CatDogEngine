@@ -103,6 +103,8 @@ void EditorApp::Init(engine::EngineInitArgs initArgs)
 
 	InitECWorld();
 	m_pEditorImGuiContext->SetSceneWorld(m_pSceneWorld.get());
+	// In order to avoid temporary handling of bugs
+	m_pSceneWorld->GetSceneDatabase()->GetMeshes().reserve(100);
 
 	InitEngineRenderers();
 

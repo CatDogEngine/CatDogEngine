@@ -52,6 +52,7 @@ constexpr const char* cameraNearFarPlane                = "u_cameraNearFarPlane"
 constexpr const char* cameraLookAt                      = "u_cameraLookAt";
 constexpr const char* clipFrustumDepth                  = "u_clipFrustumDepth";
 												        
+constexpr const char* IsCastShadow						= "u_isCastShadow";
 constexpr const char* directionShadowMapTexture         = "DirectionShadowMapTexture";
 constexpr const char* pointShadowMapTexture             = "PointShadowMapTexture";
 constexpr const char* spotShadowMapTexture              = "SpotShadowMapTexture";
@@ -95,6 +96,7 @@ void WorldRenderer::Init()
 
 	GetRenderContext()->CreateUniform(cameraNearFarPlane, bgfx::UniformType::Vec4, 1);
 	GetRenderContext()->CreateUniform(clipFrustumDepth, bgfx::UniformType::Vec4, 1);
+	GetRenderContext()->CreateUniform(IsCastShadow, bgfx::UniformType::Vec4, 1);
 
 	bgfx::setViewName(GetViewID(), "WorldRenderer");
 }
@@ -367,6 +369,19 @@ void WorldRenderer::Render(float deltaTime)
 		{
 			auto lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[lightIndex]);
 			cd::LightType lightType = lightComponent->GetType();
+
+			constexpr StringCrc CastShadowIntensityCrc(IsCastShadow);
+			if (lightComponent->IsCastShadow())
+			{
+				cd::Vec4f vec4 = cd::Vec4f::One();
+				GetRenderContext()->FillUniform(CastShadowIntensityCrc, &vec4);
+			}
+			else
+			{
+				cd::Vec4f vec4 = cd::Vec4f::Zero();
+				GetRenderContext()->FillUniform(CastShadowIntensityCrc, &vec4);
+			}
+			//GetRenderContext()->FillUniform(CastShadowIntensityCrc, &lightComponent->IsCastShadow());
 			if (cd::LightType::Directional == lightType)
 			{
 				bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());

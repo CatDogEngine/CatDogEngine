@@ -97,7 +97,7 @@ void ShadowMapRenderer::Render(float deltaTime)
 			// Non-shadow-casting lights(include area lights) are excluded
 			if (!lightComponent->IsCastShadow())
 			{
-				continue;
+				//continue;
 			}
 
 			// Render shadow map
