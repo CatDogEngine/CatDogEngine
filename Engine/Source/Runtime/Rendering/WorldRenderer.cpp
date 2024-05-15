@@ -52,7 +52,7 @@ constexpr const char* cameraNearFarPlane                = "u_cameraNearFarPlane"
 constexpr const char* cameraLookAt                      = "u_cameraLookAt";
 constexpr const char* clipFrustumDepth                  = "u_clipFrustumDepth";
 												        
-constexpr const char* IsCastShadow						= "u_isCastShadow";
+constexpr const char* IsCastShadow                      = "u_isCastShadow";
 constexpr const char* directionShadowMapTexture         = "DirectionShadowMapTexture";
 constexpr const char* pointShadowMapTexture             = "PointShadowMapTexture";
 constexpr const char* spotShadowMapTexture              = "SpotShadowMapTexture";
