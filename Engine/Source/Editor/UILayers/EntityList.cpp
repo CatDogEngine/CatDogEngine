@@ -310,9 +310,9 @@ void EntityList::AddEntity(engine::SceneWorld* pSceneWorld)
                 pTransformComponent->SetTransform(transform);
                 pTransformComponent->Build();
 
-                auto* MaterialComponent = pSceneWorld->GetMaterialComponent(entity);
-                MaterialComponent->SetFactor<float>(cd::MaterialPropertyGroup::Metallic, horizontalIndex * (1.0f / 6.0f));
-                MaterialComponent->SetFactor<float>(cd::MaterialPropertyGroup::Roughness, verticalIndex * (1.0f / 6.0f));
+                auto* pMaterialComponent = pSceneWorld->GetMaterialComponent(entity);
+                pMaterialComponent->SetFactor<float>(cd::MaterialPropertyGroup::Metallic, horizontalIndex * (1.0f / 6.0f));
+                pMaterialComponent->SetFactor<float>(cd::MaterialPropertyGroup::Roughness, verticalIndex * (1.0f / 6.0f));
             }
         }
 
