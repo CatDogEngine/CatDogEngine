@@ -286,7 +286,6 @@ void EntityList::AddEntity(engine::SceneWorld* pSceneWorld)
     
     else if (ImGui::MenuItem("PBR Demo"))
     {
-
         engine::Entity entity = AddNamedEntity("DirectionalLight");
         auto& lightComponent = CreateLightComponents(entity, cd::LightType::Directional, 4.0f, cd::Vec3f(1.0f, 1.0f, 1.0f), true);
         lightComponent.SetDirection(cd::Direction(0.65f, -0.65f, 0.3f));
@@ -295,21 +294,21 @@ void EntityList::AddEntity(engine::SceneWorld* pSceneWorld)
         lightComponent.SetFrustumClips(cd::Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
         lightComponent.SetShadowMapTexture(BGFX_INVALID_HANDLE);
 
-        for (int horizontalIndex = 0 ; horizontalIndex < 7; horizontalIndex++)
+        for (int horizontalIndex = 0 ; horizontalIndex < 7; ++horizontalIndex)
         {
-            for (int verticalIndex = 0; verticalIndex < 7; verticalIndex++)
+            for (int verticalIndex = 0; verticalIndex < 7; ++verticalIndex)
             {
                 engine::Entity entity = AddNamedEntity("Sphere");
                 std::optional<cd::Mesh> optMesh = cd::MeshGenerator::Generate(cd::Sphere(cd::Point(0.0f), 10.0f), 100U, 100U, pPBRMaterialType->GetRequiredVertexFormat());
                 assert(optMesh.has_value());
-                optMesh->SetName(pSceneWorld->GetNameComponent(entity)->GetName());
+                optMesh->SetName("Sphere");
                 CreateShapeComponents(entity, cd::MoveTemp(optMesh.value()), pPBRMaterialType);
 
-                auto* transformComponent = pSceneWorld->GetTransformComponent(entity);
+                auto* pTransformComponent = pSceneWorld->GetTransformComponent(entity);
                 cd::Transform transform = cd::Transform::Identity();
                 transform.SetTranslation(cd::Vec3f(26.0f * (horizontalIndex - 4), 26.0f * (verticalIndex - 4), 0.0f));
-                transformComponent->SetTransform(transform);
-                transformComponent->Build();
+                pTransformComponent->SetTransform(transform);
+                pTransformComponent->Build();
 
                 auto* MaterialComponent = pSceneWorld->GetMaterialComponent(entity);
                 MaterialComponent->SetFactor<float>(cd::MaterialPropertyGroup::Metallic, horizontalIndex * (1.0f / 6.0f));
