@@ -154,7 +154,22 @@ public:
 	int GetBlurScaling() const { return m_blurScaling; }
 	void SetBlurScaling(int blurscaling) { m_blurScaling = blurscaling; }
 #endif
+	
+	//Gaussian
+	float& GetViewWidth() { return m_viewWidth; }
+	float& GetViewHeight() { return m_viewHeight; }
+	void SetViewWidth(float width) { m_viewWidth = width; }
+	void SetViewHeight(float height) { m_viewHeight = height; }
 
+	float GetFocalX() const
+	{
+		return m_viewWidth / (2.0f * std::tan(m_fov / 2.0f));
+	}
+
+	float GetFocalY() const
+	{
+		return m_viewHeight / (2.0f * std::tan(m_fov / 2.0f));
+	}
 private:
 	// Input
 	float m_aspect;
@@ -189,6 +204,12 @@ private:
 	float m_blurSize;
 	int m_blurScaling;
 #endif
+
+
+	//Gaussian
+	float m_viewWidth;
+	float m_viewHeight;
+
 };
 
 }
