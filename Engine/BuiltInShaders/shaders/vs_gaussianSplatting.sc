@@ -1,5 +1,5 @@
 
-$input a_position, i_data0//, i_data1, i_data2, i_data3, i_data4
+$input a_position//, i_data0//, i_data1, i_data2, i_data3, i_data4
 $output v_color0, v_texcoord0
 
 #include "../common/common.sh"
@@ -55,7 +55,9 @@ vec2 Unpack(uint x)
 
 void main()
 {
-	uint index = i_data0.x;
+	// 这里本来应该用实例化的index 即 i_data0.x
+	//	uint index = i_data0.x;
+	uint index = a_position.x;
 	//从纹理 u_texture 中获取中心点数据 cen，使用 index 计算纹理坐标。
 	uvec4 cen = texelFetch(u_texture, ivec2((uint(index) & 0x3ffu) << 1, uint(index) >> 10), 0);
 	//将中心点数据转换为浮点数，并应用视图和投影变换，得到 2D 位置 pos2d。

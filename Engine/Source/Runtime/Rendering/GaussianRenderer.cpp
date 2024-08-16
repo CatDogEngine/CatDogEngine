@@ -126,31 +126,31 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		//	}
 		//}
 
-		//Instace
-		const uint16_t instanceStride = 16;
-		// to total number of instances to draw
-		uint32_t totalSprites;
-		totalSprites = gaussianVertexCount;
-		uint32_t drawnSprites = bgfx::getAvailInstanceDataBuffer(totalSprites, instanceStride);
+		////Instace
+		//const uint16_t instanceStride = 16;
+		//// to total number of instances to draw
+		//uint32_t totalSprites;
+		//totalSprites = gaussianVertexCount;
+		//uint32_t drawnSprites = bgfx::getAvailInstanceDataBuffer(totalSprites, instanceStride);
 
-		bgfx::InstanceDataBuffer idb;
-		bgfx::allocInstanceDataBuffer(&idb, drawnSprites, instanceStride);
+		//bgfx::InstanceDataBuffer idb;
+		//bgfx::allocInstanceDataBuffer(&idb, drawnSprites, instanceStride);
 
-		uint8_t* data = idb.data;
-		for (uint32_t ii = 0; ii < drawnSprites; ++ii)
-		{
-		//	float* mtx = (float*)data;
-		//bx::mtxSRT(mtx, Transform.GetScale().x(), Transform.GetScale().y(), Transform.GetScale().z(),
-		//	Transform.GetRotation().Pitch(), Transform.GetRotation().Yaw(), Transform.GetRotation().Roll(),
-		//	Transform.GetTranslation().x(), Transform.GetTranslation().y(), Transform.GetTranslation().z());
+		//uint8_t* data = idb.data;
+		//for (uint32_t ii = 0; ii < drawnSprites; ++ii)
+		//{
+		////	float* mtx = (float*)data;
+		////bx::mtxSRT(mtx, Transform.GetScale().x(), Transform.GetScale().y(), Transform.GetScale().z(),
+		////	Transform.GetRotation().Pitch(), Transform.GetRotation().Yaw(), Transform.GetRotation().Roll(),
+		////	Transform.GetTranslation().x(), Transform.GetTranslation().y(), Transform.GetTranslation().z());
 
-			uint32_t* texIndex = (uint32_t*)&data;
-			texIndex[0] = depthIndex[ii];
-			texIndex[1] = 0;
-			texIndex[2] = 0;
-			texIndex[3] = 0;
-			data += instanceStride;
-		}
+		//	uint32_t* texIndex = (uint32_t*)&data;
+		//	texIndex[0] = depthIndex[ii];
+		//	texIndex[1] = 0;
+		//	texIndex[2] = 0;
+		//	texIndex[3] = 0;
+		//	data += instanceStride;
+		//}
 		constexpr StringCrc GaussianSampler("u_texture");
 		bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), pGaussianComponent->GetGaussianTextureHandle());
 		//GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
@@ -179,7 +179,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
 		bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 
-		bgfx::setInstanceDataBuffer(&idb,0, gaussianVertexCount);
+		//bgfx::setInstanceDataBuffer(&idb,0, gaussianVertexCount);
 
 		constexpr uint64_t state = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS |
 			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA) | BGFX_STATE_PT_TRISTRIP;

@@ -1206,9 +1206,9 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 	transformComponent.SetTransform(cd::Transform::Identity());
 	transformComponent.Build();
 	auto& GaussianRenderComponent = pWorld->CreateComponent<engine::GaussianRenderComponent>(entity);
-	CD_ERROR("NOTE: The ply file is an absolute address.");
-	CD_ERROR("D: / gaussian - splatting / data / output / point_cloud / iteration_30000 / point_cloud.ply");
-	std::ifstream inFile("D:/gaussian-splatting/data/output/point_cloud/iteration_30000/point_cloud.ply", std::ios::in | std::ios::binary);
+	std::string filePath(pFilePath);
+	std::replace(filePath.begin(), filePath.end(), '\\', '/');
+	std::ifstream inFile(filePath, std::ios::in | std::ios::binary);
 	if (inFile.is_open())
 	{
 		CD_ERROR("read over");
