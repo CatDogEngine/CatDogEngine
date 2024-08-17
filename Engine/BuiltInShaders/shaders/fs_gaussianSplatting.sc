@@ -11,4 +11,6 @@ void main()
     float B = exp(A) * v_color0.a;
     //fragColor = vec4(B * vColor.rgb, B);：设置输出颜色fragColor。RGB分量按B缩放，alpha分量设置为B。
     gl_FragColor = vec4(B * v_color0.rgb, B);
+
+    gl_FragColor = vec4_splat(1.0);
 }

@@ -18,6 +18,7 @@ void engine::GaussianRenderer::Init()
 	//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
 	//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
+	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
 
 	//GetRenderContext()->CreateUniform("Translation", bgfx::UniformType::Vec4);
 	//GetRenderContext()->CreateUniform("Rotation", bgfx::UniformType::Vec4);
@@ -77,15 +78,15 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		auto& Transform = pTransformComponent->GetTransform();
 
 		auto gaussianBuffer = pGaussianComponent->GetGaussianBuffer();
-		auto gaussianVertexCount = pGaussianComponent->GetVertexCount();
+		auto gaussianCount = pGaussianComponent->GetVertexCount();
 		f_buffer.assign(reinterpret_cast<float*>(gaussianBuffer.data()),
 			reinterpret_cast<float*>(gaussianBuffer.data() + gaussianBuffer.size()));
 
 		float maxDepth = -std::numeric_limits<float>::infinity();
 		float minDepth = std::numeric_limits<float>::infinity();
 
-		sizeList.resize(gaussianVertexCount);
-		for (size_t i = 0; i < gaussianVertexCount; ++i)
+		sizeList.resize(gaussianCount);
+		for (size_t i = 0; i < gaussianCount; ++i)
 		{
 			float depth = ((camViewProj.Data(0, 2) * f_buffer[8 * i + 0] +
 				camViewProj.Data(1, 2) * f_buffer[8 * i + 1] +
@@ -97,7 +98,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 
 		float depthInv = (256 * 256) / (maxDepth - minDepth);
 		counts0.assign(256 * 256, 0);
-		for (size_t i = 0; i < gaussianVertexCount; ++i)
+		for (size_t i = 0; i < gaussianCount; ++i)
 		{
 			sizeList[i] = static_cast<uint32_t>((sizeList[i] - minDepth) * depthInv);
 			if (sizeList[i] == 65536) sizeList[i] -= 1;
@@ -110,13 +111,15 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			starts0[i] = starts0[i - 1] + counts0[i - 1];
 		}
 
-		depthIndex.resize(gaussianVertexCount);
-		for (uint32_t i = 0; i < gaussianVertexCount; ++i)
+		depthIndex.resize(gaussianCount);
+		for (uint32_t i = 0; i < gaussianCount; ++i)
 		{
 			depthIndex[starts0[sizeList[i]]++] = i;
 		}
 
-		//depthIndex.resize(gaussianVertexCount * 4);
+		for (uint32_t i = 0; i < gaussianCount; i++)
+		{
+			//depthIndex.resize(gaussianVertexCount * 4);
 		//for (uint32_t i = 0; i < gaussianVertexCount; ++i)
 		//{
 		//	uint32_t index = starts0[sizeList[i]]++;
@@ -151,42 +154,47 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		//	texIndex[3] = 0;
 		//	data += instanceStride;
 		//}
-		constexpr StringCrc GaussianSampler("u_texture");
-		bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), pGaussianComponent->GetGaussianTextureHandle());
-		//GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
-		//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
-		//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
-		//GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
-		//constexpr StringCrc projectionCrc("projection");
-		//bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &camProj, 1);
-		//constexpr StringCrc viewCrc("view");
-		//bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &camView, 1);
-		//constexpr StringCrc focalCrc("focal");
-		//cd::Vec4f focal{FocalX, FocalY, 0.0f, 0.0f};
-		//bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
-		constexpr StringCrc viewportCrc("viewport");
-		cd::Vec4f viewport{viewWidth, viewHeight, 0.0f, 0.0f};
-		bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
+			constexpr StringCrc GaussianSampler("u_texture");
+			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), pGaussianComponent->GetGaussianTextureHandle());
+			//GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
+			//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
+			//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
+			//GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
+			//constexpr StringCrc projectionCrc("projection");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &camProj, 1);
+			//constexpr StringCrc viewCrc("view");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &camView, 1);
+			//constexpr StringCrc focalCrc("focal");
+			//cd::Vec4f focal{FocalX, FocalY, 0.0f, 0.0f};
+			//bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
+			constexpr StringCrc viewportCrc("viewport");
+			cd::Vec4f viewport{viewWidth, viewHeight, 0.0f, 0.0f};
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
 
-		//constexpr StringCrc TranslationCrc("Translation");
-		//bgfx::setUniform(GetRenderContext()->GetUniform(TranslationCrc), &Transform.GetTranslation(), 1);
+			constexpr StringCrc depthIndexCrc("depthIndex");
+			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex[i++], 1);
 
-		//constexpr StringCrc RotationCrc("Rotation");
-		//bgfx::setUniform(GetRenderContext()->GetUniform(RotationCrc), &Transform.GetRotation(), 1);
+			//constexpr StringCrc TranslationCrc("Translation");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(TranslationCrc), &Transform.GetTranslation(), 1);
 
-		//constexpr StringCrc ScaleCrc("Scale");
-		//bgfx::setUniform(GetRenderContext()->GetUniform(ScaleCrc), &Transform.GetScale(), 1);
-		bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
-		bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
+			//constexpr StringCrc RotationCrc("Rotation");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(RotationCrc), &Transform.GetRotation(), 1);
 
-		//bgfx::setInstanceDataBuffer(&idb,0, gaussianVertexCount);
+			//constexpr StringCrc ScaleCrc("Scale");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(ScaleCrc), &Transform.GetScale(), 1);
+			bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
+			bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 
-		constexpr uint64_t state = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS |
-			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA) | BGFX_STATE_PT_TRISTRIP;
-		bgfx::setState(state);
+			//bgfx::setInstanceDataBuffer(&idb,0, 60);
 
-		constexpr StringCrc programHandleIndex{ "GaussianProgram" };
-		GetRenderContext()->Submit(GetViewID(), programHandleIndex);
+			constexpr uint64_t state = BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA | BGFX_STATE_DEPTH_TEST_LESS |
+				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA) | BGFX_STATE_PT_TRISTRIP;
+			bgfx::setState(state);
+
+			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
+			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
+		}
+		
 	}
 }
 }

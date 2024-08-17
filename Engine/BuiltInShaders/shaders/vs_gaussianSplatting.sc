@@ -11,6 +11,7 @@ uniform vec4 viewport;//x,y
 //uniform vec4 Translation;
 //uniform vec4 Rotation;
 //uniform vec4 Scale;
+uniform vec4 depthIndex;
 
 // mat4 mtxSRT(float _sx, float _sy, float _sz, float _ax, float _ay, float _az, float _tx, float _ty, float _tz) {
 //     float sx = sin(_ax);
@@ -50,14 +51,14 @@ uniform vec4 viewport;//x,y
 
 vec2 Unpack(uint x)
 {
-	return vec2(x & 0xffff, x >> 16);
+	return vec2(uintBitsToFloat(x & 0xffff), uintBitsToFloat(x >> 16));
 }
 
 void main()
 {
 	// 这里本来应该用实例化的index 即 i_data0.x
-	//	uint index = i_data0.x;
-	uint index = a_position.x;
+	uint index = depthIndex.x;
+	//uint index = a_position.x;
 	//从纹理 u_texture 中获取中心点数据 cen，使用 index 计算纹理坐标。
 	uvec4 cen = texelFetch(u_texture, ivec2((uint(index) & 0x3ffu) << 1, uint(index) >> 10), 0);
 	//将中心点数据转换为浮点数，并应用视图和投影变换，得到 2D 位置 pos2d。

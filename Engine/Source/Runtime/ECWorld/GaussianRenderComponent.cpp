@@ -371,7 +371,7 @@ void GaussianRenderComponent::GenerateTexture()
 	bgfx::TextureFormat::Enum format = bgfx::TextureFormat::RGBA32U; // fomat
 
 	const bgfx::Memory* mem = bgfx::copy(m_textureBuffer.data(), static_cast<uint32_t>(m_textureBuffer.size()));
-	m_textureHandle = bgfx::createTexture2D(static_cast<uint16_t>(texwidth), static_cast<uint16_t>(texheight), hasMips, numLayers, format, BGFX_TEXTURE_NONE | BGFX_SAMPLER_NONE, mem);
+	m_textureHandle = bgfx::createTexture2D(static_cast<uint16_t>(texwidth), static_cast<uint16_t>(texheight), hasMips, numLayers, format, 0, mem);
 	CD_ERROR("Generate TextureHandle Over");
 }
 
