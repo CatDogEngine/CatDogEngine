@@ -172,7 +172,10 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
 
 			constexpr StringCrc depthIndexCrc("depthIndex");
-			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex[i], 1);
+			//CD_ERROR(i);
+			//CD_ERROR(depthIndex[i]);
+			cd::Vec4f Index{depthIndex[i], 0.0f, 0.0f, 0.0f};
+			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &Index, 1);
 
 			//constexpr StringCrc TranslationCrc("n");
 			//bgfx::setUniform(GetRenderContext()->GetUniform(TranslationCrc), &Transform.GetTranslation(), 1);
