@@ -174,7 +174,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			constexpr StringCrc depthIndexCrc("depthIndex");
 			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex[i], 1);
 
-			//constexpr StringCrc TranslationCrc("Translation");
+			//constexpr StringCrc TranslationCrc("n");
 			//bgfx::setUniform(GetRenderContext()->GetUniform(TranslationCrc), &Transform.GetTranslation(), 1);
 
 			//constexpr StringCrc RotationCrc("Rotation");

@@ -51,7 +51,7 @@ uniform vec4 depthIndex;
 
 vec2 Unpack(uint x)
 {
-	return vec2(uintBitsToFloat(x & 0xffff), uintBitsToFloat(x >> 16));
+	return vec2(uintBitsToFloat((x & 0x0000ffff) << 16), uintBitsToFloat(x & 0xffff0000));
 }
 
 void main()
@@ -119,14 +119,13 @@ void main()
 			//计算顶点在屏幕上的位置 gl_Position，并应用主轴和次轴的变换。
 			vec2 vCenter = pos2d.xy / vec2_splat(pos2d.w);
 			vec2 test = vCenter + vec2(majorAxis / viewport.xy * a_position.x) + vec2(minorAxis / viewport.xy * a_position.y);
-
-				//mat4 model = mtxFromCols(i_data0, i_data1, i_data2, i_data3);
-	//vec4 worldPos = mul(model,vec4(a_position,1.0));
-	//gl_Position = mul(u_viewProj, worldPos);
-			//mat4 model = mtxSRT(Scale.x, Scale.y, Scale.z,
+			// mat4 model = mtxFromCols(i_data0, i_data1, i_data2, i_data3);
+			// vec4 worldPos = mul(model,vec4(a_position,1.0));
+			// gl_Position = mul(u_viewProj, worldPos);
+			// mat4 model = mtxSRT(Scale.x, Scale.y, Scale.z,
 			//				Rotation.x, Rotation.y, Rotation.z,
 			//				Translation.x, Translation.y, Translation.z);
-			//vec4 worldPos = mul(model,vec4(test.x, test.y, 0.0, 1.0));
+			// vec4 worldPos = mul(model,vec4(test.x, test.y, 0.0, 1.0));
 			gl_Position = vec4(test.x, test.y, 0.0, 1.0);
 			//gl_Position = mul(u_viewProj, worldPos);
 		}
