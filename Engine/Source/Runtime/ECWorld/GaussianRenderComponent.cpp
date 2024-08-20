@@ -296,8 +296,6 @@ void GaussianRenderComponent::GenerateTexture()
 	size_t  texwidth = 1024 * 2;
 	size_t  texheight = static_cast<int>(std::ceil((2 * m_vertextCount) / static_cast<float>(texwidth)));
 	m_textureBuffer.resize(texwidth * texheight * 4 * sizeof(uint32_t));
-	const bgfx::Caps* caps = bgfx::getCaps();
-	uint16_t maxTextureSize = caps->limits.maxTextureSize;
 
 	uint8_t* texdata_c = reinterpret_cast<uint8_t*>(m_textureBuffer.data());
 	float* texdata_f = reinterpret_cast<float*>(m_textureBuffer.data());

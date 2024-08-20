@@ -4,8 +4,8 @@ $output v_color0, v_texcoord0
 
 #include "../common/common.sh"
 USAMPLER2D(u_texture, 0);
-// uniform mat4 projection, view;
-// uniform vec4 focal; //x,y
+uniform mat4 projection, view;
+uniform vec4 focal; //x,y
 uniform vec4 viewport;//x,y
 
 //uniform vec4 Translation;
@@ -54,16 +54,24 @@ vec2 Unpack(uint x)
 	return vec2(uintBitsToFloat((x & 0x0000ffff) << 16), uintBitsToFloat(x & 0xffff0000));
 }
 
+uint Pack(vec2 _x)
+{
+    uint x1 = floatBitsToUint(_x.x) >> 16;
+    uint x2 = floatBitsToUint(_x.y) & 0xffff0000;
+    return x1 | x2;
+}
+
+
 void main()
 {
 	// 这里本来应该用实例化的index 即 i_data0.x
-	uint index = depthIndex.x;
+	uint index = Pack(vec2(depthIndex.x,depthIndex.y));
 	//uint index = a_position.x;
 	//从纹理 u_texture 中获取中心点数据 cen，使用 index 计算纹理坐标。
-	uvec4 cen = texelFetch(u_texture, ivec2((uint(index) & 0x3ffu) << 1, uint(index) >> 10), 0);
+    uvec4 cen = texelFetch(u_texture, ivec2((uint(index) & 0x3ffu) << 1, uint(index) >> 10), 0);
 	//将中心点数据转换为浮点数，并应用视图和投影变换，得到 2D 位置 pos2d。
-	vec4 cam = mul(u_view,vec4(uintBitsToFloat(cen.xyz), 1));
-	vec4 pos2d = mul(u_proj, cam);
+	vec4 cam = mul(view,vec4(uintBitsToFloat(cen.xyz), 1));
+	vec4 pos2d = mul(projection, cam);
 	//计算裁剪范围 clip，并检查 pos2d 是否在裁剪范围内。如果不在范围内，将顶点位置设置为 (0.0, 0.0, 2.0, 1.0) 并返回。
 	float clip = 1.2 * pos2d.w;
     if (pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip) {
@@ -80,17 +88,20 @@ void main()
    		mat3 Vrk = mat3(u1.x, u1.y, u2.x, u1.y, u2.y, u3.x, u2.x, u3.x, u3.y);
 		
 		//构建雅可比矩阵 J，用于将 3D 空间中的点转换为 2D 图像平面上的点。
+		/*
+		https://math.stackexchange.com/questions/4716499/pinhole-camera-projection-of-3d-multivariate-gaussian
+		*/
 		mat3 J = mat3(
-			u_proj[0][0], u_proj[0][1], u_proj[0][2],
-			u_proj[1][0], u_proj[1][1], u_proj[1][2],
-			u_proj[2][0], u_proj[2][1], u_proj[2][2]
+			focal.x / cam.z, 0., -(focal.x * cam.x) / (cam.z * cam.z), 
+			0., -focal.y / cam.z, (focal.y * cam.y) / (cam.z * cam.z), 
+			0., 0., 0.
 		);
 
 
 		mat3 viewMat3 = mat3(
-			u_view[0][0], u_view[0][1], u_view[0][2],
-			u_view[1][0], u_view[1][1], u_view[1][2],
-			u_view[2][0], u_view[2][1], u_view[2][2]
+			view[0][0], view[0][1], view[0][2],
+			view[1][0], view[1][1], view[1][2],
+			view[2][0], view[2][1], view[2][2]
 		);
 
 		//计算变换矩阵 T，并将协方差矩阵 Vrk 转换为 2D 协方差矩阵 cov2d。
@@ -126,7 +137,7 @@ void main()
 			//				Rotation.x, Rotation.y, Rotation.z,
 			//				Translation.x, Translation.y, Translation.z);
 			// vec4 worldPos = mul(model,vec4(test.x, test.y, 0.0, 1.0));
-			gl_Position = vec4(test.x, test.y, 0.0, 1.0);
+			gl_Position = vec4(ivec2(((uint(index) & 0x3ffu) << 1) | 1u, uint(index) >> 10),cen.z, 1.0);
 			//gl_Position = mul(u_viewProj, worldPos);
 		}
 	}

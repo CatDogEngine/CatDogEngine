@@ -9,14 +9,67 @@
 
 namespace engine
 {
+float halfToFloat(uint16_t value)
+{
+	uint32_t sign = (value & 0x8000) << 16;
+	uint32_t exponent = (value & 0x7C00) >> 10;
+	uint32_t mantissa = value & 0x03FF;
+
+	if (exponent == 0)
+	{
+		if (mantissa == 0)
+		{
+			return *reinterpret_cast<float*>(&sign);
+		}
+		else
+		{
+			while ((mantissa & 0x0400) == 0)
+			{
+				mantissa <<= 1;
+				exponent--;
+			}
+			exponent++;
+			mantissa &= ~0x0400;
+		}
+	}
+	else if (exponent == 0x1F)
+	{
+		if (mantissa == 0)
+		{
+			uint32_t temp = sign | 0x7F800000;
+			return *reinterpret_cast<float*>(&temp);
+		}
+		else
+		{
+			uint32_t temp = sign | 0x7F800000 | (mantissa << 13);
+			return *reinterpret_cast<float*>(&temp);
+		}
+	}
+
+	exponent = exponent + (127 - 15);
+	mantissa = mantissa << 13;
+
+	uint32_t result = sign | (exponent << 23) | mantissa;
+	return *reinterpret_cast<float*>(&result);
+}
+
+cd::Vec2f unpackHalf2x16(uint32_t packed)
+{
+	uint16_t half1 = static_cast<uint16_t>(packed >> 16);
+	uint16_t half2 = static_cast<uint16_t>(packed & 0xFFFF);
+	float v1 = halfToFloat(half1), v2 = halfToFloat(half2);
+	return cd::Vec2f{v1,v2};
+}
+
+
 void engine::GaussianRenderer::Init()
 {
 	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("GaussianProgram", "vs_gaussianSplatting", "fs_gaussianSplatting"));
 
 	GetRenderContext()->CreateUniform("u_texture", bgfx::UniformType::Sampler);
-	//GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
-	//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
-	//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
+	GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
+	GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
+	GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
 
@@ -112,9 +165,14 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		}
 
 		depthIndex.resize(gaussianCount);
+		depthIndexFloat.resize(gaussianCount);
 		for (uint32_t i = 0; i < gaussianCount; ++i)
 		{
 			depthIndex[starts0[sizeList[i]]++] = i;
+		}
+		for (uint32_t i = 0; i < gaussianCount; ++i)
+		{
+			depthIndexFloat[i] = unpackHalf2x16(depthIndex[i]);
 		}
 
 		for (uint32_t i = 0; i < gaussianCount; i++)
@@ -160,13 +218,13 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
 			//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
 			//GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
-			//constexpr StringCrc projectionCrc("projection");
-			//bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &camProj, 1);
-			//constexpr StringCrc viewCrc("view");
-			//bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &camView, 1);
-			//constexpr StringCrc focalCrc("focal");
-			//cd::Vec4f focal{FocalX, FocalY, 0.0f, 0.0f};
-			//bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
+			constexpr StringCrc projectionCrc("projection");
+			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &camProj, 1);
+			constexpr StringCrc viewCrc("view");
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &camView, 1);
+			constexpr StringCrc focalCrc("focal");
+			cd::Vec4f focal{FocalX, FocalY, 0.0f, 0.0f};
+			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
 			constexpr StringCrc viewportCrc("viewport");
 			cd::Vec4f viewport{viewWidth, viewHeight, 0.0f, 0.0f};
 			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
@@ -174,7 +232,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			constexpr StringCrc depthIndexCrc("depthIndex");
 			//CD_ERROR(i);
 			//CD_ERROR(depthIndex[i]);
-			cd::Vec4f Index{depthIndex[i], 0.0f, 0.0f, 0.0f};
+			cd::Vec4f Index{depthIndexFloat[i].x(), depthIndexFloat[i].y(), 0.0f, 0.0f};
 			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &Index, 1);
 
 			//constexpr StringCrc TranslationCrc("n");

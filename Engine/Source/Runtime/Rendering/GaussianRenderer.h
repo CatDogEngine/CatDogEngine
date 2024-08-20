@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
+#include "RenderContext.h"
 #include <vector>
 
 namespace engine
@@ -27,7 +28,7 @@ private:
 	std::vector<uint32_t> counts0;
 	std::vector<uint32_t> starts0;
 	std::vector<uint32_t> depthIndex;
-
+	std::vector<cd::Vec2f> depthIndexFloat;
 };
 
 }
