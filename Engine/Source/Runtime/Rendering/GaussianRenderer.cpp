@@ -153,8 +153,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		counts0.assign(256 * 256, 0);
 		for (size_t i = 0; i < gaussianCount; ++i)
 		{
-			sizeList[i] = static_cast<uint32_t>((sizeList[i] - minDepth) * depthInv);
-			if (sizeList[i] == 65536) sizeList[i] -= 1;
+			sizeList[i] = static_cast<int32_t>((sizeList[i] - minDepth) * depthInv);
 			counts0[sizeList[i]]++;
 		}
 
