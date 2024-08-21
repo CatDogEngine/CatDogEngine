@@ -54,18 +54,13 @@ vec2 Unpack(uint x)
 	return vec2(uintBitsToFloat((x & 0x0000ffff) << 16), uintBitsToFloat(x & 0xffff0000));
 }
 
-uint Pack(vec2 _x)
-{
-    uint x1 = floatBitsToUint(_x.x) >> 16;
-    uint x2 = floatBitsToUint(_x.y) & 0xffff0000;
-    return x1 | x2;
-}
+
 
 
 void main()
 {
 	// 这里本来应该用实例化的index 即 i_data0.x
-	uint index = Pack(vec2(depthIndex.x,depthIndex.y));
+	uint index = floatBitsToUint(depthIndex.x);
 	//uint index = a_position.x;
 	//从纹理 u_texture 中获取中心点数据 cen，使用 index 计算纹理坐标。
     uvec4 cen = texelFetch(u_texture, ivec2((uint(index) & 0x3ffu) << 1, uint(index) >> 10), 0);
@@ -74,7 +69,7 @@ void main()
 	vec4 pos2d = mul(projection, cam);
 	//计算裁剪范围 clip，并检查 pos2d 是否在裁剪范围内。如果不在范围内，将顶点位置设置为 (0.0, 0.0, 2.0, 1.0) 并返回。
 	float clip = 1.2 * pos2d.w;
-    if (pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip) {
+  if (pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip) {
         gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     }
 	else
@@ -129,7 +124,7 @@ void main()
 
 			//计算顶点在屏幕上的位置 gl_Position，并应用主轴和次轴的变换。
 			vec2 vCenter = pos2d.xy / vec2_splat(pos2d.w);
-			vec2 test = vCenter + vec2(majorAxis / viewport.xy * a_position.x) + vec2(minorAxis / viewport.xy * a_position.y);
+			vec2 test = vCenter + vec2(a_position.x * majorAxis / viewport.xy) + vec2(a_position.y * minorAxis / viewport.xy);
 			// mat4 model = mtxFromCols(i_data0, i_data1, i_data2, i_data3);
 			// vec4 worldPos = mul(model,vec4(a_position,1.0));
 			// gl_Position = mul(u_viewProj, worldPos);
@@ -137,7 +132,7 @@ void main()
 			//				Rotation.x, Rotation.y, Rotation.z,
 			//				Translation.x, Translation.y, Translation.z);
 			// vec4 worldPos = mul(model,vec4(test.x, test.y, 0.0, 1.0));
-			gl_Position = vec4(ivec2(((uint(index) & 0x3ffu) << 1) | 1u, uint(index) >> 10),cen.z, 1.0);
+			gl_Position = vec4(test.x,test.y,0.0, 1.0);
 			//gl_Position = mul(u_viewProj, worldPos);
 		}
 	}
