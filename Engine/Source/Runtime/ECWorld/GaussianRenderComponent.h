@@ -68,7 +68,7 @@ private:
 	std::vector<std::byte> m_gausianAttributesBuffer;
 
 	//texture
-	std::vector<std::byte> m_textureBuffer;
+	std::vector<uint32_t> m_textureBuffer;
 	bgfx::TextureHandle m_textureHandle;
 };
 

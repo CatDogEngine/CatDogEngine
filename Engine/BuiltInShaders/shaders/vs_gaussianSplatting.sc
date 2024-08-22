@@ -55,8 +55,6 @@ vec2 Unpack(uint x)
 }
 
 
-
-
 void main()
 {
 	// 这里本来应该用实例化的index 即 i_data0.x

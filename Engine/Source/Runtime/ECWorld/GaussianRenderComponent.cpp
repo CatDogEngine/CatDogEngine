@@ -355,13 +355,13 @@ void GaussianRenderComponent::GenerateTexture()
 			M[2] * M[2] + M[5] * M[5] + M[8] * M[8]
 		};
 
-		uint32_t packed1 = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
-		uint32_t packed2 = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
-		uint32_t packed3 = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
+		//uint32_t packed1 = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
+		//uint32_t packed2 = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
+		//uint32_t packed3 = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
 
-		std::memcpy(&m_textureBuffer[8 * i + 4 * sizeof(uint32_t)], &packed1, sizeof(uint32_t));
-		std::memcpy(&m_textureBuffer[8 * i + 5 * sizeof(uint32_t)], &packed2, sizeof(uint32_t));
-		std::memcpy(&m_textureBuffer[8 * i + 6 * sizeof(uint32_t)], &packed3, sizeof(uint32_t));
+		m_textureBuffer[8 * i + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
+		m_textureBuffer[8 * i + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
+		m_textureBuffer[8 * i + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
 	}
 
 	bool hasMips = false;  //if-mip-map
