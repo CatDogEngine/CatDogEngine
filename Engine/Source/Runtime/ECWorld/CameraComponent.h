@@ -161,19 +161,23 @@ public:
 	void SetViewWidth(float width) { m_viewWidth = width; }
 	void SetViewHeight(float height) { m_viewHeight = height; }
 
-	float GetFocalX() const
+	float CalculateFOVy() 
 	{
-		return m_viewWidth / (2.0f * std::tan(m_fov / 2.0f));
+		//m_fov_y = 2.0f * std::atan(std::tan(m_fov / 2.0f * cd::Math::PI / 180.0f) / std::sqrt(1.0f + m_aspect * m_aspect)) * 180.0f / cd::Math::PI;
+		return m_fov_y;
 	}
 
-	float GetFocalY() const
+	float CalculateFOVx() 
 	{
-		return m_viewHeight / (2.0f * std::tan(m_fov / 2.0f));
+		//m_fov_x = 2.0f * std::atan(m_aspect * std::tan(m_fov_y / 2.0f * cd::Math::PI / 180.0f)) * 180.0f / cd::Math::PI;
+		return m_fov_x;
 	}
 private:
 	// Input
 	float m_aspect;
 	float m_fov;
+	float m_fov_x = 1159.5880733038064f;
+	float m_fov_y = 1164.6601287484507f;
 	float m_nearPlane;
 	float m_farPlane;
 	cd::NDCDepth m_ndcDepth;

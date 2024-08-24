@@ -15,9 +15,9 @@ void engine::GaussianRenderer::Init()
 	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("GaussianProgram", "vs_gaussianSplatting", "fs_gaussianSplatting"));
 
 	GetRenderContext()->CreateUniform("u_texture", bgfx::UniformType::Sampler);
-	GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
-	GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
-	GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
+	//GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
+	//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
+	//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
 
@@ -63,8 +63,8 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	const cd::Matrix4x4 camView = pMainCameraComponent->GetViewMatrix();
 	const cd::Matrix4x4 camProj = pMainCameraComponent->GetProjectionMatrix();
 	const cd::Matrix4x4 camViewProj = camProj * camView;
-	auto FocalX = pMainCameraComponent->GetFocalX();
-	auto FocalY = pMainCameraComponent->GetFocalY();
+	//auto FocalY = pMainCameraComponent->CalculateFOVy();
+	//auto FocalX = pMainCameraComponent->CalculateFOVx();
 	auto viewWidth = pMainCameraComponent->GetViewWidth();
 	auto viewHeight = pMainCameraComponent->GetViewHeight();
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
@@ -161,13 +161,13 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			//GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
 			//GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
 			//GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
-			constexpr StringCrc projectionCrc("projection");
-			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &camProj, 1);
-			constexpr StringCrc viewCrc("view");
-			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &camView, 1);
-			constexpr StringCrc focalCrc("focal");
-			cd::Vec4f focal{FocalX, FocalY, 0.0f, 0.0f};
-			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
+			//constexpr StringCrc projectionCrc("projection");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &camProj, 1);
+			//constexpr StringCrc viewCrc("view");
+			//bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &camView, 1);
+			//constexpr StringCrc focalCrc("focal");
+			//cd::Vec4f focal{FocalX, FocalY, 0.0f, 0.0f};
+			//bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
 			constexpr StringCrc viewportCrc("viewport");
 			cd::Vec4f viewport{viewWidth, viewHeight, 0.0f, 0.0f};
 			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);

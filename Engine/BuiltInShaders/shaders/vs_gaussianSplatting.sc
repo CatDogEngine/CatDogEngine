@@ -1,11 +1,11 @@
 
 $input a_position//, i_data0//, i_data1, i_data2, i_data3, i_data4
-$output v_color0, v_texcoord0
+$output v_color0, v_color1
 
 #include "../common/common.sh"
 USAMPLER2D(u_texture, 0);
-uniform mat4 projection, view;
-uniform vec4 focal; //x,y
+// uniform mat4 projection, view;
+// uniform vec4 focal; //x,y
 uniform vec4 viewport;//x,y
 
 //uniform vec4 Translation;
@@ -63,8 +63,8 @@ void main()
 	//从纹理 u_texture 中获取中心点数据 cen，使用 index 计算纹理坐标。
     uvec4 cen = texelFetch(u_texture, ivec2((uint(index) & 0x3ffu) << 1, uint(index) >> 10), 0);
 	//将中心点数据转换为浮点数，并应用视图和投影变换，得到 2D 位置 pos2d。
-	vec4 cam = mul(view,vec4(uintBitsToFloat(cen.xyz), 1));
-	vec4 pos2d = mul(projection, cam);
+	vec4 cam = mul(u_view,vec4(uintBitsToFloat(cen.xyz), 1));
+	vec4 pos2d = mul(u_proj, cam);
 	//计算裁剪范围 clip，并检查 pos2d 是否在裁剪范围内。如果不在范围内，将顶点位置设置为 (0.0, 0.0, 2.0, 1.0) 并返回。
 	float clip = 1.2 * pos2d.w;
   if (pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip) {
@@ -84,17 +84,23 @@ void main()
 		/*
 		https://math.stackexchange.com/questions/4716499/pinhole-camera-projection-of-3d-multivariate-gaussian
 		*/
+		// mat3 J = mat3(
+		// 	focal.x / cam.z, 0., -(focal.x * cam.x) / (cam.z * cam.z), 
+		// 	0., -focal.y / cam.z, (focal.y * cam.y) / (cam.z * cam.z), 
+		// 	0., 0., 0.
+		// );
 		mat3 J = mat3(
-			focal.x / cam.z, 0., -(focal.x * cam.x) / (cam.z * cam.z), 
-			0., -focal.y / cam.z, (focal.y * cam.y) / (cam.z * cam.z), 
-			0., 0., 0.
+			u_proj[0][0], u_proj[0][1], u_proj[0][2],
+			u_proj[1][0], u_proj[1][1], u_proj[1][2],
+			u_proj[2][0], u_proj[2][1], u_proj[2][2]
 		);
 
 
+
 		mat3 viewMat3 = mat3(
-			view[0][0], view[0][1], view[0][2],
-			view[1][0], view[1][1], view[1][2],
-			view[2][0], view[2][1], view[2][2]
+			u_view[0][0], u_view[0][1], u_view[0][2],
+			u_view[1][0], u_view[1][1], u_view[1][2],
+			u_view[2][0], u_view[2][1], u_view[2][2]
 		);
 
 		//计算变换矩阵 T，并将协方差矩阵 Vrk 转换为 2D 协方差矩阵 cov2d。
@@ -118,7 +124,7 @@ void main()
 			//计算顶点颜色 vColor，并将顶点位置 position 传递给片段着色器。
 			v_color0 = clamp(pos2d.z/pos2d.w+1.0, 0.0, 1.0) *
 				vec4((cov.w) & 0xffu, (cov.w >> 8) & 0xffu, (cov.w >> 16) & 0xffu, (cov.w >> 24) & 0xffu) / 255.0;
-			v_texcoord0 = a_position.xy;
+			v_color1.xy = a_position.xy;
 
 			//计算顶点在屏幕上的位置 gl_Position，并应用主轴和次轴的变换。
 			vec2 vCenter = pos2d.xy / vec2_splat(pos2d.w);

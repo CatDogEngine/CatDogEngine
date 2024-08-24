@@ -1,10 +1,10 @@
-$input v_color0, v_texcoord0
+$input v_color0, v_color1
 #include "../common/common.sh"
 
 void main()
 {
     // float A = -dot(vPosition, vPosition);：计算vPosition与自身的负点积。实际上是- (x^2 + y^2)，其中vPosition是(x, y)。
-	float A = -dot(v_texcoord0, v_texcoord0);
+	float A = -dot(v_color1.xy, v_color1.xy);
     //if (A < -4.0) discard;：如果A小于-4.0，则丢弃该片段。这实际上创建了一个半径为2单位的圆形裁剪区域。
     if (A < -4.0) discard;
     //float B = exp(A) * vColor.a;：计算B为A的指数函数乘以vColor的alpha分量。指数函数exp(A)对于负值的A衰减得很快。
