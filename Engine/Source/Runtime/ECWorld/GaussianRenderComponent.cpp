@@ -188,9 +188,9 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 			float f_dc_1 = dataView.get<float>(row * row_offset + offsets["f_dc_1"]);
 			float f_dc_2 = dataView.get<float>(row * row_offset + offsets["f_dc_2"]);
 
-			rgba[0] = static_cast<uint8_t>((0.5f + SH_C0 * f_dc_0) * 255.0f);
-			rgba[1] = static_cast<uint8_t>((0.5f + SH_C0 * f_dc_1) * 255.0f);
-			rgba[2] = static_cast<uint8_t>((0.5f + SH_C0 * f_dc_2) * 255.0f);
+			rgba[0] = static_cast<uint8_t>(std::round((0.5f + SH_C0 * f_dc_0) * 255.0f));
+			rgba[1] = static_cast<uint8_t>(std::round((0.5f + SH_C0 * f_dc_1) * 255.0f));
+			rgba[2] = static_cast<uint8_t>(std::round((0.5f + SH_C0 * f_dc_2) * 255.0f));
 		}
 		else
 		{
@@ -204,7 +204,7 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 
 		if (types.find("opacity") != types.end())
 		{
-			rgba[3] = static_cast<uint8_t>((1 / (1 + std::exp(-opacity))) * 255.0f);
+			rgba[3] = static_cast<uint8_t>(std::round((1 / (1 + std::exp(-opacity))) * 255.0f));
 		}
 		else
 		{
@@ -227,10 +227,10 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 				rot_3 * rot_3
 			);
 
-			rot[0] = static_cast<uint8_t>((rot_0 / qlen) * 128.0f + 128.0f);
-			rot[1] = static_cast<uint8_t>((rot_1 / qlen) * 128.0f + 128.0f);
-			rot[2] = static_cast<uint8_t>((rot_2 / qlen) * 128.0f + 128.0f);
-			rot[3] = static_cast<uint8_t>((rot_3 / qlen) * 128.0f + 128.0f);
+			rot[0] = static_cast<uint8_t>(std::round((rot_0 / qlen) * 128.0f + 128.0f));
+			rot[1] = static_cast<uint8_t>(std::round((rot_1 / qlen) * 128.0f + 128.0f));
+			rot[2] = static_cast<uint8_t>(std::round((rot_2 / qlen) * 128.0f + 128.0f));
+			rot[3] = static_cast<uint8_t>(std::round((rot_3 / qlen) * 128.0f + 128.0f));
 
 			scales[0] = std::exp(dataView.get<float>(row * row_offset + offsets["scale_0"]));
 			scales[1] = std::exp(dataView.get<float>(row * row_offset + offsets["scale_1"]));
@@ -258,48 +258,45 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 
 uint16_t floatToHalf(float value)
 {
-	uint32_t f = *reinterpret_cast<uint32_t*>(&value);
-	uint32_t sign = (f >> 16) & 0x8000;
-	uint32_t exponent = ((f >> 23) & 0xff) - (127 - 15);
-	uint32_t mantissa = f & 0x007fffff;
-
-	if (exponent <= 0)
+	int32_t f = *reinterpret_cast<int32_t*> (&value);
+	uint16_t sign = (f >> 31) & 0x0001;
+	uint16_t exp = (f >> 23) & 0x00ff;
+	int32_t frac = f & 0x007fffff;
+	uint16_t newExp;
+	if (exp == 0)
 	{
-		if (exponent < -10)
-		{
-			return static_cast<uint16_t>(sign);
-		}
-		mantissa = (mantissa | 0x00800000) >> (1 - exponent);
-		return static_cast<uint16_t>(sign | (mantissa >> 13));
+		newExp = 0;
 	}
-	else if (exponent == 0xff - (127 - 15))
+	else if (exp < 113)
 	{
-		if (mantissa == 0)
+		newExp = 0;
+		frac |= 0x00800000;
+		frac >>= (113 - exp);
+		if (frac & 0x01000000)
 		{
-			return static_cast<uint16_t>(sign | 0x7c00);
+			newExp = 1;
+			frac = 0;
 		}
-		else
-		{
-			mantissa >>= 13;
-			return static_cast<uint16_t>(sign | 0x7c00 | mantissa | (mantissa == 0));
-		}
+	}
+	else if (exp < 142)
+	{
+		newExp = exp - 112;
 	}
 	else
 	{
-		if (exponent > 30)
-		{
-			return static_cast<uint16_t>(sign | 0x7c00);
-		}
-		return static_cast<uint16_t>(sign | (exponent << 10) | (mantissa >> 13));
+		newExp = 31;
+		frac = 0;
 	}
+
+	return (sign << 15) | (newExp << 10) | (frac >> 13);
 }
 
-
-uint32_t packHalf2x16(float v1, float v2)
+// Function to pack two half-precision floating point values into a single uint32_t
+uint32_t packHalf2x16(float x, float y)
 {
-	uint16_t half1 = floatToHalf(v1);
-	uint16_t half2 = floatToHalf(v2);
-	return (static_cast<uint32_t>(half1) << 16) | static_cast<uint32_t>(half2);
+	uint16_t halfX = floatToHalf(x);
+	uint16_t halfY = floatToHalf(y);
+	return (static_cast<uint32_t>(halfX) | (static_cast<uint32_t>(halfY) << 16));
 }
 
 void GaussianRenderComponent::GenerateTexture()
@@ -335,6 +332,7 @@ void GaussianRenderComponent::GenerateTexture()
 			f_buffer[8 * i + 3 + 1],
 			f_buffer[8 * i + 3 + 2]
 		};
+
 		float rot[4] = {
 			(u_buffer[32 * i + 28 + 0] - 128) / 128.0f,
 			(u_buffer[32 * i + 28 + 1] - 128) / 128.0f,
@@ -374,10 +372,20 @@ void GaussianRenderComponent::GenerateTexture()
 		//uint32_t packed1 = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
 		//uint32_t packed2 = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
 		//uint32_t packed3 = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
-
+		//CD_ERROR(4 * sigma[1]);
+		//CD_ERROR(4 * sigma[2]);
+		//CD_ERROR(4 * sigma[3]);
+		//CD_ERROR(4 * sigma[4]);
+		//CD_ERROR(4 * sigma[5]);
 		m_textureBuffer[8 * i + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
 		m_textureBuffer[8 * i + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
 		m_textureBuffer[8 * i + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
+		if (i == m_vertextCount - 1)
+		{
+			CD_ERROR(m_textureBuffer[8 * i + 4]);
+			CD_ERROR(m_textureBuffer[8 * i + 5]);
+			CD_ERROR(m_textureBuffer[8 * i + 6]);
+		}
 	}
 
 	bool hasMips = false;  //if-mip-map
