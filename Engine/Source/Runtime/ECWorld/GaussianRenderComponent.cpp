@@ -106,6 +106,7 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 			types[name] = arrayType;
 			offsets[name] = row_offset;
 			CD_ERROR(name);
+			CD_ERROR(types[name]);
 			CD_ERROR(offsets[name]);	
 			std::string number_str;
 			for (char c : arrayType)
@@ -163,22 +164,61 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 	{
 		size_t row = sizeIndex[j];
 
-		float* position = reinterpret_cast<float*>(&buffer[j * rowLength]);
-		float* scales = reinterpret_cast<float*>(&buffer[j * rowLength + 4 * 3]);
-		std::byte* rgba = &buffer[j * rowLength + 4 * 3 + 4 * 3];
-		std::byte* rot = &buffer[j * rowLength + 4 * 3 + 4 * 3 + 4];
+		std::byte* basePtr = &buffer[j * rowLength];
 
-		float scale_0 = dataView.get<float>(row * rowLength + offsets.at("scale_0"));
-		float scale_1 = dataView.get<float>(row * rowLength + offsets.at("scale_1"));
-		float scale_2 = dataView.get<float>(row * rowLength + offsets.at("scale_2"));
-		float opacity = dataView.get<float>(row * rowLength + offsets.at("opacity"));
 
+		//float* position = reinterpret_cast<float*>(&buffer[j * rowLength]);
+		//float* scales = reinterpret_cast<float*>(&buffer[j * rowLength + 4 * 3]);
+		//std::byte* rgba = &buffer[j * rowLength + 4 * 3 + 4 * 3];
+		//std::byte* rot = &buffer[j * rowLength + 4 * 3 + 4 * 3 + 4];
+		float position[3] = {
+				dataView.get<float>(row * row_offset + offsets["x"]),
+				dataView.get<float>(row * row_offset + offsets["y"]),
+				dataView.get<float>(row * row_offset + offsets["z"])
+		};
+
+		float opacity = dataView.get<float>(row * row_offset + offsets["opacity"]);
+
+		uint8_t rgba[4]{};
+		const float SH_C0 = 0.28209479177387814f;
+		if (types.find("f_dc_0") != types.end())
+		{
+
+			float f_dc_0 = dataView.get<float>(row * row_offset + offsets["f_dc_0"]);
+			float f_dc_1 = dataView.get<float>(row * row_offset + offsets["f_dc_1"]);
+			float f_dc_2 = dataView.get<float>(row * row_offset + offsets["f_dc_2"]);
+
+			rgba[0] = static_cast<uint8_t>((0.5f + SH_C0 * f_dc_0) * 255.0f);
+			rgba[1] = static_cast<uint8_t>((0.5f + SH_C0 * f_dc_1) * 255.0f);
+			rgba[2] = static_cast<uint8_t>((0.5f + SH_C0 * f_dc_2) * 255.0f);
+		}
+		else
+		{
+			float red = dataView.get<float>(row * row_offset + offsets["red"]);
+			float green = dataView.get<float>(row * row_offset + offsets["green"]);
+			float blue = dataView.get<float>(row * row_offset + offsets["blue"]);
+			rgba[0] = static_cast<uint8_t>(red);
+			rgba[1] = static_cast<uint8_t>(green);
+			rgba[2] = static_cast<uint8_t>(blue);
+		}
+
+		if (types.find("opacity") != types.end())
+		{
+			rgba[3] = static_cast<uint8_t>((1 / (1 + std::exp(-opacity))) * 255.0f);
+		}
+		else
+		{
+			rgba[3] = static_cast<uint8_t>(255.0f);
+		}
+
+		float scales[3]{};
+		uint8_t rot[4]{};
 		if (types.find("scale_0") != types.end())
 		{
-			float rot_0 = dataView.get<float>(row * rowLength + offsets.at("rot_0"));
-			float rot_1 = dataView.get<float>(row * rowLength + offsets.at("rot_1"));
-			float rot_2 = dataView.get<float>(row * rowLength + offsets.at("rot_2"));
-			float rot_3 = dataView.get<float>(row * rowLength + offsets.at("rot_3"));
+			float rot_0 = dataView.get<float>(row * row_offset + offsets["rot_0"]);
+			float rot_1 = dataView.get<float>(row * row_offset + offsets["rot_1"]);
+			float rot_2 = dataView.get<float>(row * row_offset + offsets["rot_2"]);
+			float rot_3 = dataView.get<float>(row * row_offset + offsets["rot_3"]);
 
 			float qlen = std::sqrt(
 				rot_0 * rot_0 +
@@ -187,14 +227,14 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 				rot_3 * rot_3
 			);
 
-			rot[0] = static_cast<std::byte>((rot_0 / qlen) * 128 + 128);
-			rot[1] = static_cast<std::byte>((rot_1 / qlen) * 128 + 128);
-			rot[2] = static_cast<std::byte>((rot_2 / qlen) * 128 + 128);
-			rot[3] = static_cast<std::byte>((rot_3 / qlen) * 128 + 128);
+			rot[0] = static_cast<uint8_t>((rot_0 / qlen) * 128.0f + 128.0f);
+			rot[1] = static_cast<uint8_t>((rot_1 / qlen) * 128.0f + 128.0f);
+			rot[2] = static_cast<uint8_t>((rot_2 / qlen) * 128.0f + 128.0f);
+			rot[3] = static_cast<uint8_t>((rot_3 / qlen) * 128.0f + 128.0f);
 
-			scales[0] = std::exp(scale_0);
-			scales[1] = std::exp(scale_1);
-			scales[2] = std::exp(scale_2);
+			scales[0] = std::exp(dataView.get<float>(row * row_offset + offsets["scale_0"]));
+			scales[1] = std::exp(dataView.get<float>(row * row_offset + offsets["scale_1"]));
+			scales[2] = std::exp(dataView.get<float>(row * row_offset + offsets["scale_2"]));
 		}
 		else
 		{
@@ -202,40 +242,16 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 			scales[1] = 0.01f;
 			scales[2] = 0.01f;
 
-			rot[0] = std::byte{ 255 };
-			rot[1] = std::byte{ 0 };
-			rot[2] = std::byte{ 0 };
-			rot[3] = std::byte{ 0 };
-		}
-
-		position[0] = dataView.get<float>(row * rowLength + offsets.at("x"));
-		position[1] = dataView.get<float>(row * rowLength + offsets.at("y"));
-		position[2] = dataView.get<float>(row * rowLength + offsets.at("z"));
-
-		if (types.find("f_dc_0") != types.end())
-		{
-			const float SH_C0 = 0.28209479177387814f;
-			rgba[0] = static_cast<std::byte>((0.5f + SH_C0 * dataView.get<float>(row * rowLength + offsets.at("f_dc_0"))) * 255);
-			rgba[1] = static_cast<std::byte>((0.5f + SH_C0 * dataView.get<float>(row * rowLength + offsets.at("f_dc_1"))) * 255);
-			rgba[2] = static_cast<std::byte>((0.5f + SH_C0 * dataView.get<float>(row * rowLength + offsets.at("f_dc_2"))) * 255);
-		}
-		else
-		{
-			rgba[0] = std::byte{ dataView.get<uint8_t>(row * rowLength + offsets.at("red")) };
-			rgba[1] = std::byte{ dataView.get<uint8_t>(row * rowLength + offsets.at("green")) };
-			rgba[2] = std::byte{ dataView.get<uint8_t>(row * rowLength + offsets.at("blue")) };
-		}
-
-		if (types.find("opacity") != types.end())
-		{
-			rgba[3] = static_cast<std::byte>((1 / (1 + std::exp(-opacity))) * 255);
-		}
-		else
-		{
-			rgba[3] = std::byte{ 255 };
-		}
+			rot[0] = static_cast<uint8_t>(255.0f );
+			rot[1] = static_cast<uint8_t>(0.0f);
+			rot[2] = static_cast<uint8_t>(0.0f);
+			rot[3] = static_cast<uint8_t>(0.0f);
+		}		
+		std::memcpy(basePtr, position, sizeof(position));
+		std::memcpy(basePtr + 4 * 3, scales, sizeof(scales));
+		std::memcpy(basePtr + 4 * 3 + 4 * 3, rgba, sizeof(rgba));
+		std::memcpy(basePtr + 4 * 3 + 4 * 3 + 4, rot, sizeof(rot));
 	}
-
 	m_gausianAttributesBuffer = buffer;
 	CD_ERROR("ReadBuffer Over");
 }
