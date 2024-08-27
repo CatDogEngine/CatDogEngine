@@ -166,11 +166,6 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 
 		std::byte* basePtr = &buffer[j * rowLength];
 
-
-		//float* position = reinterpret_cast<float*>(&buffer[j * rowLength]);
-		//float* scales = reinterpret_cast<float*>(&buffer[j * rowLength + 4 * 3]);
-		//std::byte* rgba = &buffer[j * rowLength + 4 * 3 + 4 * 3];
-		//std::byte* rot = &buffer[j * rowLength + 4 * 3 + 4 * 3 + 4];
 		float position[3] = {
 				dataView.get<float>(row * row_offset + offsets["x"]),
 				dataView.get<float>(row * row_offset + offsets["y"]),
@@ -369,23 +364,9 @@ void GaussianRenderComponent::GenerateTexture()
 			M[2] * M[2] + M[5] * M[5] + M[8] * M[8]
 		};
 
-		//uint32_t packed1 = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
-		//uint32_t packed2 = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
-		//uint32_t packed3 = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
-		//CD_ERROR(4 * sigma[1]);
-		//CD_ERROR(4 * sigma[2]);
-		//CD_ERROR(4 * sigma[3]);
-		//CD_ERROR(4 * sigma[4]);
-		//CD_ERROR(4 * sigma[5]);
 		m_textureBuffer[8 * i + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
 		m_textureBuffer[8 * i + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
 		m_textureBuffer[8 * i + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
-		if (i == m_vertextCount - 1)
-		{
-			CD_ERROR(m_textureBuffer[8 * i + 4]);
-			CD_ERROR(m_textureBuffer[8 * i + 5]);
-			CD_ERROR(m_textureBuffer[8 * i + 6]);
-		}
 	}
 
 	bool hasMips = false;  //if-mip-map

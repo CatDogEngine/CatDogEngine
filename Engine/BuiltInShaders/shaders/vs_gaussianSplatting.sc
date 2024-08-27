@@ -95,8 +95,6 @@ void main()
 			u_proj[2][0], u_proj[2][1], u_proj[2][2]
 		);
 
-
-
 		mat3 viewMat3 = mat3(
 			u_view[0][0], u_view[0][1], u_view[0][2],
 			u_view[1][0], u_view[1][1], u_view[1][2],
