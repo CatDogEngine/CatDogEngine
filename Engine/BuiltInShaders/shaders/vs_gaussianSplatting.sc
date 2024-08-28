@@ -96,7 +96,7 @@ void main()
 		);
 
 		mat3 viewMat3 = mat3(
-			u_view[0][0], view[0][1], view[0][2],
+			view[0][0], view[0][1], view[0][2],
 			view[1][0], view[1][1], view[1][2],
 			view[2][0], view[2][1], view[2][2]
 		);
