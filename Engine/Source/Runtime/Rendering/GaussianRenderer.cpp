@@ -32,20 +32,24 @@ void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float*
 
 std::vector<float> multiply4(const std::vector<float>& a, const std::vector<float>& b)
 {
-	std::vector<float> result(16, 0.0f); 
-
-	for (int i = 0; i < 4; ++i)
-	{
-		for (int j = 0; j < 4; ++j)
-		{
-			for (int k = 0; k < 4; ++k)
-			{
-				result[i * 4 + j] += a[i * 4 + k] * b[k * 4 + j];
-			}
-		}
-	}
-
-	return result;
+	return {
+		 b[0] * a[0] + b[1] * a[4] + b[2] * a[8] + b[3] * a[12],
+		 b[0] * a[1] + b[1] * a[5] + b[2] * a[9] + b[3] * a[13],
+		 b[0] * a[2] + b[1] * a[6] + b[2] * a[10] + b[3] * a[14],
+		 b[0] * a[3] + b[1] * a[7] + b[2] * a[11] + b[3] * a[15],
+		 b[4] * a[0] + b[5] * a[4] + b[6] * a[8] + b[7] * a[12],
+		 b[4] * a[1] + b[5] * a[5] + b[6] * a[9] + b[7] * a[13],
+		 b[4] * a[2] + b[5] * a[6] + b[6] * a[10] + b[7] * a[14],
+		 b[4] * a[3] + b[5] * a[7] + b[6] * a[11] + b[7] * a[15],
+		 b[8] * a[0] + b[9] * a[4] + b[10] * a[8] + b[11] * a[12],
+		 b[8] * a[1] + b[9] * a[5] + b[10] * a[9] + b[11] * a[13],
+		 b[8] * a[2] + b[9] * a[6] + b[10] * a[10] + b[11] * a[14],
+		 b[8] * a[3] + b[9] * a[7] + b[10] * a[11] + b[11] * a[15],
+		 b[12] * a[0] + b[13] * a[4] + b[14] * a[8] + b[15] * a[12],
+		 b[12] * a[1] + b[13] * a[5] + b[14] * a[9] + b[15] * a[13],
+		 b[12] * a[2] + b[13] * a[6] + b[14] * a[10] + b[15] * a[14],
+		 b[12] * a[3] + b[13] * a[7] + b[14] * a[11] + b[15] * a[15]
+	};
 }
 
 void engine::GaussianRenderer::Render(float deltaTime)
@@ -70,8 +74,8 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	auto fx = pMainCameraComponent->GetFocalx();
 	auto fy = pMainCameraComponent->GetFocaly();
-	auto viewWidth = pMainCameraComponent->GetViewWidth();
-	auto viewHeight = pMainCameraComponent->GetViewHeight();
+	auto viewWidth = 1959.0f;
+	auto viewHeight = 1090.0f;
 	auto viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
 	auto projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
 	auto viewProj = multiply4(projMartrix, viewMatrix);
