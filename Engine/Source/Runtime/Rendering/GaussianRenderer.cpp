@@ -15,6 +15,9 @@ void engine::GaussianRenderer::Init()
 	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("GaussianProgram", "vs_gaussianSplatting", "fs_gaussianSplatting"));
 
 	GetRenderContext()->CreateUniform("u_texture", bgfx::UniformType::Sampler);
+	GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
+	GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
+	GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
 	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
 
@@ -27,6 +30,24 @@ void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float*
 	bgfx::setViewTransform(GetViewID(), pViewMatrix, pProjectionMatrix);
 }
 
+std::vector<float> multiply4(const std::vector<float>& a, const std::vector<float>& b)
+{
+	std::vector<float> result(16, 0.0f); 
+
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; ++j)
+		{
+			for (int k = 0; k < 4; ++k)
+			{
+				result[i * 4 + j] += a[i * 4 + k] * b[k * 4 + j];
+			}
+		}
+	}
+
+	return result;
+}
+
 void engine::GaussianRenderer::Render(float deltaTime)
 {
 	for (const auto pResource : m_dependentShaderResources)
@@ -37,14 +58,23 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			return;
 		}
 	}
+	float rotation[3][3] = {
+		{0.876134201218856f, 0.06925962026449776f, 0.47706599800804744f},
+		{-0.04747421839895102f, 0.9972110940209488f, -0.057586739349882114f},
+		{-0.4797239414934443f, 0.027805376500959853f, 0.8769787916452908f}
+	};
 
+	float position[3] = {
+		-3.0089893469241797f, -0.11086489695181866f, -3.7527640949141428f
+	};
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	const cd::Matrix4x4 camView = pMainCameraComponent->GetViewMatrix();
-	const cd::Matrix4x4 camProj = pMainCameraComponent->GetProjectionMatrix();
-	const cd::Matrix4x4 camViewProj = camProj * camView;
-
+	auto fx = pMainCameraComponent->GetFocalx();
+	auto fy = pMainCameraComponent->GetFocaly();
 	auto viewWidth = pMainCameraComponent->GetViewWidth();
 	auto viewHeight = pMainCameraComponent->GetViewHeight();
+	auto viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
+	auto projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
+	auto viewProj = multiply4(projMartrix, viewMatrix);
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		if (auto* pTransformComponent = m_pCurrentSceneWorld->GetTransformComponent(entity))
@@ -67,9 +97,9 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		sizeList.resize(gaussianCount);
 		for (size_t i = 0; i < gaussianCount; ++i)
 		{
-			float depth = ((camViewProj.Data(0, 2) * f_buffer[8 * i + 0] +
-				camViewProj.Data(1, 2) * f_buffer[8 * i + 1] +
-				camViewProj.Data(2, 2) * f_buffer[8 * i + 2]) * 4096);
+			float depth = ((viewProj[2] * f_buffer[8 * i + 0] +
+				viewProj[6] * f_buffer[8 * i + 1] +
+				viewProj[10] * f_buffer[8 * i + 2]) * 4096);
 			sizeList[i] = static_cast<int32_t>(depth);
 			if (depth > maxDepth) maxDepth = depth;
 			if (depth < minDepth) minDepth = depth;
@@ -101,14 +131,24 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			constexpr StringCrc GaussianSampler("u_texture");
 			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), pGaussianComponent->GetGaussianTextureHandle());
 
+			constexpr StringCrc projectionCrc("projection");
+			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &projMartrix, 1);
+
+			constexpr StringCrc viewCrc("view");
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &viewMatrix, 1);
+
+			constexpr StringCrc focalCrc("focal");
+			cd::Vec4f focal{fx, fy, 0.0f, 0.0f};
+			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
+
 			constexpr StringCrc viewportCrc("viewport");
 			cd::Vec4f viewport{viewWidth, viewHeight, 0.0f, 0.0f};
 			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
 
 			constexpr StringCrc depthIndexCrc("depthIndex");
-
 			cd::Vec4f Index{*reinterpret_cast<float*>(&depthIndex[i]), 0.0f, 0.0f,0.0f};
 			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &Index, 1);
+
 			bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
 			bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 

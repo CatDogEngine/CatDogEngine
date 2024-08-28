@@ -161,23 +161,17 @@ public:
 	void SetViewWidth(float width) { m_viewWidth = width; }
 	void SetViewHeight(float height) { m_viewHeight = height; }
 
-	float CalculateFOVy() 
-	{
-		//m_fov_y = 2.0f * std::atan(std::tan(m_fov / 2.0f * cd::Math::PI / 180.0f) / std::sqrt(1.0f + m_aspect * m_aspect)) * 180.0f / cd::Math::PI;
-		return m_fov_y;
-	}
+	float GetFocalx(){ return m_focal_x; }
+	float GetFocaly() { return m_focal_y; }
 
-	float CalculateFOVx() 
-	{
-		//m_fov_x = 2.0f * std::atan(m_aspect * std::tan(m_fov_y / 2.0f * cd::Math::PI / 180.0f)) * 180.0f / cd::Math::PI;
-		return m_fov_x;
-	}
+	std::vector<float> getProjectionMatrix(double fx, double fy, float width, float height);
+	std::vector<float> getViewMatrix(const float R[3][3], const float t[3]);
 private:
 	// Input
 	float m_aspect;
 	float m_fov;
-	float m_fov_x = 1159.5880733038064f;
-	float m_fov_y = 1164.6601287484507f;
+	float m_focal_x = 1159.5880733038064f;
+	float m_focal_y = 1164.6601287484507f;
 	float m_nearPlane;
 	float m_farPlane;
 	cd::NDCDepth m_ndcDepth;
