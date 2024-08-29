@@ -1202,31 +1202,31 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 		return entity;
 	};
 
-	/*Add Camera*/
-	engine::Entity cameraEntity = AddNamedEntity("GaussianCamera");
-	auto& cameraComponent = pWorld->CreateComponent<engine::CameraComponent>(cameraEntity);
-	float rotation[3][3] = {
-	{0.876134201218856f, 0.06925962026449776f, 0.47706599800804744f},
-	{-0.04747421839895102f, 0.9972110940209488f, -0.057586739349882114f},
-	{-0.4797239414934443f, 0.027805376500959853f, 0.8769787916452908f}
-	};
+	///*Add Camera*/
+	//engine::Entity cameraEntity = AddNamedEntity("GaussianCamera");
+	//auto& cameraComponent = pWorld->CreateComponent<engine::CameraComponent>(cameraEntity);
+	//float rotation[3][3] = {
+	//{0.876134201218856f, 0.06925962026449776f, 0.47706599800804744f},
+	//{-0.04747421839895102f, 0.9972110940209488f, -0.057586739349882114f},
+	//{-0.4797239414934443f, 0.027805376500959853f, 0.8769787916452908f}
+	//};
 
-	float position[3] = {
-		-3.0089893469241797f, -0.11086489695181866f, -3.7527640949141428f
-	};
-	auto fx = cameraComponent.GetFocalx();
-	auto fy = cameraComponent.GetFocaly();
-	auto viewWidth = 1959.0f;
-	auto viewHeight = 1090.0f;
-	auto viewMatrix = cameraComponent.getViewMatrix(rotation, position);
-	auto projMartrix = cameraComponent.getProjectionMatrix(fx, fy, viewWidth, viewHeight);
-	cameraComponent.SetNearPlane(0.2f);
-	cameraComponent.SetFarPlane(200.0f);
-	cameraComponent.SetAspect(static_cast<float>(viewWidth) / static_cast<float>(viewHeight));
-	cameraComponent.SetFov(99.86f);
-	cameraComponent.setViewMatrix(viewMatrix);
-	cameraComponent.setProjMatrix(projMartrix);
-	pSceneWorld->SetMainCameraEntity(cameraEntity);
+	//float position[3] = {
+	//	-3.0089893469241797f, -0.11086489695181866f, -3.7527640949141428f
+	//};
+	//auto fx = cameraComponent.GetFocalx();
+	//auto fy = cameraComponent.GetFocaly();
+	//auto viewWidth = 1959.0f;
+	//auto viewHeight = 1090.0f;
+	//auto viewMatrix = cameraComponent.getViewMatrix(rotation, position);
+	//auto projMartrix = cameraComponent.getProjectionMatrix(fx, fy, viewWidth, viewHeight);
+	//cameraComponent.SetNearPlane(0.2f);
+	//cameraComponent.SetFarPlane(200.0f);
+	//cameraComponent.SetAspect(static_cast<float>(viewWidth) / static_cast<float>(viewHeight));
+	//cameraComponent.SetFov(99.86f);
+	//cameraComponent.setViewMatrix(viewMatrix);
+	//cameraComponent.setProjMatrix(projMartrix);
+	//pSceneWorld->SetMainCameraEntity(cameraEntity);
 
 	/*AddGS*/
 	engine::Entity entity = AddNamedEntity("GaussianSplattingEntity");
