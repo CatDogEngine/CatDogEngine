@@ -1201,6 +1201,8 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 
 		return entity;
 	};
+
+	/*Add Camera*/
 	engine::Entity cameraEntity = AddNamedEntity("GaussianCamera");
 	auto& cameraComponent = pWorld->CreateComponent<engine::CameraComponent>(cameraEntity);
 	float rotation[3][3] = {
@@ -1225,6 +1227,8 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 	cameraComponent.setViewMatrix(viewMatrix);
 	cameraComponent.setProjMatrix(projMartrix);
 	pSceneWorld->SetMainCameraEntity(cameraEntity);
+
+	/*AddGS*/
 	engine::Entity entity = AddNamedEntity("GaussianSplattingEntity");
 	auto& transformComponent = pWorld->CreateComponent<engine::TransformComponent>(entity);
 	transformComponent.SetTransform(cd::Transform::Identity());
