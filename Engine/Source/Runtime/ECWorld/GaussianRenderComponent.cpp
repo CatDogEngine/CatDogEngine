@@ -1,61 +1,31 @@
 #include "GaussianRenderComponent.h"
+#include "GaussianUtil\DataView.h"
+#include "Log\Log.h"
 #include "Rendering/Utility/VertexLayoutUtility.h"
 #include "Scene/Types.h"
 #include "Scene/VertexFormat.h"
-#include "Log\Log.h"
-#include "GaussianUtil\DataView.h"
+
+#include <bgfx/bgfx.h>
+#include <unordered_map>
 
 namespace engine
 {
 
 void GaussianRenderComponent::Build()
 {
+	constexpr std::array<cd::Vec2f, 4> vertices =
+	{
+		cd::Vec2f{ -2.0f, -2.0f }, cd::Vec2f{ 2.0f, -2.0f }, cd::Vec2f{ 2.0f, 2.0f }, cd::Vec2f{ -2.0f, 2.0f },
+	};
+	constexpr std::array<uint16_t, 6> indices = { 0, 1, 2, 0, 2, 3 };
+
 	cd::VertexFormat vertexFormat;
-	vertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Position, cd::AttributeValueType::Float, 3);
-
-	const uint32_t vertexCount = 4;
-	std::vector<cd::Point> vertexArray;
-	vertexArray.resize(vertexCount);
-	// pos 
-	for (uint32_t i = 0; i < vertexCount; i += 4)
-	{
-		vertexArray[i] = { cd::Point{-2, -2, 0} };
-		vertexArray[i + 1] = { cd::Point{2, -2, 0} };
-		vertexArray[i + 2] = { cd::Point{2, 2, 0} };
-		vertexArray[i + 3] = { cd::Point{-2, 2, 0} };
-	}
-
-	m_vertexBuffer.resize(vertexCount * vertexFormat.GetStride());
-	uint32_t currentDataSize = 0U;
-	auto currentDataPtr = m_vertexBuffer.data();
-	for (uint32_t vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
-	{
-		//position
-		const cd::Point& position = vertexArray[vertexIndex];
-		constexpr uint32_t posDataSize = cd::Point::Size * sizeof(cd::Point::ValueType);
-		std::memcpy(&currentDataPtr[currentDataSize], position.begin(), posDataSize);
-		currentDataSize += posDataSize;
-	}
-
-	const bool useU16Index = true;
-	const uint32_t indexTypeSize = useU16Index ? sizeof(uint16_t) : sizeof(uint32_t);
-	const uint32_t indicesCount = 6;
-	m_indexBuffer.resize(indicesCount * indexTypeSize);
-	currentDataSize = 0U;
-	currentDataPtr = m_indexBuffer.data();
-
-	std::vector<uint16_t> indexes = { 0,1,2,0,2,3 };
-
-	for (const auto& index : indexes)
-	{
-		std::memcpy(&currentDataPtr[currentDataSize], &index, indexTypeSize);
-		currentDataSize += static_cast<uint32_t>(indexTypeSize);
-	}
-
 	bgfx::VertexLayout vertexLayout;
+	vertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Position, cd::AttributeValueType::Float, 2);
 	VertexLayoutUtility::CreateVertexLayout(vertexLayout, vertexFormat.GetVertexAttributeLayouts());
-	m_vertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(m_vertexBuffer.data(), static_cast<uint32_t>(m_vertexBuffer.size())), vertexLayout).idx;
-	m_indexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(m_indexBuffer.data(), static_cast<uint32_t>(m_indexBuffer.size())), 0U).idx;
+	
+	m_vertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertices.data(), uint32_t(vertices.size() * sizeof(cd::Vec2f))), vertexLayout).idx;
+	m_indexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices.data(), uint32_t(indices.size() * sizeof(uint16_t)))).idx;
 }
 
 void GaussianRenderComponent::ProcessingPlyBuffer()
@@ -374,7 +344,7 @@ void GaussianRenderComponent::GenerateTexture()
 	bgfx::TextureFormat::Enum format = bgfx::TextureFormat::RGBA32U; // fomat
 
 	const bgfx::Memory* mem = bgfx::copy(m_textureBuffer.data(), static_cast<uint32_t>(m_textureBuffer.size()));
-	m_textureHandle = bgfx::createTexture2D(static_cast<uint16_t>(texwidth), static_cast<uint16_t>(texheight), hasMips, numLayers, format, 0, mem);
+	m_textureHandle = bgfx::createTexture2D(static_cast<uint16_t>(texwidth), static_cast<uint16_t>(texheight), hasMips, numLayers, format, 0, mem).idx;
 	CD_ERROR("Generate TextureHandle Over");
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "Core/StringCrc.h"
 #include <vector>
-#include <bgfx/bgfx.h>
 
 namespace engine
 {
@@ -35,41 +34,33 @@ public:
 	uint16_t& GetVertexBufferHandle() { return m_vertexBufferHandle; }
 	uint16_t& GetIndexBufferHandle() { return m_indexBufferHandle; }
 
-	std::vector<std::byte>& GetVertexBuffer() { return m_vertexBuffer; }
-	std::vector<std::byte>& GetIndexBuffer() { return m_indexBuffer; }
-
-	
 	std::vector<std::byte>& GetGaussianBuffer() { return m_gausianAttributesBuffer; }
 
-	//ply
-	void SetPlyData(std::vector<std::byte>& buffer) { m_readBuffer = buffer; }
-
+	// ply
+	void SetPlyData(std::vector<std::byte> buffer) { m_readBuffer = std::move(buffer); }
 	void ProcessingPlyBuffer();
-
 	void GenerateTexture();
 
 	uint32_t& GetVertexCount() { return m_vertextCount; }
-
-	bgfx::TextureHandle& GetGaussianTextureHandle() { return m_textureHandle; }
+	uint16_t GetGaussianTextureHandle() { return m_textureHandle; }
 
 private:
-	std::vector<std::byte> m_vertexBuffer;
-	std::vector<std::byte> m_indexBuffer;
 	uint16_t m_vertexBufferHandle = UINT16_MAX;
 	uint16_t m_indexBufferHandle = UINT16_MAX;
 
-	//ply
+	// ply
 	std::vector<std::byte> m_readBuffer;
 
 	std::vector<float> m_sizeList;
 	std::vector<uint32_t> m_sizeIndex;
 	uint32_t m_vertextCount;
-	//gaussian
+
+	// gaussian
 	std::vector<std::byte> m_gausianAttributesBuffer;
 
-	//texture
+	// texture
 	std::vector<uint32_t> m_textureBuffer;
-	bgfx::TextureHandle m_textureHandle;
+	uint16_t m_textureHandle;
 };
 
 }
