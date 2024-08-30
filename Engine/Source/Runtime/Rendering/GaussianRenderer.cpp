@@ -87,29 +87,26 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		std::vector<uint32_t> depthIndices(gaussianCount);
 
 		// Sort
-		bool enableSort = false;
+		bool enableSort = true;
 		if(enableSort)
 		{
-			std::vector<float> floatBuffer;
 			std::vector<int32_t> sizeList(gaussianCount);
 			std::vector<uint32_t> count(256 * 256, 0);
 			std::vector<uint32_t> start(256 * 256, 0);
 
 			auto &gaussianBuffer = pGaussianComponent->GetGaussianBuffer();
-			floatBuffer.resize(gaussianBuffer.size() / sizeof(float));
-			memcpy(floatBuffer.data(), gaussianBuffer.data(), gaussianBuffer.size());
+			float *pFloatBuffer = reinterpret_cast<float *>(gaussianBuffer.data());
 
-			float maxDepth = -std::numeric_limits<float>::infinity();
-			float minDepth = std::numeric_limits<float>::infinity();
-
+			float maxDepth = -std::numeric_limits<float>::max();
+			float minDepth = std::numeric_limits<float>::max();
 			for (size_t i = 0; i < gaussianCount; ++i)
 			{
-				float depth = ((viewProj[2] * floatBuffer[8 * i] +
-					viewProj[6] * floatBuffer[8 * i + 1] +
-					viewProj[10] * floatBuffer[8 * i + 2]) * 4096);
-				sizeList[i] = static_cast<int32_t>(depth);
+				float depth = ((viewProj[2] * pFloatBuffer[8 * i] +
+					viewProj[6] * pFloatBuffer[8 * i + 1] +
+					viewProj[10] * pFloatBuffer[8 * i + 2]) * 4096);
+				sizeList[i] = (int32_t)depth;
 				maxDepth = (depth > maxDepth) ? depth : maxDepth;
-				minDepth = (depth > minDepth) ? depth : minDepth;
+				minDepth = (depth < minDepth) ? depth : minDepth;
 			}
 
 			float depthInv = (256 * 256) / (maxDepth - minDepth);

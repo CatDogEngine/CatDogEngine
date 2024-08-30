@@ -217,7 +217,8 @@ void GaussianRenderComponent::ProcessingPlyBuffer()
 		std::memcpy(basePtr + 4 * 3 + 4 * 3, rgba, sizeof(rgba));
 		std::memcpy(basePtr + 4 * 3 + 4 * 3 + 4, rot, sizeof(rot));
 	}
-	m_gausianAttributesBuffer = buffer;
+	m_gausianAttributesBuffer = std::move(buffer);
+
 	CD_ERROR("ReadBuffer Over");
 }
 
