@@ -1250,7 +1250,7 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 	inFile.seekg(0, std::ios::beg);
 	std::vector<std::byte> buffer(fileSize);
 	inFile.read(reinterpret_cast<char*>(buffer.data()), fileSize);
-	GaussianRenderComponent.SetPlyData(buffer);
+	GaussianRenderComponent.SetPlyData(std::move(buffer));
 	GaussianRenderComponent.ProcessingPlyBuffer();
 	GaussianRenderComponent.GenerateTexture();
 	GaussianRenderComponent.Build();

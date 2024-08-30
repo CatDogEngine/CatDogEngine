@@ -3,13 +3,11 @@ $input v_color0, v_color1
 
 void main()
 {
-    // float A = -dot(vPosition, vPosition);：计算vPosition与自身的负点积。实际上是- (x^2 + y^2)，其中vPosition是(x, y)。
+    // A = -|v_color1|^2
 	float A = -dot(v_color1.xy, v_color1.xy);
-    //if (A < -4.0) discard;：如果A小于-4.0，则丢弃该片段。这实际上创建了一个半径为2单位的圆形裁剪区域。
+    // 如果 A 小于 -4.0，则丢弃该片段，这实际上创造了一个椭圆形状的裁剪区域。
     if (A < -4.0) discard;
-    //float B = exp(A) * vColor.a;：计算B为A的指数函数乘以vColor的alpha分量。指数函数exp(A)对于负值的A衰减得很快。
+    // exp(A) 在 0 -> -4 的范围内衰减得很快，这将会创造一个从中心逐渐淡出的椭圆。
     float B = exp(A) * v_color0.a;
-    //fragColor = vec4(B * vColor.rgb, B);：设置输出颜色fragColor。RGB分量按B缩放，alpha分量设置为B。
     gl_FragColor = vec4(B * v_color0.rgb, B);
-    
 }
