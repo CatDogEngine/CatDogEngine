@@ -52,16 +52,10 @@ void main()
 			0.0, 0.0, 0.0
 		);
 
-		mat3 viewMat3 = mat3(
-			view[0][0], view[0][1], view[0][2],
-			view[1][0], view[1][1], view[1][2],
-			view[2][0], view[2][1], view[2][2]
-		);
-
 		// 计算变换矩阵 T，并将协方差矩阵 Vrk 转换为 2D 协方差矩阵 cov2d。
 		// 用于将 3D 空间中的点转换为 2D 图像平面上的点，
 		// 并计算这些点在 2D 平面上的不确定性（即误差椭圆）。
-		mat3 T = transpose(viewMat3) * J;
+		mat3 T = transpose((mat3)u_view) * J;
 		mat3 cov2d = transpose(T) * Vrk * T;
 
 		// 计算协方差矩阵 cov2d 的特征值 lambda1 和 lambda2。

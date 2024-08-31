@@ -73,13 +73,14 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	};
 
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	auto fx = pMainCameraComponent->GetFocalx();
-	auto fy = pMainCameraComponent->GetFocaly();
-	auto viewWidth = 1959.0f;
-	auto viewHeight = 1090.0f;
-	auto viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
-	auto projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
-	auto viewProj = multiply4(projMartrix, viewMatrix);
+	float fx = pMainCameraComponent->GetFocalx();
+	float fy = pMainCameraComponent->GetFocaly();
+	float viewWidth = 1959.0f;
+	float viewHeight = 1090.0f;
+
+	std::vector<float> viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
+	std::vector<float> projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
+	std::vector<float> viewProj = multiply4(projMartrix, viewMatrix);
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
@@ -143,22 +144,22 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), bgfx::TextureHandle{ pGaussianComponent->GetGaussianTextureHandle() });
 
 			constexpr StringCrc projectionCrc("projection");
-			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &projMartrix, 1);
+			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), projMartrix.data());
 
 			constexpr StringCrc viewCrc("view");
-			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &viewMatrix, 1);
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), viewMatrix.data());
 
 			constexpr StringCrc focalCrc("focal");
-			cd::Vec4f focal{ fx, fy, 0.0f, 0.0f };
-			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
+			float focal[2] = { fx, fy };
+			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), focal);
 
 			constexpr StringCrc viewportCrc("viewport");
-			cd::Vec4f viewport{ viewWidth, viewHeight, 0.0f, 0.0f };
-			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
+			float viewport[2] = { viewWidth, viewHeight };
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), viewport);
 
 			constexpr StringCrc depthIndexCrc("depthIndex");
-			cd::Vec4f depthIndex{ *reinterpret_cast<float *>(&depthIndices[i]), 0.0f, 0.0f, 0.0f };
-			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex, 1);
+			float depthIndex = *reinterpret_cast<float *>(&depthIndices[i]);
+			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex);
 
 			bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
 
