@@ -73,26 +73,30 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	};
 
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	auto fx = pMainCameraComponent->GetFocalx();
-	auto fy = pMainCameraComponent->GetFocaly();
-	auto viewWidth = 1959.0f;
-	auto viewHeight = 1090.0f;
-	auto viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
-	auto projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
-	auto viewProj = multiply4(projMartrix, viewMatrix);
+	float fx = pMainCameraComponent->GetFocalx();
+	float fy = pMainCameraComponent->GetFocaly();
+	float viewWidth = 1959.0f;
+	float viewHeight = 1090.0f;
+
+	std::vector<float> viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
+	std::vector<float> projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
+	std::vector<float> viewProj = multiply4(projMartrix, viewMatrix);
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
-		uint32_t gaussianCount = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity)->GetVertexCount();
-		std::vector<uint32_t> depthIndices(gaussianCount);
+		const uint32_t gaussianCount = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity)->GetVertexCount();
+		static std::vector<uint32_t> depthIndices(gaussianCount);
 
 		// Sort
 		bool enableSort = true;
 		if(enableSort)
 		{
-			std::vector<int32_t> sizeList(gaussianCount);
-			std::vector<uint32_t> count(256 * 256, 0);
-			std::vector<uint32_t> start(256 * 256, 0);
+			static std::vector<int32_t> sizeList(gaussianCount);
+			static std::vector<uint32_t> count(256 * 256, 0);
+			static std::vector<uint32_t> start(256 * 256, 0);
+
+			memset(count.data(), 0, count.size() * sizeof(uint32_t));
+			memset(start.data(), 0, start.size() * sizeof(uint32_t));
 
 			auto &gaussianBuffer = pGaussianComponent->GetGaussianBuffer();
 			float *pFloatBuffer = reinterpret_cast<float *>(gaussianBuffer.data());
@@ -140,27 +144,31 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), bgfx::TextureHandle{ pGaussianComponent->GetGaussianTextureHandle() });
 
 			constexpr StringCrc projectionCrc("projection");
-			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), &projMartrix, 1);
+			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), projMartrix.data());
 
 			constexpr StringCrc viewCrc("view");
-			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), &viewMatrix, 1);
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), viewMatrix.data());
 
 			constexpr StringCrc focalCrc("focal");
-			cd::Vec4f focal{ fx, fy, 0.0f, 0.0f };
-			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), &focal, 1);
+			float focal[2] = { fx, fy };
+			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), focal);
 
 			constexpr StringCrc viewportCrc("viewport");
-			cd::Vec4f viewport{ viewWidth, viewHeight, 0.0f, 0.0f };
-			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), &viewport, 1);
+			float viewport[2] = { viewWidth, viewHeight };
+			bgfx::setUniform(GetRenderContext()->GetUniform(viewportCrc), viewport);
 
 			constexpr StringCrc depthIndexCrc("depthIndex");
-			cd::Vec4f depthIndex{ *reinterpret_cast<float *>(&depthIndices[i]), 0.0f, 0.0f, 0.0f };
-			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex, 1);
+			float depthIndex = *reinterpret_cast<float *>(&depthIndices[i]);
+			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex);
 
 			bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
-			bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 
-			bgfx::setState(BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA);
+			bgfx::setState(
+				BGFX_STATE_PT_TRISTRIP |
+				BGFX_STATE_WRITE_RGB |
+				BGFX_STATE_WRITE_A |
+				BGFX_STATE_BLEND_EQUATION_ADD |
+				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE));
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
