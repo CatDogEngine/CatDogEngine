@@ -13,19 +13,17 @@ namespace engine
 
 void GaussianRenderComponent::Build()
 {
-	constexpr std::array<cd::Vec2f, 4> vertices =
+	const static std::array<float, 8> vertexDatas =
 	{
-		cd::Vec2f{ -2.0f, -2.0f }, cd::Vec2f{ 2.0f, -2.0f }, cd::Vec2f{ 2.0f, 2.0f }, cd::Vec2f{ -2.0f, 2.0f },
+		2.0f, -2.0f,
+		-2.0f, -2.0f,
+		2.0f, 2.0f,
+		-2.0f, 2.0f,
 	};
-	constexpr std::array<uint16_t, 6> indices = { 0, 1, 2, 0, 2, 3 };
 
-	cd::VertexFormat vertexFormat;
 	bgfx::VertexLayout vertexLayout;
-	vertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Position, cd::AttributeValueType::Float, 2);
-	VertexLayoutUtility::CreateVertexLayout(vertexLayout, vertexFormat.GetVertexAttributeLayouts());
-	
-	m_vertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertices.data(), uint32_t(vertices.size() * sizeof(cd::Vec2f))), vertexLayout).idx;
-	m_indexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices.data(), uint32_t(indices.size() * sizeof(uint16_t)))).idx;
+	vertexLayout.begin().add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float).end();
+	m_vertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertexDatas.data(), uint32_t(vertexDatas.size() * sizeof(float))), vertexLayout).idx;
 }
 
 void GaussianRenderComponent::ProcessingPlyBuffer()

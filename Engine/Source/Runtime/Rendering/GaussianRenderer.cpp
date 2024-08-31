@@ -83,16 +83,19 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
-		uint32_t gaussianCount = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity)->GetVertexCount();
-		std::vector<uint32_t> depthIndices(gaussianCount);
+		const uint32_t gaussianCount = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity)->GetVertexCount();
+		static std::vector<uint32_t> depthIndices(gaussianCount);
 
 		// Sort
 		bool enableSort = true;
 		if(enableSort)
 		{
-			std::vector<int32_t> sizeList(gaussianCount);
-			std::vector<uint32_t> count(256 * 256, 0);
-			std::vector<uint32_t> start(256 * 256, 0);
+			static std::vector<int32_t> sizeList(gaussianCount);
+			static std::vector<uint32_t> count(256 * 256, 0);
+			static std::vector<uint32_t> start(256 * 256, 0);
+
+			memset(count.data(), 0, count.size() * sizeof(uint32_t));
+			memset(start.data(), 0, start.size() * sizeof(uint32_t));
 
 			auto &gaussianBuffer = pGaussianComponent->GetGaussianBuffer();
 			float *pFloatBuffer = reinterpret_cast<float *>(gaussianBuffer.data());
@@ -158,9 +161,13 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex, 1);
 
 			bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
-			bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 
-			bgfx::setState(BGFX_STATE_WRITE_MASK | BGFX_STATE_MSAA);
+			bgfx::setState(
+				BGFX_STATE_PT_TRISTRIP |
+				BGFX_STATE_WRITE_RGB |
+				BGFX_STATE_WRITE_A |
+				BGFX_STATE_BLEND_EQUATION_ADD |
+				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE));
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
