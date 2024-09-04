@@ -43,12 +43,28 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
 	auto& viewMatrix = pMainCameraComponent->GetViewMatrix();
-
+	float view[16]{ 0 };
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			view[i * 4 + j] = viewMatrix.Data(i, j);
+		}
+	}
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
 
 
+		bx::memCopy(m_curView, view, 16 * sizeof(float));
+
+		bgfx::setState(
+			BGFX_STATE_PT_TRISTRIP |
+			BGFX_STATE_WRITE_RGB |
+			BGFX_STATE_WRITE_A |
+			BGFX_STATE_BLEND_EQUATION_ADD |
+			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
+			0);
 			constexpr StringCrc focalCrc("u_focal");
 			float focal[4] = { fx, fy,0.0f,0.0f };
 			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), focal);
@@ -56,23 +72,6 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setVertexBuffer(0, pGaussianComponent->GetVBH());
 			auto& splatData = pGaussianComponent->GetSplatData(m_curBuffer);
 			bgfx::setInstanceDataBuffer(splatData.m_vbh,0 , splatData.m_vertexCount);
-			float view[16]{ 0 };
-			for (int i = 0; i < 4; ++i)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					view[i * 4 + j] = viewMatrix.Data(i, j);
-				}
-			}
-			bx::memCopy(m_curView, view, 16 * sizeof(float));
-
-			bgfx::setState(
-				BGFX_STATE_PT_TRISTRIP |
-				BGFX_STATE_WRITE_RGB |
-				BGFX_STATE_WRITE_A |
-				BGFX_STATE_BLEND_EQUATION_ADD |
-				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
-				0);
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
