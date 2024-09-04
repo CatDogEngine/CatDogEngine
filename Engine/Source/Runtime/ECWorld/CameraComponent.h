@@ -161,15 +161,11 @@ public:
 	void SetViewWidth(float width) { m_viewWidth = width; }
 	void SetViewHeight(float height) { m_viewHeight = height; }
 
-	float GetFocalx(){ return m_focal_x; }
-	float GetFocaly() { return m_focal_y; }
 
 private:
 	// Input
 	float m_aspect;
 	float m_fov;
-	float m_focal_x = 1159.5880733038064f;
-	float m_focal_y = 1164.6601287484507f;
 	float m_nearPlane;
 	float m_farPlane;
 	cd::NDCDepth m_ndcDepth;
