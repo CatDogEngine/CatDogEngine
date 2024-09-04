@@ -9,6 +9,8 @@ vec4  v_color1           : COLOR1;
 flat  ivec4 v_indices    : BLENDINDICES = vec4(0, 0, 0, 0);
 vec4  v_weight           : BLENDWEIGHT = vec4(1.0, 1.0, 1.0, 1.0);
 vec2  v_alphaMapTexCoord : TEXCOORD5 = vec2(0.0, 0.0);
+vec2 v_position  : TEXCOORD0 = vec2(0.0, 0.0);
+vec4 v_color	 : COLOR     = vec4(1.0, 0.0, 0.0, 1.0);
 
 vec3  a_position         : POSITION;
 vec3  a_normal           : NORMAL;
@@ -20,8 +22,7 @@ vec4  a_color1           : COLOR1;
 ivec4 a_indices          : BLENDINDICES;
 vec4  a_weight           : BLENDWEIGHT;
 
-vec4 i_data0     : TEXCOORD7;
-vec4 i_data1     : TEXCOORD6;
-vec4 i_data2     : TEXCOORD5;
-vec4 i_data3     : TEXCOORD4;
-vec4 i_data4     : TEXCOORD3;
+vec4 i_data0 : TEXCOORD0;	// color
+vec4 i_data1 : TEXCOORD1;	// center
+vec4 i_data2 : TEXCOORD2;	// covA
+vec4 i_data3 : TEXCOORD3;	// covB

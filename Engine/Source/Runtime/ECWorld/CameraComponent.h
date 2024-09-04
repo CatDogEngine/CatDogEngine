@@ -164,34 +164,6 @@ public:
 	float GetFocalx(){ return m_focal_x; }
 	float GetFocaly() { return m_focal_y; }
 
-	std::vector<float> getProjectionMatrix(double fx, double fy, float width, float height);
-	std::vector<float> getViewMatrix(const float R[3][3], const float t[3]);
-	void setViewMatrix(std::vector<float> view)
-	{
-		for (int i = 0; i < 4; ++i)
-		{
-			for (int j = 0; j < 4; ++j)
-			{
-				if (i * 4 + j < view.size())
-				{
-					m_viewMatrix.Data(i,j) = view[i * 4 + j];
-				}
-			}
-		}
-	}
-	void setProjMatrix(std::vector<float> proj) 
-	{
-		for (int i = 0; i < 4; ++i)
-		{
-			for (int j = 0; j < 4; ++j)
-			{
-				if (i * 4 + j < proj.size())
-				{
-					m_projectionMatrix.Data(i, j) = proj[i * 4 + j];
-				}
-			}
-		}
-	}
 private:
 	// Input
 	float m_aspect;

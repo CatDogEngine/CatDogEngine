@@ -2,11 +2,11 @@
 
 #include "Renderer.h"
 #include "RenderContext.h"
+#include <atomic>
 #include <vector>
 
 namespace engine
 {
-
 class SceneWorld;
 
 class GaussianRenderer final : public Renderer
@@ -22,6 +22,10 @@ public:
 
 private:
 	SceneWorld* m_pCurrentSceneWorld = nullptr;
+	std::atomic<int>	m_curBuffer = 0;
+	std::atomic<bool>	m_isSorting = false;
+	float m_curView[16];
+	float m_lastView[16];
 };
 
 }

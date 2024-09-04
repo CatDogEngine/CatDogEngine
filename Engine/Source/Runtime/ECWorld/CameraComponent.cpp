@@ -22,33 +22,6 @@ void CameraComponent::BuildProjectMatrix()
 	m_projectionMatrix = cd::Matrix4x4::Perspective(m_fov, m_aspect, m_nearPlane, m_farPlane, cd::NDCDepth::MinusOneToOne == m_ndcDepth);
 }
 
-std::vector<float> CameraComponent::getProjectionMatrix(double fx, double fy, float width, float height)
-{
-	const double znear = 0.2;
-	const double zfar = 200.0;
-	std::vector<float> projectionMatrix = {
-		static_cast<float>(2 * fx / width), 0.0f, 0.0f, 0.0f,
-		0.0f, static_cast<float>(-2 * fy / height), 0.0f, 0.0f,
-		0.0f, 0.0f, static_cast<float>(zfar / (zfar - znear)), 1.0f,
-		0.0f, 0.0f, static_cast<float>(-zfar * znear / (zfar - znear)), 0.0f
-	};
-	return projectionMatrix;
-}
-
-std::vector<float> CameraComponent::getViewMatrix(const float R[3][3], const float t[3])
-{
-	std::vector<float> camToWorld(16);
-
-	camToWorld[0] = R[0][0]; camToWorld[1] = R[0][1]; camToWorld[2] = R[0][2]; camToWorld[3] = 0;
-	camToWorld[4] = R[1][0]; camToWorld[5] = R[1][1]; camToWorld[6] = R[1][2]; camToWorld[7] = 0;
-	camToWorld[8] = R[2][0]; camToWorld[9] = R[2][1]; camToWorld[10] = R[2][2]; camToWorld[11] = 0;
-	camToWorld[12] = -t[0] * R[0][0] - t[1] * R[1][0] - t[2] * R[2][0];
-	camToWorld[13] = -t[0] * R[0][1] - t[1] * R[1][1] - t[2] * R[2][1];
-	camToWorld[14] = -t[0] * R[0][2] - t[1] * R[1][2] - t[2] * R[2][2];
-	camToWorld[15] = 1;
-
-	return camToWorld;
-}
 
 cd::Ray CameraComponent::EmitRay(float screenX, float screenY, float width, float height) const
 {
