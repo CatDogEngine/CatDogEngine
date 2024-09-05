@@ -63,8 +63,8 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			BGFX_STATE_WRITE_RGB |
 			BGFX_STATE_WRITE_A |
 			BGFX_STATE_BLEND_EQUATION_ADD |
-			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
-			0);
+			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+
 			constexpr StringCrc focalCrc("u_focal");
 			float focal[4] = { fx, fy,0.0f,0.0f };
 			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), focal);

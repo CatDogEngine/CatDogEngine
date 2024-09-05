@@ -15,10 +15,10 @@ namespace engine
 	{
 		ms_layoutInstance
 			.begin()
-			.add(bgfx::Attrib::TexCoord7, 4, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord6, 4, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord5, 4, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord4, 4, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord0, 4, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord1, 4, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
 			.end();
 	}
 
