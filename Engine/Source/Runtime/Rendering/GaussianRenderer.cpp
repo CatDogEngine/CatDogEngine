@@ -58,6 +58,14 @@ void engine::GaussianRenderer::Render(float deltaTime)
 
 		bx::memCopy(m_curView, view, 16 * sizeof(float));
 
+		//NOTE: this state can't render GS point so i change it to the next one
+		//bgfx::setState(
+		//	BGFX_STATE_PT_TRISTRIP |
+		//	BGFX_STATE_WRITE_RGB |
+		//	BGFX_STATE_WRITE_A |
+		//	BGFX_STATE_BLEND_EQUATION_ADD |
+		//	BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
+		//	0);
 		bgfx::setState(
 			BGFX_STATE_PT_TRISTRIP |
 			BGFX_STATE_WRITE_RGB |
