@@ -13,17 +13,21 @@ namespace engine
 
 void GaussianRenderComponent::Build()
 {
-	const static std::array<float, 8> vertexDatas =
+	const static std::array<float, 8> vertices =
 	{
-		2.0f, -2.0f,
 		-2.0f, -2.0f,
+		2.0f, -2.0f,
 		2.0f, 2.0f,
 		-2.0f, 2.0f,
+	};
+	const static std::array<uint16_t, 6> indices = {
+		0, 1, 2, 0, 2, 3,
 	};
 
 	bgfx::VertexLayout vertexLayout;
 	vertexLayout.begin().add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float).end();
-	m_vertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertexDatas.data(), uint32_t(vertexDatas.size() * sizeof(float))), vertexLayout).idx;
+	m_vertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertices.data(), uint32_t(vertices.size() * sizeof(float))), vertexLayout).idx;
+	m_indexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices.data(), uint32_t(indices.size() * sizeof(uint16_t)))).idx;
 }
 
 void GaussianRenderComponent::ProcessingPlyBuffer()

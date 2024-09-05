@@ -10,27 +10,36 @@
 namespace engine
 {
 
-void engine::GaussianRenderer::Init()
+namespace
 {
-	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("GaussianProgram", "vs_gaussianSplatting", "fs_gaussianSplatting"));
 
-	GetRenderContext()->CreateUniform("u_texture", bgfx::UniformType::Sampler);
-	GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
-	GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
-	GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
-	GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
-	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
+std::vector<float> GetViewMatrix(const float R[3][3], const float t[3])
+{
+	std::vector<float> camToWorld(16);
 
-	bgfx::setViewName(GetViewID(), "GaussianRenderer");
+	camToWorld[0] = R[0][0]; camToWorld[1] = R[0][1]; camToWorld[2] = R[0][2]; camToWorld[3] = 0;
+	camToWorld[4] = R[1][0]; camToWorld[5] = R[1][1]; camToWorld[6] = R[1][2]; camToWorld[7] = 0;
+	camToWorld[8] = R[2][0]; camToWorld[9] = R[2][1]; camToWorld[10] = R[2][2]; camToWorld[11] = 0;
+	camToWorld[12] = -t[0] * R[0][0] - t[1] * R[1][0] - t[2] * R[2][0];
+	camToWorld[13] = -t[0] * R[0][1] - t[1] * R[1][1] - t[2] * R[2][1];
+	camToWorld[14] = -t[0] * R[0][2] - t[1] * R[1][2] - t[2] * R[2][2];
+	camToWorld[15] = 1;
+
+	return camToWorld;
 }
 
-void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float* pProjectionMatrix)
+std::vector<float> GetProjectionMatrix(float fx, float fy, float width, float height)
 {
-	UpdateViewRenderTarget();
-	bgfx::setViewTransform(GetViewID(), pViewMatrix, pProjectionMatrix);
+	float znear = 0.2f;
+	float zfar = 200.0f;
+
+	return { (2.0f * fx) / width, 0.0f, 0.0f, 0.0f,
+		0.0f, -(2.0f * fy) / height, 0.0f, 0.0f,
+		0.0f, 0.0f, zfar / (zfar - znear), 1.0f,
+		0.0f, 0.0f, -(zfar * znear) / (zfar - znear), 0.0f };
 }
 
-std::vector<float> multiply4(const std::vector<float>& a, const std::vector<float>& b)
+std::vector<float> Multiply4(const std::vector<float> &a, const std::vector<float> &b)
 {
 	return {
 		 b[0] * a[0] + b[1] * a[4] + b[2] * a[8] + b[3] * a[12],
@@ -50,6 +59,28 @@ std::vector<float> multiply4(const std::vector<float>& a, const std::vector<floa
 		 b[12] * a[2] + b[13] * a[6] + b[14] * a[10] + b[15] * a[14],
 		 b[12] * a[3] + b[13] * a[7] + b[14] * a[11] + b[15] * a[15]
 	};
+}
+
+} // namespace
+
+void engine::GaussianRenderer::Init()
+{
+	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("GaussianProgram", "vs_gaussianSplatting", "fs_gaussianSplatting"));
+
+	GetRenderContext()->CreateUniform("u_texture", bgfx::UniformType::Sampler);
+	GetRenderContext()->CreateUniform("projection", bgfx::UniformType::Mat4);
+	GetRenderContext()->CreateUniform("view", bgfx::UniformType::Mat4);
+	GetRenderContext()->CreateUniform("focal", bgfx::UniformType::Vec4);
+	GetRenderContext()->CreateUniform("viewport", bgfx::UniformType::Vec4);
+	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
+
+	bgfx::setViewName(GetViewID(), "GaussianRenderer");
+}
+
+void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float* pProjectionMatrix)
+{
+	UpdateViewRenderTarget();
+	bgfx::setViewTransform(GetViewID(), pViewMatrix, pProjectionMatrix);
 }
 
 void engine::GaussianRenderer::Render(float deltaTime)
@@ -72,15 +103,14 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		-3.0089893469241797f, -0.11086489695181866f, -3.7527640949141428f
 	};
 
-	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	float fx = pMainCameraComponent->GetFocalx();
-	float fy = pMainCameraComponent->GetFocaly();
-	float viewWidth = 1959.0f;
-	float viewHeight = 1090.0f;
+	constexpr float fx = 1159.5880733038064f;
+	constexpr float fy = 1164.6601287484507f;
+	constexpr float viewWidth = 619.0f;
+	constexpr float viewHeight = 438.0f;
 
-	std::vector<float> viewMatrix = pMainCameraComponent->getViewMatrix(rotation, position);
-	std::vector<float> projMartrix = pMainCameraComponent->getProjectionMatrix(fx,fy, viewWidth, viewHeight);
-	std::vector<float> viewProj = multiply4(projMartrix, viewMatrix);
+	std::vector<float> viewMatrix = GetViewMatrix(rotation, position);
+	std::vector<float> projMartrix = GetProjectionMatrix(fx,fy, viewWidth, viewHeight);
+	std::vector<float> viewProj = Multiply4(projMartrix, viewMatrix);
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
@@ -88,7 +118,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		static std::vector<uint32_t> depthIndices(gaussianCount);
 
 		// Sort
-		bool enableSort = true;
+		bool enableSort = false;
 		if(enableSort)
 		{
 			static std::vector<int32_t> sizeList(gaussianCount);
@@ -138,7 +168,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			}
 		}
 
-		for (size_t i = 0; i < gaussianCount; ++i)
+		for (size_t i = 4; i < 5; ++i)
 		{
 			constexpr StringCrc GaussianSampler("u_texture");
 			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), bgfx::TextureHandle{ pGaussianComponent->GetGaussianTextureHandle() });
@@ -162,13 +192,11 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setUniform(GetRenderContext()->GetUniform(depthIndexCrc), &depthIndex);
 
 			bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pGaussianComponent->GetVertexBufferHandle() });
+			bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 
 			bgfx::setState(
-				BGFX_STATE_PT_TRISTRIP |
 				BGFX_STATE_WRITE_RGB |
-				BGFX_STATE_WRITE_A |
-				BGFX_STATE_BLEND_EQUATION_ADD |
-				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE));
+				BGFX_STATE_WRITE_A);
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);

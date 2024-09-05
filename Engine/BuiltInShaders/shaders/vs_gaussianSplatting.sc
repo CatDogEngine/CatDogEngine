@@ -10,11 +10,14 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform vec4 focal; // vec2
 uniform vec4 viewport; // vec2
-uniform vec4 depthIndex;
+uniform vec4 depthIndex; // uint32
 
 vec2 Unpack(uint x)
 {
-	return vec2(uintBitsToFloat((x & 0x0000ffff) << 16), uintBitsToFloat(x & 0xffff0000));
+	x = 0x3c003c00;
+	return unpackHalf2x16(x);
+	// return vec2(f16tof32(x & 0xffff), f16tof32(x >> 16) );
+	// return vec2(uintBitsToFloat(x << 16), uintBitsToFloat(x & 0xffff0000));
 }
 
 void main()
@@ -86,6 +89,8 @@ void main()
 				a_position.x * majorAxis / viewport.xy +
 				a_position.y * minorAxis / viewport.xy;
 			gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
+			v_color0 = vec4(u1.x, u1.y, u2.x, u2.y);
+			v_color1 = vec4(u3.x, u3.y, 0.0, 0.0);
 		}
 	}
 }

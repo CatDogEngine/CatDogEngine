@@ -10,4 +10,5 @@ void main()
     // exp(A) 在 0 -> -4 的范围内衰减得很快，这将会创造一个从中心逐渐淡出的椭圆。
     float B = exp(A) * v_color0.a;
     gl_FragColor = vec4(B * v_color0.rgb, B);
+    gl_FragColor = vec4_splat(1.0);
 }

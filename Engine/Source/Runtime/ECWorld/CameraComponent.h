@@ -154,50 +154,11 @@ public:
 	int GetBlurScaling() const { return m_blurScaling; }
 	void SetBlurScaling(int blurscaling) { m_blurScaling = blurscaling; }
 #endif
-	
-	//Gaussian
-	float& GetViewWidth() { return m_viewWidth; }
-	float& GetViewHeight() { return m_viewHeight; }
-	void SetViewWidth(float width) { m_viewWidth = width; }
-	void SetViewHeight(float height) { m_viewHeight = height; }
 
-	float GetFocalx(){ return m_focal_x; }
-	float GetFocaly() { return m_focal_y; }
-
-	std::vector<float> getProjectionMatrix(double fx, double fy, float width, float height);
-	std::vector<float> getViewMatrix(const float R[3][3], const float t[3]);
-	void setViewMatrix(std::vector<float> view)
-	{
-		for (int i = 0; i < 4; ++i)
-		{
-			for (int j = 0; j < 4; ++j)
-			{
-				if (i * 4 + j < view.size())
-				{
-					m_viewMatrix.Data(i,j) = view[i * 4 + j];
-				}
-			}
-		}
-	}
-	void setProjMatrix(std::vector<float> proj) 
-	{
-		for (int i = 0; i < 4; ++i)
-		{
-			for (int j = 0; j < 4; ++j)
-			{
-				if (i * 4 + j < proj.size())
-				{
-					m_projectionMatrix.Data(i, j) = proj[i * 4 + j];
-				}
-			}
-		}
-	}
 private:
 	// Input
 	float m_aspect;
 	float m_fov;
-	float m_focal_x = 1159.5880733038064f;
-	float m_focal_y = 1164.6601287484507f;
 	float m_nearPlane;
 	float m_farPlane;
 	cd::NDCDepth m_ndcDepth;
@@ -228,12 +189,6 @@ private:
 	float m_blurSize;
 	int m_blurScaling;
 #endif
-
-
-	//Gaussian
-	float m_viewWidth;
-	float m_viewHeight;
-
 };
 
 }

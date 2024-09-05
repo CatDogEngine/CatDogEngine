@@ -5,6 +5,8 @@
 #include "Base/NameOf.h"
 #include "Log/Log.h"
 
+#include <iostream>
+
 namespace editor
 {
 
@@ -45,6 +47,7 @@ void Process::Run()
 
 	// LOG
 	CD_ENGINE_INFO("Start process {0}", m_processName.c_str());
+	std::cout << "Start process " << m_processName.c_str() << std::endl;;
 
 	for(int i = 1, num = static_cast<int>(commandLine.size() - 1); i < num; ++i)
 	{
@@ -70,6 +73,7 @@ void Process::Run()
 		int processResult;
 		subprocess_join(m_pProcess.get(), &processResult);
 		CD_ENGINE_INFO("End process {0}", m_processName.c_str());
+		std::cout << "End process " << m_processName.c_str() << std::endl;;
 	}
 }
 
@@ -92,11 +96,13 @@ void Process::PrintSubProcessLog(OutputType outputType, subprocess_s* const pSub
 		if (OutputType::StdOut == outputType)
 		{
 			CD_ENGINE_TRACE("{0}\n{1}", nameof::nameof_enum(OutputType::StdOut), processOutputData);
+			std::cout << nameof::nameof_enum(OutputType::StdErr) << " " << processOutputData << std::endl;
 			m_onOutput.Invoke(m_handle, processOutputData);
 		}
 		else if (OutputType::StdErr == outputType)
 		{
 			CD_ENGINE_ERROR("{0}\n{1}", nameof::nameof_enum(OutputType::StdErr), processOutputData);
+			std::cerr << nameof::nameof_enum(OutputType::StdErr) << " " << processOutputData << std::endl;
 			m_onErrorOutput.Invoke(m_handle, processOutputData);
 		}
 	}
