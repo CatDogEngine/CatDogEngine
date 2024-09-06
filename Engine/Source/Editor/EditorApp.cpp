@@ -262,18 +262,18 @@ void EditorApp::InitECWorld()
 
 void EditorApp::InitMaterialType()
 {
-	m_pRenderContext->RegisterShaderProgram("WorldProgram", "vs_PBR", "fs_PBR");
-	m_pRenderContext->RegisterShaderProgram("AnimationProgram", "vs_animation", "fs_animation");
-	m_pRenderContext->RegisterShaderProgram("TerrainProgram", "vs_terrain", "fs_terrain");
-	m_pRenderContext->RegisterShaderProgram("ParticleProgram", "vs_particleSprite", "fs_particleSprite");
-	m_pRenderContext->RegisterShaderProgram("CelluloidProgram", "vs_celluloid", "fs_celluloid");
+	//m_pRenderContext->RegisterShaderProgram("WorldProgram", "vs_PBR", "fs_PBR");
+	//m_pRenderContext->RegisterShaderProgram("AnimationProgram", "vs_animation", "fs_animation");
+	//m_pRenderContext->RegisterShaderProgram("TerrainProgram", "vs_terrain", "fs_terrain");
+	//m_pRenderContext->RegisterShaderProgram("ParticleProgram", "vs_particleSprite", "fs_particleSprite");
+	//m_pRenderContext->RegisterShaderProgram("CelluloidProgram", "vs_celluloid", "fs_celluloid");
 
 	m_pSceneWorld = std::make_unique<engine::SceneWorld>();
-	m_pSceneWorld->CreatePBRMaterialType("WorldProgram", IsAtmosphericScatteringEnable());
-	m_pSceneWorld->CreateAnimationMaterialType("AnimationProgram");
-	m_pSceneWorld->CreateTerrainMaterialType("TerrainProgram");
-	m_pSceneWorld->CreateParticleMaterialType("ParticleProgram");
-	m_pSceneWorld->CreateCelluloidMaterialType("CelluloidProgram");
+	//m_pSceneWorld->CreatePBRMaterialType("WorldProgram", IsAtmosphericScatteringEnable());
+	//m_pSceneWorld->CreateAnimationMaterialType("AnimationProgram");
+	//m_pSceneWorld->CreateTerrainMaterialType("TerrainProgram");
+	//m_pSceneWorld->CreateParticleMaterialType("ParticleProgram");
+	//m_pSceneWorld->CreateCelluloidMaterialType("CelluloidProgram");
 }
 
 void EditorApp::InitEditorCameraEntity()
@@ -477,70 +477,70 @@ void EditorApp::InitEngineRenderers()
 	// The init size doesn't make sense. It will resize by SceneView.
 	engine::RenderTarget* pSceneRenderTarget = m_pRenderContext->CreateRenderTarget(sceneViewRenderTargetName, 1, 1, std::move(attachmentDesc));
 
-	auto pShadowMapRenderer = std::make_unique<engine::ShadowMapRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pShadowMapRenderer = pShadowMapRenderer.get();
-	pShadowMapRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pShadowMapRenderer));
-
+	//auto pShadowMapRenderer = std::make_unique<engine::ShadowMapRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pShadowMapRenderer = pShadowMapRenderer.get();
+	//pShadowMapRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pShadowMapRenderer));
+	
 	auto pSkyboxRenderer = std::make_unique<engine::SkyboxRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
 	m_pIBLSkyRenderer = pSkyboxRenderer.get();
 	pSkyboxRenderer->SetSceneWorld(m_pSceneWorld.get());
 	AddEngineRenderer(cd::MoveTemp(pSkyboxRenderer));
-
-	if (IsAtmosphericScatteringEnable())
-	{
-		auto pPBRSkyRenderer = std::make_unique<engine::PBRSkyRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-		m_pPBRSkyRenderer = pPBRSkyRenderer.get();
-		pPBRSkyRenderer->SetSceneWorld(m_pSceneWorld.get());
-		AddEngineRenderer(cd::MoveTemp(pPBRSkyRenderer));
-	}
-
-	auto pSkeletonRenderer = std::make_unique<engine::SkeletonRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	pSkeletonRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pSkeletonRenderer));
-
-	auto pAnimationRenderer = std::make_unique<engine::AnimationRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	pAnimationRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pAnimationRenderer));
-
-	auto pSceneRenderer = std::make_unique<engine::WorldRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pSceneRenderer = pSceneRenderer.get();
-	pSceneRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pSceneRenderer));
-
-	auto pCelluloidRenderer = std::make_unique<engine::CelluloidRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pCelluloidRenderer = pCelluloidRenderer.get();
-	pCelluloidRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pCelluloidRenderer));
-
-	auto pOutLineRenderer = std::make_unique<engine::OutLineRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pOutLineRenderer = pOutLineRenderer.get();
-	pOutLineRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pOutLineRenderer));
-
-	auto pBlendShapeRenderer = std::make_unique<engine::BlendShapeRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	pBlendShapeRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pBlendShapeRenderer));
-
-	auto pTerrainRenderer = std::make_unique<engine::TerrainRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pTerrainRenderer = pTerrainRenderer.get();
-	pTerrainRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pTerrainRenderer));
-
-	auto pWhiteModelRenderer = std::make_unique<engine::WhiteModelRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pWhiteModelRenderer = pWhiteModelRenderer.get();
-	pWhiteModelRenderer->SetSceneWorld(m_pSceneWorld.get());
-	pWhiteModelRenderer->SetEnable(false);
-	AddEngineRenderer(cd::MoveTemp(pWhiteModelRenderer));
-
-	auto pParticleRenderer = std::make_unique<engine::ParticleRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	pParticleRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pParticleRenderer));
-
-	auto pParticleForceFieldRenderer = std::make_unique<engine::ParticleForceFieldRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	pParticleForceFieldRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pParticleForceFieldRenderer));
-
+	
+	//if (IsAtmosphericScatteringEnable())
+	//{
+	//	auto pPBRSkyRenderer = std::make_unique<engine::PBRSkyRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//	m_pPBRSkyRenderer = pPBRSkyRenderer.get();
+	//	pPBRSkyRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//	AddEngineRenderer(cd::MoveTemp(pPBRSkyRenderer));
+	//}
+	//
+	//auto pSkeletonRenderer = std::make_unique<engine::SkeletonRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//pSkeletonRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pSkeletonRenderer));
+	//
+	//auto pAnimationRenderer = std::make_unique<engine::AnimationRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//pAnimationRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pAnimationRenderer));
+	//
+	//auto pSceneRenderer = std::make_unique<engine::WorldRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pSceneRenderer = pSceneRenderer.get();
+	//pSceneRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pSceneRenderer));
+	//
+	//auto pCelluloidRenderer = std::make_unique<engine::CelluloidRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pCelluloidRenderer = pCelluloidRenderer.get();
+	//pCelluloidRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pCelluloidRenderer));
+	//
+	//auto pOutLineRenderer = std::make_unique<engine::OutLineRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pOutLineRenderer = pOutLineRenderer.get();
+	//pOutLineRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pOutLineRenderer));
+	//
+	//auto pBlendShapeRenderer = std::make_unique<engine::BlendShapeRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//pBlendShapeRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pBlendShapeRenderer));
+	//
+	//auto pTerrainRenderer = std::make_unique<engine::TerrainRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pTerrainRenderer = pTerrainRenderer.get();
+	//pTerrainRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pTerrainRenderer));
+	//
+	//auto pWhiteModelRenderer = std::make_unique<engine::WhiteModelRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pWhiteModelRenderer = pWhiteModelRenderer.get();
+	//pWhiteModelRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//pWhiteModelRenderer->SetEnable(false);
+	//AddEngineRenderer(cd::MoveTemp(pWhiteModelRenderer));
+	//
+	//auto pParticleRenderer = std::make_unique<engine::ParticleRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//pParticleRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pParticleRenderer));
+	//
+	//auto pParticleForceFieldRenderer = std::make_unique<engine::ParticleForceFieldRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//pParticleForceFieldRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pParticleForceFieldRenderer));
+	
 	auto pGaussianRenderer = std::make_unique<engine::GaussianRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
 	pGaussianRenderer->SetSceneWorld(m_pSceneWorld.get());
 	AddEngineRenderer(cd::MoveTemp(pGaussianRenderer));
@@ -551,23 +551,23 @@ void EditorApp::InitEngineRenderers()
 	AddEngineRenderer(cd::MoveTemp(pDDGIRenderer));
 #endif
 
-	auto pAABBRenderer = std::make_unique<engine::AABBRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pAABBRenderer = pAABBRenderer.get();
-	pAABBRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pAABBRenderer));
-
-	auto pWireframeRenderer = std::make_unique<engine::WireframeRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	m_pWireframeRenderer = pWireframeRenderer.get();
-	pWireframeRenderer->SetSceneWorld(m_pSceneWorld.get());
-	AddEngineRenderer(cd::MoveTemp(pWireframeRenderer));
+	//auto pAABBRenderer = std::make_unique<engine::AABBRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pAABBRenderer = pAABBRenderer.get();
+	//pAABBRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pAABBRenderer));
+	//
+	//auto pWireframeRenderer = std::make_unique<engine::WireframeRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//m_pWireframeRenderer = pWireframeRenderer.get();
+	//pWireframeRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//AddEngineRenderer(cd::MoveTemp(pWireframeRenderer));
 
 	auto pBlitRTRenderPass = std::make_unique<engine::BlitRenderTargetPass>(m_pRenderContext->CreateView(), pSceneRenderTarget);
 	AddEngineRenderer(cd::MoveTemp(pBlitRTRenderPass));
 
-	auto pBloomRenderer = std::make_unique<engine::BloomRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
-	pBloomRenderer->SetSceneWorld(m_pSceneWorld.get());
-	pBloomRenderer->SetEnable(false);
-	AddEngineRenderer(cd::MoveTemp(pBloomRenderer));
+	//auto pBloomRenderer = std::make_unique<engine::BloomRenderer>(m_pRenderContext->CreateView(), pSceneRenderTarget);
+	//pBloomRenderer->SetSceneWorld(m_pSceneWorld.get());
+	//pBloomRenderer->SetEnable(false);
+	//AddEngineRenderer(cd::MoveTemp(pBloomRenderer));
 
 	// We can debug vertex/material/texture information by just output that to screen as fragmentColor.
 	// But postprocess will bring unnecessary confusion. 

@@ -31,7 +31,8 @@ public:
 
 	void Build();
 
-	uint16_t& GetVertexBufferHandle() { return m_vertexBufferHandle; }
+	uint16_t GetVertexBufferHandle() const { return m_vertexBufferHandle; }
+	uint16_t GetIndexBufferHandle() const { return m_indexBufferHandle; }
 
 	std::vector<std::byte>& GetGaussianBuffer() { return m_gausianAttributesBuffer; }
 
@@ -45,6 +46,7 @@ public:
 
 private:
 	uint16_t m_vertexBufferHandle = UINT16_MAX;
+	uint16_t m_indexBufferHandle = UINT16_MAX;
 
 	// ply
 	std::vector<std::byte> m_readBuffer;
