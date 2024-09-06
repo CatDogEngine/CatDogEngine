@@ -168,7 +168,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			}
 		}
 
-		for (size_t i = 4; i < 5; ++i)
+		for (size_t i = 0; i < gaussianCount; ++i)
 		{
 			constexpr StringCrc GaussianSampler("u_texture");
 			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), bgfx::TextureHandle{ pGaussianComponent->GetGaussianTextureHandle() });
@@ -196,7 +196,9 @@ void engine::GaussianRenderer::Render(float deltaTime)
 
 			bgfx::setState(
 				BGFX_STATE_WRITE_RGB |
-				BGFX_STATE_WRITE_A);
+				BGFX_STATE_WRITE_A |
+				BGFX_STATE_BLEND_EQUATION_ADD |
+				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);

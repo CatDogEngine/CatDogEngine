@@ -52,10 +52,12 @@ void Process::Run()
 	for(int i = 1, num = static_cast<int>(commandLine.size() - 1); i < num; ++i)
 	{
 		CD_ENGINE_TRACE("\tArgument {0}", commandLine[i]);
+		std::cout << "\tArgument " << commandLine[i] << std::endl;;
 	}
 	for (int i = 1, num = static_cast<int>(environments.size() - 1); i < num; ++i)
 	{
 		CD_ENGINE_TRACE("\tEnvironment {0}", environments[i]);
+		std::cout << "\tEnvironment " << environments[i] << std::endl;;
 	}
 
 	if (m_printChildProcessLog)

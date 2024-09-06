@@ -14,10 +14,7 @@ uniform vec4 depthIndex; // uint32
 
 vec2 Unpack(uint x)
 {
-	x = 0x3c003c00;
 	return unpackHalf2x16(x);
-	// return vec2(f16tof32(x & 0xffff), f16tof32(x >> 16) );
-	// return vec2(uintBitsToFloat(x << 16), uintBitsToFloat(x & 0xffff0000));
 }
 
 void main()
@@ -30,8 +27,7 @@ void main()
 	vec4 cam = mul(view, vec4(uintBitsToFloat(cen.xyz), 1.0));
 	vec4 pos2d = mul(projection, cam);
 
-	// 计算裁剪范围 clip，并检查 pos2d 是否在裁剪范围内。
-	// 如果不在范围内，将顶点位置设置为 (0.0, 0.0, 2.0, 1.0) 并返回。
+	// 手动裁剪
 	float clip = 1.2 * pos2d.w;
 	if(pos2d.x < -clip || pos2d.y < -clip || pos2d.z < -clip ||
 		pos2d.x > clip || pos2d.y > clip)
@@ -58,7 +54,7 @@ void main()
 		// 计算变换矩阵 T，并将协方差矩阵 Vrk 转换为 2D 协方差矩阵 cov2d。
 		// 用于将 3D 空间中的点转换为 2D 图像平面上的点，
 		// 并计算这些点在 2D 平面上的不确定性（即误差椭圆）。
-		mat3 T = transpose((mat3)u_view) * J;
+		mat3 T = transpose(mat3(u_view)) * J;
 		mat3 cov2d = transpose(T) * Vrk * T;
 
 		// 计算协方差矩阵 cov2d 的特征值 lambda1 和 lambda2。
@@ -66,31 +62,27 @@ void main()
 		float radius = length(vec2((cov2d[0][0] - cov2d[1][1]) / 2.0, cov2d[0][1]));
 		float lambda1 = mid + radius;
 		float lambda2 = mid - radius;
+		lambda2 = max(lambda2, 0.01);
 
-		if(lambda2 >= 0.0)
-		{
-			// 计算主轴和次轴，用于绘制椭圆。
-			vec2 diagonalVector = normalize(vec2(cov2d[0][1], lambda1 - cov2d[0][0]));
-			vec2 majorAxis = min(sqrt(2.0 * lambda1), 1024.0) * diagonalVector;
-			vec2 minorAxis = min(sqrt(2.0 * lambda2), 1024.0) * vec2(diagonalVector.y, -diagonalVector.x);
+		// 计算主轴和次轴，用于绘制椭圆。
+		vec2 diagonalVector = normalize(vec2(cov2d[0][1], lambda1 - cov2d[0][0]));
+		vec2 majorAxis = min(sqrt(2.0 * lambda1), 1024.0) * diagonalVector;
+		vec2 minorAxis = min(sqrt(2.0 * lambda2), 1024.0) * vec2(diagonalVector.y, -diagonalVector.x);
 
-			// 计算顶点颜色 vColor，并将顶点位置 position 传递给片段着色器。
-			v_color0 = clamp(pos2d.z / pos2d.w + 1.0, 0.0, 1.0) *
-				vec4(cov.w & 0xffu,
-					(cov.w >> 8) & 0xffu,
-					(cov.w >> 16) & 0xffu,
-					(cov.w >> 24) & 0xffu
-					) / 255.0;
-			v_color1.xy = a_position.xy;
+		// 计算顶点颜色 vColor，并将顶点位置 position 传递给片段着色器。
+		v_color0 = clamp(pos2d.z / pos2d.w + 1.0, 0.0, 1.0) *
+			vec4(cov.w & 0xffu,
+				(cov.w >> 8) & 0xffu,
+				(cov.w >> 16) & 0xffu,
+				(cov.w >> 24) & 0xffu
+				) / 255.0;
+		v_color1.xy = a_position.xy;
 
-			// 计算顶点在屏幕上的位置 gl_Position，并应用主轴和次轴的变换。
-			vec2 vCenter = pos2d.xy / pos2d.w;
-			vec2 pos = vCenter +
-				a_position.x * majorAxis / viewport.xy +
-				a_position.y * minorAxis / viewport.xy;
-			gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
-			v_color0 = vec4(u1.x, u1.y, u2.x, u2.y);
-			v_color1 = vec4(u3.x, u3.y, 0.0, 0.0);
-		}
+		// 计算顶点在屏幕上的位置 gl_Position，并应用主轴和次轴的变换。
+		vec2 vCenter = pos2d.xy / pos2d.w;
+		vec2 pos = vCenter +
+			a_position.x * majorAxis / viewport.xy +
+			a_position.y * minorAxis / viewport.xy;
+		gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
 	}
 }
