@@ -36,28 +36,31 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	}
 
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
+	TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	auto& fov = pMainCameraComponent->GetFov();
 	auto& width = pMainCameraComponent->GetViewWidth();
 	auto& height = pMainCameraComponent->GetViewHeight();
 	auto& aspect = pMainCameraComponent->GetAspect();
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
-	auto& viewMatrix = pMainCameraComponent->GetViewMatrix();
-	float view[16]{ 0 };
-	for (int i = 0; i < 4; ++i)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			view[i * 4 + j] = viewMatrix.Data(i, j);
-		}
-	}
+	////cd::Vec3f lookAt = GetLookAt(transform).Normalize();
+	////cd::Vec3f up = GetUp(transform).Normalize();
+	////cd::Vec3f eye = transform.GetTranslation();
+
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
+		float view[16]{ 0 };
+		float proj[16]{ 0 };
+		auto& transform = pMCTComponent->GetTransform();
+		bx::mtxLookAt(view, bx::load<bx::Vec3>(&transform.GetTranslation().x()),
+			bx::load<bx::Vec3>(&pMainCameraComponent->GetLookAt(transform).Normalize().x()),
+			bx::load<bx::Vec3>(&pMainCameraComponent->GetUp(transform).Normalize().x()));
+		bx::mtxProj(proj, fov, float(width) / float(height), 0.2f, 200.0f, false);
 
+		UpdateView(view, proj);
 
 		bx::memCopy(m_curView, view, 16 * sizeof(float));
-
 		//NOTE: this state can't render GS point so i change it to the next one
 		//bgfx::setState(
 		//	BGFX_STATE_PT_TRISTRIP |
@@ -66,6 +69,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		//	BGFX_STATE_BLEND_EQUATION_ADD |
 		//	BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
 		//	0);
+
 		bgfx::setState(
 			BGFX_STATE_PT_TRISTRIP |
 			BGFX_STATE_WRITE_RGB |
@@ -74,7 +78,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
 
 			constexpr StringCrc focalCrc("u_focal");
-			float focal[4] = { fx, fy,0.0f,0.0f };
+			float focal[4] = { fx, fy, 0.0f, 0.0f };
 			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), focal);
 
 			bgfx::setVertexBuffer(0, pGaussianComponent->GetVBH());
@@ -145,7 +149,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 						GaussianRenderer* example = (GaussianRenderer*)bufferPtr;
 						example->m_curBuffer = 1 - example->m_curBuffer;
 						};
-					bgfx::update(pGaussianComponent->GetSplatData(nextBuffer).m_vbh, 0, bgfx::makeRef(pGaussianComponent->GetSplatData(nextBuffer).m_buffer, vertexCount * sizeof(InstanceDataVertex), releaseFn, this));
+					bgfx::update(pGaussianComponent->GetSplatData(nextBuffer).m_vbh, 0, bgfx::makeRef(pGaussianComponent->GetSplatData(nextBuffer).m_buffer, pGaussianComponent->GetSplatData(0).m_vertexCount * sizeof(InstanceDataVertex), releaseFn, this));
 
 					m_isSorting = false;
 

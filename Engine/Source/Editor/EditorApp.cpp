@@ -290,15 +290,15 @@ void EditorApp::InitEditorCameraEntity()
 	cameraTransformComponent.Build();
 
 	auto& cameraTransform = cameraTransformComponent.GetTransform();
-	cameraTransform.SetTranslation(cd::Point(0.0f, 0.0f, -100.0f));
+	cameraTransform.SetTranslation(cd::Point(-3.0f, 0.0f, -4.0f));
 	engine::CameraComponent::SetLookAt(cd::Direction(0.0f, 0.0f, 1.0f), cameraTransform);
 	engine::CameraComponent::SetUp(cd::Direction(0.0f, 1.0f, 0.0f), cameraTransform);
 
 	auto& cameraComponent = pWorld->CreateComponent<engine::CameraComponent>(cameraEntity);
 	cameraComponent.SetAspect(1.0f);
-	cameraComponent.SetFov(45.0f);
-	cameraComponent.SetNearPlane(0.1f);
-	cameraComponent.SetFarPlane(2000.0f);
+	cameraComponent.SetFov(60.0f);
+	cameraComponent.SetNearPlane(0.2f);
+	cameraComponent.SetFarPlane(200.0f);
 	cameraComponent.SetNDCDepth(bgfx::getCaps()->homogeneousDepth ? cd::NDCDepth::MinusOneToOne : cd::NDCDepth::ZeroToOne);
 	cameraComponent.SetExposure(1.0f);
 	cameraComponent.SetGammaCorrection(0.45f);
