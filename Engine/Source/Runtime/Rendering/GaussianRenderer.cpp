@@ -36,13 +36,15 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	}
 
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
+	//TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	auto& fov = pMainCameraComponent->GetFov();
 	auto& width = pMainCameraComponent->GetViewWidth();
 	auto& height = pMainCameraComponent->GetViewHeight();
 	auto& aspect = pMainCameraComponent->GetAspect();
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
+	auto& viewMatrix=pMainCameraComponent->GetViewMatrix();
+	auto& projMatrix = pMainCameraComponent->GetProjectionMatrix();
 	////cd::Vec3f lookAt = GetLookAt(transform).Normalize();
 	////cd::Vec3f up = GetUp(transform).Normalize();
 	////cd::Vec3f eye = transform.GetTranslation();
@@ -52,14 +54,27 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
 		float view[16]{ 0 };
 		float proj[16]{ 0 };
-		auto& transform = pMCTComponent->GetTransform();
-		bx::mtxLookAt(view, bx::load<bx::Vec3>(&transform.GetTranslation().x()),
-			bx::load<bx::Vec3>(&pMainCameraComponent->GetLookAt(transform).Normalize().x()),
-			bx::load<bx::Vec3>(&pMainCameraComponent->GetUp(transform).Normalize().x()));
-		bx::mtxProj(proj, fov, float(width) / float(height), 0.2f, 200.0f, false);
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				view[i*4+j] = viewMatrix.Data(i,j);
+			}
+		}
+		//auto& transform = pMCTComponent->GetTransform();
 
-		UpdateView(view, proj);
+		//auto at = pMainCameraComponent->GetLookAt(transform);
+		//auto up = pMainCameraComponent->GetUp(transform);
 
+		//bx::Vec3 m_eye = bx::Vec3{ transform.GetTranslation().x(),transform.GetTranslation().y(),transform.GetTranslation().z() };
+		//bx::Vec3 m_at = bx::Vec3{ pMainCameraComponent->GetLookAt(transform).x(),pMainCameraComponent->GetLookAt(transform).y(),pMainCameraComponent->GetLookAt(transform).z() };
+		//bx::Vec3 m_up = bx::Vec3{ pMainCameraComponent->GetUp(transform).x(),pMainCameraComponent->GetUp(transform).y(),pMainCameraComponent->GetUp(transform).z() };
+
+		//bx::mtxLookAt(view, bx::load<bx::Vec3>(&m_eye.x), bx::load<bx::Vec3>(&m_at.x), bx::load<bx::Vec3>(&m_up.x));
+		//bx::mtxProj(proj, 60.0f, float(width) / float(height), 0.2f, 200.0f, false);
+
+		////UpdateView(viewMatrix.begin(), proj);
+		//bgfx::setViewTransform(GetViewID(), viewMatrix.begin(), proj);
 		bx::memCopy(m_curView, view, 16 * sizeof(float));
 		//NOTE: this state can't render GS point so i change it to the next one
 		//bgfx::setState(
