@@ -34,6 +34,12 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			return;
 		}
 	}
+	bgfx::setViewClear(GetViewID()
+		, BGFX_CLEAR_COLOR
+		, 0x00000000
+		, 1.0f
+		, 0
+	);
 
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	//TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
@@ -90,7 +96,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			BGFX_STATE_WRITE_RGB |
 			BGFX_STATE_WRITE_A |
 			BGFX_STATE_BLEND_EQUATION_ADD |
-			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE));
 
 			constexpr StringCrc focalCrc("u_focal");
 			float focal[4] = { fx, fy, 0.0f, 0.0f };
