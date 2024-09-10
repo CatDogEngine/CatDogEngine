@@ -77,12 +77,7 @@ public:
 	void InitlayoutInstance();
 
 	bgfx::VertexBufferHandle& GetVBH() { return m_vbh; }
-	GaussianSplatData& GetSplatData(int index) {
-		if (index < 0 || index >= 2) {
-			throw std::out_of_range("Index out of range");
-		}
-		return m_splatData[index];
-	}
+	GaussianSplatData& GetSplatData(int index) { return m_splatData[index]; }
 
 
 private:
