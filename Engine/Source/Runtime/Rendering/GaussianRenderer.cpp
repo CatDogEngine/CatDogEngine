@@ -40,9 +40,10 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		, 1.0f
 		, 0
 	);
-
+	//cd::Matrix4x4 lightView = cd::Matrix4x4::LookAt<cd::Handedness::Left>(cascadeFrustumCenter,
+	//	cascadeFrustumCenter + lightDirection, cd::Vec3f(0.0f, 1.0f, 0.0f));
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	//TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
+	TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	auto& fov = pMainCameraComponent->GetFov();
 	auto& width = pMainCameraComponent->GetViewWidth();
 	auto& height = pMainCameraComponent->GetViewHeight();
@@ -51,13 +52,24 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
 	auto& viewMatrix=pMainCameraComponent->GetViewMatrix();
 	auto& projMatrix = pMainCameraComponent->GetProjectionMatrix();
-	////cd::Vec3f lookAt = GetLookAt(transform).Normalize();
-	////cd::Vec3f up = GetUp(transform).Normalize();
-	////cd::Vec3f eye = transform.GetTranslation();
 
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
+		//auto* pGaussianTransformComponent = m_pCurrentSceneWorld->GetTransformComponent(entity);
+		//auto& T = pGaussianTransformComponent->GetTransform().GetTranslation();
+		//cd::Direction direction = T - pMCTComponent->GetTransform().GetTranslation();
+		//pMainCameraComponent->SetLookAt(direction, pMCTComponent->GetTransform());
+
+		//cd::Vec3f lookAt = pMainCameraComponent->GetLookAt(pMCTComponent->GetTransform()).Normalize();
+		//cd::Vec3f up = pMainCameraComponent->GetUp(pMCTComponent->GetTransform()).Normalize();
+		//cd::Vec3f eye = pMCTComponent->GetTransform().GetTranslation();
+
+		//pMainCameraComponent->BuildProjectMatrix();
+		//pMainCameraComponent->BuildViewMatrix(eye, lookAt, up);
+
+		//bgfx::setViewTransform(GetViewID(), pMainCameraComponent->GetViewMatrix().begin(), pMainCameraComponent->GetProjectionMatrix().begin());
+
 		float view[16]{ 0 };
 		float proj[16]{ 0 };
 		for (int i = 0; i < 4; i++)
@@ -82,26 +94,19 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		////UpdateView(viewMatrix.begin(), proj);
 		//bgfx::setViewTransform(GetViewID(), viewMatrix.begin(), proj);
 		bx::memCopy(m_curView, view, 16 * sizeof(float));
-		//NOTE: this state can't render GS point so i change it to the next one
-		//bgfx::setState(
-		//	BGFX_STATE_PT_TRISTRIP |
-		//	BGFX_STATE_WRITE_RGB |
-		//	BGFX_STATE_WRITE_A |
-		//	BGFX_STATE_BLEND_EQUATION_ADD |
-		//	BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
-		//	0);
-
 		bgfx::setState(
 			BGFX_STATE_PT_TRISTRIP |
 			BGFX_STATE_WRITE_RGB |
 			BGFX_STATE_WRITE_A |
 			BGFX_STATE_BLEND_EQUATION_ADD |
-			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE));
+			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
+			0);
 
 			constexpr StringCrc focalCrc("u_focal");
-			float focal[4] = { fx, fy, 0.0f, 0.0f };
+			float focal[4];
+			focal[0] = fx;
+			focal[1] = fy;
 			bgfx::setUniform(GetRenderContext()->GetUniform(focalCrc), focal);
-
 			bgfx::setVertexBuffer(0, pGaussianComponent->GetVBH());
 			auto& splatData = pGaussianComponent->GetSplatData(m_curBuffer);
 			bgfx::setInstanceDataBuffer(splatData.m_vbh,0 , splatData.m_vertexCount);
@@ -109,7 +114,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
 
-			bgfx::frame();
+			//bgfx::frame();
 
 			if (bx::memCmp(m_curView, m_lastView, 16 * sizeof(float)) != 0) {
 				float dot = m_lastView[2] * m_curView[2] +
@@ -180,11 +185,5 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			}
 	}
 }
-
-
-
-
-
-
 
 }

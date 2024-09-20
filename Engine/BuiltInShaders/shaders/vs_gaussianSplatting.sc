@@ -62,7 +62,7 @@ void main()
 		vec2 v2 = min(sqrt(2.0 * lambda2), 1024.0) * vec2(diagonalVector.y, -diagonalVector.x);
 
 		v_color = color;
-		v_position = a_position;
+		v_position = a_position.xy;
 
 		vec2 viewSize = vec2(u_viewRect.z, u_viewRect.w);
 
