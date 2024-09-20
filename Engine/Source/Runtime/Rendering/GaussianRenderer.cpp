@@ -47,7 +47,6 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	auto& fov = pMainCameraComponent->GetFov();
 	auto& width = pMainCameraComponent->GetViewWidth();
 	auto& height = pMainCameraComponent->GetViewHeight();
-	pMainCameraComponent->SetAspect(static_cast<uint16_t>(width), static_cast<uint16_t>(height));
 	auto& aspect = pMainCameraComponent->GetAspect();
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
