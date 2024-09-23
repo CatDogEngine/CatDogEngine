@@ -72,13 +72,14 @@ void engine::GaussianRenderer::Render(float deltaTime)
 
 		float view[16]{ 0 };
 		float proj[16]{ 0 };
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				view[i*4+j] = viewMatrix.Data(i,j);
-			}
-		}
+		//for (int i = 0; i < 4; i++)
+		//{
+		//	for (int j = 0; j < 4; j++)
+		//	{
+		//		view[i*4+j] = viewMatrix.Data(i,j);
+		//	}
+		//}
+		memcpy(view, viewMatrix.begin(), sizeof(viewMatrix));
 		//auto& transform = pMCTComponent->GetTransform();
 
 		//auto at = pMainCameraComponent->GetLookAt(transform);
