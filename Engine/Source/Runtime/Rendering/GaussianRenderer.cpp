@@ -56,44 +56,8 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
-		//auto* pGaussianTransformComponent = m_pCurrentSceneWorld->GetTransformComponent(entity);
-		//auto& T = pGaussianTransformComponent->GetTransform().GetTranslation();
-		//cd::Direction direction = T - pMCTComponent->GetTransform().GetTranslation();
-		//pMainCameraComponent->SetLookAt(direction, pMCTComponent->GetTransform());
-
-		//cd::Vec3f lookAt = pMainCameraComponent->GetLookAt(pMCTComponent->GetTransform()).Normalize();
-		//cd::Vec3f up = pMainCameraComponent->GetUp(pMCTComponent->GetTransform()).Normalize();
-		//cd::Vec3f eye = pMCTComponent->GetTransform().GetTranslation();
-
-		//pMainCameraComponent->BuildProjectMatrix();
-		//pMainCameraComponent->BuildViewMatrix(eye, lookAt, up);
-
-		//bgfx::setViewTransform(GetViewID(), pMainCameraComponent->GetViewMatrix().begin(), pMainCameraComponent->GetProjectionMatrix().begin());
-
 		float view[16]{ 0 };
-		float proj[16]{ 0 };
-		//for (int i = 0; i < 4; i++)
-		//{
-		//	for (int j = 0; j < 4; j++)
-		//	{
-		//		view[i*4+j] = viewMatrix.Data(i,j);
-		//	}
-		//}
 		memcpy(view, viewMatrix.begin(), sizeof(viewMatrix));
-		//auto& transform = pMCTComponent->GetTransform();
-
-		//auto at = pMainCameraComponent->GetLookAt(transform);
-		//auto up = pMainCameraComponent->GetUp(transform);
-
-		//bx::Vec3 m_eye = bx::Vec3{ transform.GetTranslation().x(),transform.GetTranslation().y(),transform.GetTranslation().z() };
-		//bx::Vec3 m_at = bx::Vec3{ pMainCameraComponent->GetLookAt(transform).x(),pMainCameraComponent->GetLookAt(transform).y(),pMainCameraComponent->GetLookAt(transform).z() };
-		//bx::Vec3 m_up = bx::Vec3{ pMainCameraComponent->GetUp(transform).x(),pMainCameraComponent->GetUp(transform).y(),pMainCameraComponent->GetUp(transform).z() };
-
-		//bx::mtxLookAt(view, bx::load<bx::Vec3>(&m_eye.x), bx::load<bx::Vec3>(&m_at.x), bx::load<bx::Vec3>(&m_up.x));
-		//bx::mtxProj(proj, 60.0f, float(width) / float(height), 0.2f, 200.0f, false);
-
-		////UpdateView(viewMatrix.begin(), proj);
-		//bgfx::setViewTransform(GetViewID(), viewMatrix.begin(), proj);
 		bx::memCopy(m_curView, view, 16 * sizeof(float));
 		bgfx::setState(
 			BGFX_STATE_PT_TRISTRIP |
@@ -115,15 +79,13 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
 
-			//bgfx::frame();
+			bgfx::frame();
 
 			if (bx::memCmp(m_curView, m_lastView, 16 * sizeof(float)) != 0) {
 				float dot = m_lastView[2] * m_curView[2] +
 					m_lastView[6] * m_curView[6] +
 					m_lastView[10] * m_curView[10];
 				if (abs(dot - 1.0) > 0.01 && !m_isSorting) {
-					///*std::thread* th = */new std::thread(&ExampleGaussianSplatting::SortGaussians, this, m_viewMtx);
-					/*SortGaussians(viewMatrix);*/
 					if (!pGaussianComponent->GetSplatData(m_curBuffer).m_vertexCount) {
 						return;
 					}
@@ -181,7 +143,6 @@ void engine::GaussianRenderer::Render(float deltaTime)
 					m_isSorting = false;
 
 					bx::memCopy(m_lastView, m_curView, 16 * sizeof(float));
-					//m_curBuffer = 1 - m_curBuffer;
 				}
 			}
 	}
