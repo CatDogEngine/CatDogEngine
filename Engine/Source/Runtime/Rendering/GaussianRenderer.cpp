@@ -13,32 +13,6 @@ namespace engine
 namespace
 {
 
-std::vector<float> GetViewMatrix(const float R[3][3], const float t[3])
-{
-	std::vector<float> camToWorld(16);
-
-	camToWorld[0] = R[0][0]; camToWorld[1] = R[0][1]; camToWorld[2] = R[0][2]; camToWorld[3] = 0;
-	camToWorld[4] = R[1][0]; camToWorld[5] = R[1][1]; camToWorld[6] = R[1][2]; camToWorld[7] = 0;
-	camToWorld[8] = R[2][0]; camToWorld[9] = R[2][1]; camToWorld[10] = R[2][2]; camToWorld[11] = 0;
-	camToWorld[12] = -t[0] * R[0][0] - t[1] * R[1][0] - t[2] * R[2][0];
-	camToWorld[13] = -t[0] * R[0][1] - t[1] * R[1][1] - t[2] * R[2][1];
-	camToWorld[14] = -t[0] * R[0][2] - t[1] * R[1][2] - t[2] * R[2][2];
-	camToWorld[15] = 1;
-
-	return camToWorld;
-}
-
-std::vector<float> GetProjectionMatrix(float fx, float fy, float width, float height)
-{
-	float znear = 0.2f;
-	float zfar = 200.0f;
-
-	return { (2.0f * fx) / width, 0.0f, 0.0f, 0.0f,
-		0.0f, -(2.0f * fy) / height, 0.0f, 0.0f,
-		0.0f, 0.0f, zfar / (zfar - znear), 1.0f,
-		0.0f, 0.0f, -(zfar * znear) / (zfar - znear), 0.0f };
-}
-
 std::vector<float> Multiply4(const std::vector<float> &a, const std::vector<float> &b)
 {
 	return {
@@ -75,6 +49,13 @@ void engine::GaussianRenderer::Init()
 	GetRenderContext()->CreateUniform("depthIndex", bgfx::UniformType::Vec4);
 
 	bgfx::setViewName(GetViewID(), "GaussianRenderer");
+
+	bgfx::setViewClear(GetViewID()
+		, BGFX_CLEAR_COLOR
+		, 0x00000000
+		, 1.0f
+		, 0
+	);
 }
 
 void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float* pProjectionMatrix)
@@ -93,24 +74,29 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		}
 	}
 
-	constexpr float rotation[3][3] = {
-		{0.876134201218856f, 0.06925962026449776f, 0.47706599800804744f},
-		{-0.04747421839895102f, 0.9972110940209488f, -0.057586739349882114f},
-		{-0.4797239414934443f, 0.027805376500959853f, 0.8769787916452908f}
-	};
 
-	constexpr float position[3] = {
-		-3.0089893469241797f, -0.11086489695181866f, -3.7527640949141428f
-	};
-
-	constexpr float fx = 1159.5880733038064f;
-	constexpr float fy = 1164.6601287484507f;
+	//constexpr float fx = 1159.5880733038064f;
+	//constexpr float fy = 1164.6601287484507f;
 	constexpr float viewWidth = 619.0f;
 	constexpr float viewHeight = 438.0f;
 
-	std::vector<float> viewMatrix = GetViewMatrix(rotation, position);
-	std::vector<float> projMartrix = GetProjectionMatrix(fx,fy, viewWidth, viewHeight);
-	std::vector<float> viewProj = Multiply4(projMartrix, viewMatrix);
+	//std::vector<float> viewMatrix = GetViewMatrix(rotation, position);
+	//std::vector<float> projMartrix = GetProjectionMatrix(fx,fy, viewWidth, viewHeight);
+	//std::vector<float> viewProj = Multiply4(projMartrix, viewMatrix);
+
+	Entity entity = m_pCurrentSceneWorld->GetMainCameraEntity();
+	CameraComponent* pCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(entity);
+	std::vector<float> viewMatrix(16); // Assuming cd::Matrix4x4 is a 4x4 matrix
+	std::vector<float> projMatrix(16);
+	std::vector<float> viewProj(16);
+	cd::Matrix4x4 view = pCameraComponent->GetViewMatrix();
+	cd::Matrix4x4 proj = pCameraComponent->GetProjectionMatrix();
+	memcpy(viewMatrix.data(), view.begin(), 16 * sizeof(float));
+	memcpy(projMatrix.data(), proj.begin(), 16 * sizeof(float));
+	viewProj = Multiply4(projMatrix, viewMatrix);
+
+	float fx = (float)viewWidth / 2.0f / tanf(bx::toRad(45.0f / 2.0f));
+	float fy = (float)viewHeight * pCameraComponent->GetAspect() / 2.0f / tanf(bx::toRad(45.0f / 2.0f));
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
@@ -174,7 +160,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setTexture(0, GetRenderContext()->GetUniform(GaussianSampler), bgfx::TextureHandle{ pGaussianComponent->GetGaussianTextureHandle() });
 
 			constexpr StringCrc projectionCrc("projection");
-			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), projMartrix.data());
+			bgfx::setUniform(GetRenderContext()->GetUniform(projectionCrc), projMatrix.data());
 
 			constexpr StringCrc viewCrc("view");
 			bgfx::setUniform(GetRenderContext()->GetUniform(viewCrc), viewMatrix.data());
@@ -195,10 +181,12 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pGaussianComponent->GetIndexBufferHandle() });
 
 			bgfx::setState(
+				BGFX_STATE_PT_TRISTRIP |
 				BGFX_STATE_WRITE_RGB |
 				BGFX_STATE_WRITE_A |
 				BGFX_STATE_BLEND_EQUATION_ADD |
-				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+				BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
+				0);
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);

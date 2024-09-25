@@ -290,7 +290,7 @@ void EditorApp::InitEditorCameraEntity()
 	cameraTransformComponent.Build();
 
 	auto& cameraTransform = cameraTransformComponent.GetTransform();
-	cameraTransform.SetTranslation(cd::Point(0.0f, 0.0f, -100.0f));
+	cameraTransform.SetTranslation(cd::Point(-3.0f, 0.0f, -4.0f));
 	engine::CameraComponent::SetLookAt(cd::Direction(0.0f, 0.0f, 1.0f), cameraTransform);
 	engine::CameraComponent::SetUp(cd::Direction(0.0f, 1.0f, 0.0f), cameraTransform);
 
