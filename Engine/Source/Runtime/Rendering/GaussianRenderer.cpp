@@ -91,8 +91,8 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	std::vector<float> viewProj(16);
 	cd::Matrix4x4 view = pCameraComponent->GetViewMatrix();
 	cd::Matrix4x4 proj = pCameraComponent->GetProjectionMatrix();
-	memcpy(viewMatrix.data(), view.begin(), 16 * sizeof(float));
-	memcpy(projMatrix.data(), proj.begin(), 16 * sizeof(float));
+	memcpy(viewMatrix.data(), view.begin(), sizeof(view));
+	memcpy(projMatrix.data(), proj.begin(),  sizeof(proj));
 	viewProj = Multiply4(projMatrix, viewMatrix);
 
 	float fx = (float)viewWidth / 2.0f / tanf(bx::toRad(45.0f / 2.0f));
