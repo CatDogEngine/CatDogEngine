@@ -104,12 +104,12 @@ void engine::GaussianRenderer::Render(float deltaTime)
 		static std::vector<uint32_t> depthIndices(gaussianCount);
 
 		// Sort
-		bool enableSort = false;
+		bool enableSort = true;
 		if(enableSort)
 		{
 			static std::vector<int32_t> sizeList(gaussianCount);
-			static std::vector<uint32_t> count(256 * 256, 0);
-			static std::vector<uint32_t> start(256 * 256, 0);
+			static std::vector<uint32_t> count(256 * 256+1, 0);
+			static std::vector<uint32_t> start(256 * 256+1, 0);
 
 			memset(count.data(), 0, count.size() * sizeof(uint32_t));
 			memset(start.data(), 0, start.size() * sizeof(uint32_t));
