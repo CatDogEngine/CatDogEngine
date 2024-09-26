@@ -17,6 +17,13 @@ void engine::GaussianRenderer::Init()
 	GetRenderContext()->CreateUniform("u_focal", bgfx::UniformType::Vec4);
 
 	bgfx::setViewName(GetViewID(), "GaussianRenderer");
+
+	bgfx::setViewClear(GetViewID()
+		, BGFX_CLEAR_COLOR
+		, 0x00000000
+		, 1.0f
+		, 0
+	);
 }
 
 void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float* pProjectionMatrix)
@@ -34,14 +41,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			return;
 		}
 	}
-	bgfx::setViewClear(GetViewID()
-		, BGFX_CLEAR_COLOR
-		, 0x00000000
-		, 1.0f
-		, 0
-	);
-	//cd::Matrix4x4 lightView = cd::Matrix4x4::LookAt<cd::Handedness::Left>(cascadeFrustumCenter,
-	//	cascadeFrustumCenter + lightDirection, cd::Vec3f(0.0f, 1.0f, 0.0f));
+
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	auto& fov = pMainCameraComponent->GetFov();
