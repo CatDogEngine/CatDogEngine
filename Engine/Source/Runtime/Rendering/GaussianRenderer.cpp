@@ -18,12 +18,12 @@ void engine::GaussianRenderer::Init()
 
 	bgfx::setViewName(GetViewID(), "GaussianRenderer");
 
-	bgfx::setViewClear(GetViewID()
-		, BGFX_CLEAR_COLOR
-		, 0x00000000
-		, 1.0f
-		, 0
-	);
+	//bgfx::setViewClear(GetViewID()
+	//	, BGFX_CLEAR_COLOR
+	//	, 0x00000000
+	//	, 1.0f
+	//	, 0
+	//);
 }
 
 void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float* pProjectionMatrix)
@@ -64,7 +64,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 			BGFX_STATE_WRITE_RGB |
 			BGFX_STATE_WRITE_A |
 			BGFX_STATE_BLEND_EQUATION_ADD |
-			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_ONE) |
+			BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA) |
 			0);
 
 			constexpr StringCrc focalCrc("u_focal");
@@ -78,8 +78,6 @@ void engine::GaussianRenderer::Render(float deltaTime)
 
 			constexpr StringCrc programHandleIndex{ "GaussianProgram" };
 			GetRenderContext()->Submit(GetViewID(), programHandleIndex);
-
-			bgfx::frame();
 
 			if (bx::memCmp(m_curView, m_lastView, 16 * sizeof(float)) != 0) {
 				float dot = m_lastView[2] * m_curView[2] +
@@ -127,7 +125,7 @@ void engine::GaussianRenderer::Render(float deltaTime)
 					}
 
 					for (uint32_t j = 0; j < vertexCount; ++j) {
-						const uint32_t i = depthIndex[j];
+						const uint32_t i = depthIndex[vertexCount-j-1];
 
 						vertexBuffer[j] = splatFileData[i];
 					}
