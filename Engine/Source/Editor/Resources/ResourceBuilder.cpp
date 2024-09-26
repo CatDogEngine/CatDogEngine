@@ -260,6 +260,10 @@ TaskHandle ResourceBuilder::AddShaderBuildTask(engine::ShaderType shaderType, co
 		commandArguments.push_back(shaderLanguageDefine + ";" + pShaderFeatures);
 	}
 
+	//commandArguments.push_back("--verbose");
+	//commandArguments.push_back("--debug");
+	//commandArguments.push_back("--preprocess");
+
 	std::string shadercPath = (std::filesystem::path(CDENGINE_TOOL_PATH) / "shaderc").generic_string();
 	std::unique_ptr<Process> pProcess = std::make_unique<Process>(shadercPath.c_str());
 	pProcess->SetCommandArguments(cd::MoveTemp(commandArguments));

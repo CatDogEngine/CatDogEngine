@@ -119,6 +119,21 @@ bool IsParticleInputFile(const char* pFileExtension)
 	return false;
 }
 
+bool IsGaussianInputFile(const char* pFileExtension)
+{
+	constexpr const char* pFileExtensions[] = { ".ply" };
+	constexpr const int fileExtensionsSize = sizeof(pFileExtensions) / sizeof(pFileExtensions[0]);
+	for (int extensionIndex = 0; extensionIndex < fileExtensionsSize; ++extensionIndex)
+	{
+		if (0 == strcmp(pFileExtensions[extensionIndex], pFileExtension))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 std::string GetFilePathExtension(const std::string& FileName)
 {
 	auto pos = FileName.find_last_of('.');
@@ -814,6 +829,10 @@ void AssetBrowser::ImportAssetFile(const char* pFilePath)
 		{
 			m_importOptions.AssetType = IOAssetType::Particle;
 		}
+		else if (IsGaussianInputFile(pFileExtension.c_str()))
+		{
+			m_importOptions.AssetType = IOAssetType::GaussianSplatting;
+		}
 		else
 		{
 			// Still unknown, exit.
@@ -889,6 +908,10 @@ void AssetBrowser::ImportAssetFile(const char* pFilePath)
 	else if (IOAssetType::Particle == m_importOptions.AssetType)
 	{
 		ImportParticleEffect(pFilePath);
+	}
+	else if (IOAssetType::GaussianSplatting == m_importOptions.AssetType)
+	{
+		ImportGaussianSplattingFile(pFilePath);
 	}
 }
 
@@ -1163,6 +1186,74 @@ void AssetBrowser::ImportParticleEffect(const char* pFilePath)
 	//	const char16_t* u16_cstr = reinterpret_cast<const char16_t*>(wFilePath.c_str());
 	//	cdtools::EffekseerProducer efkProducer(u16_cstr);
 	//}
+}
+
+void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
+{
+	CD_ERROR("GaussingTesting");
+	engine::SceneWorld* pSceneWorld = GetImGuiContextInstance()->GetSceneWorld();
+	engine::World* pWorld = pSceneWorld->GetWorld();
+	auto AddNamedEntity = [&pWorld](std::string defaultName) -> engine::Entity
+	{
+		engine::Entity entity = pWorld->CreateEntity();
+		auto& nameComponent = pWorld->CreateComponent<engine::NameComponent>(entity);
+		nameComponent.SetName(defaultName + std::to_string(entity));
+
+		return entity;
+	};
+
+	///*Add Camera*/
+	//engine::Entity cameraEntity = AddNamedEntity("GaussianCamera");
+	//auto& cameraComponent = pWorld->CreateComponent<engine::CameraComponent>(cameraEntity);
+	//float rotation[3][3] = {
+	//{0.876134201218856f, 0.06925962026449776f, 0.47706599800804744f},
+	//{-0.04747421839895102f, 0.9972110940209488f, -0.057586739349882114f},
+	//{-0.4797239414934443f, 0.027805376500959853f, 0.8769787916452908f}
+	//};
+
+	//float position[3] = {
+	//	-3.0089893469241797f, -0.11086489695181866f, -3.7527640949141428f
+	//};
+	//auto fx = cameraComponent.GetFocalx();
+	//auto fy = cameraComponent.GetFocaly();
+	//auto viewWidth = 1959.0f;
+	//auto viewHeight = 1090.0f;
+	//auto viewMatrix = cameraComponent.getViewMatrix(rotation, position);
+	//auto projMartrix = cameraComponent.getProjectionMatrix(fx, fy, viewWidth, viewHeight);
+	//cameraComponent.SetNearPlane(0.2f);
+	//cameraComponent.SetFarPlane(200.0f);
+	//cameraComponent.SetAspect(static_cast<float>(viewWidth) / static_cast<float>(viewHeight));
+	//cameraComponent.SetFov(99.86f);
+	//cameraComponent.setViewMatrix(viewMatrix);
+	//cameraComponent.setProjMatrix(projMartrix);
+	//pSceneWorld->SetMainCameraEntity(cameraEntity);
+
+	/*AddGS*/
+	engine::Entity entity = AddNamedEntity("GaussianSplattingEntity");
+	auto& transformComponent = pWorld->CreateComponent<engine::TransformComponent>(entity);
+	transformComponent.SetTransform(cd::Transform::Identity());
+	transformComponent.Build();
+	auto& GaussianRenderComponent = pWorld->CreateComponent<engine::GaussianRenderComponent>(entity);
+	std::string filePath(pFilePath);
+	std::replace(filePath.begin(), filePath.end(), '\\', '/');
+	std::ifstream inFile(filePath, std::ios::in | std::ios::binary);
+	if (inFile.is_open())
+	{
+		CD_ERROR("read over");
+	}
+	else
+	{
+		CD_ERROR("GGGGGG");
+	}
+	inFile.seekg(0, std::ios::end);
+	std::streampos fileSize = inFile.tellg();
+	inFile.seekg(0, std::ios::beg);
+	std::vector<std::byte> buffer(fileSize);
+	inFile.read(reinterpret_cast<char*>(buffer.data()), fileSize);
+	GaussianRenderComponent.SetPlyData(std::move(buffer));
+	GaussianRenderComponent.ProcessingPlyBuffer();
+	GaussianRenderComponent.GenerateTexture();
+	GaussianRenderComponent.Build();
 }
 
 void AssetBrowser::ExportAssetFile(const char* pFilePath)
