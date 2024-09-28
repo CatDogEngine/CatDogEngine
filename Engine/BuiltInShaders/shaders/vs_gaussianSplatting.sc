@@ -70,6 +70,6 @@ void main()
 			vCenter +
 			v_position.x * v1 / viewSize * 2.0 +
 			v_position.y * v2 / viewSize * 2.0,
-			0.0, 1.0);
+			 pos2d.z / pos2d.w, 1.0);
 	}
 }
