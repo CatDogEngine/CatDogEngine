@@ -18,6 +18,8 @@ uniform vec4 u_focal;
 
 void main()
 {
+	// vec4 modelspace = mul(u_model, vec4(center.xyz, 1));
+	// vec4 camspace = mul(u_view, modelspace);
 	vec4 camspace = mul(u_view, vec4(center.xyz, 1));
 	vec4 pos2d = mul(u_proj, camspace);
 
@@ -47,8 +49,6 @@ void main()
 		mat3 cov = T * Vrk * transpose(T) ;
 
 		vec2 vCenter = pos2d.xy / pos2d.w;
-		vCenter.y = -vCenter.y;
-
 		float diagonal1 = cov[0][0] + 0.3;
 		float offDiagonal = cov[0][1];
 		float diagonal2 = cov[1][1] + 0.3;

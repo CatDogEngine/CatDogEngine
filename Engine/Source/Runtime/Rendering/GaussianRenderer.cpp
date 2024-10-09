@@ -36,7 +36,6 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	}
 
 	CameraComponent* pMainCameraComponent = m_pCurrentSceneWorld->GetCameraComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
-	TransformComponent* pMCTComponent = m_pCurrentSceneWorld->GetTransformComponent(m_pCurrentSceneWorld->GetMainCameraEntity());
 	auto& fov = pMainCameraComponent->GetFov();
 	auto& width = pMainCameraComponent->GetViewWidth();
 	auto& height = pMainCameraComponent->GetViewHeight();
@@ -44,12 +43,14 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
 	auto& viewMatrix=pMainCameraComponent->GetViewMatrix();
-	auto& projMatrix = pMainCameraComponent->GetProjectionMatrix();
 
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
 		auto* pGaussianComponent = m_pCurrentSceneWorld->GetGaussianRenderComponent(entity);
-		//auto* pTransfomComponent = m_pCurrentSceneWorld->GetTransformComponent(entity);
+		auto* pTransformComponent = m_pCurrentSceneWorld->GetTransformComponent(entity);
+		pTransformComponent->Build();
+		bgfx::setTransform(pTransformComponent->GetWorldMatrix().begin());
+
 		float view[16]{ 0 };
 		memcpy(view, viewMatrix.begin(), sizeof(viewMatrix));
 		bx::memCopy(m_curView, view, 16 * sizeof(float));
@@ -121,8 +122,17 @@ void engine::GaussianRenderer::Render(float deltaTime)
 
 					for (uint32_t j = 0; j < vertexCount; ++j) {
 						const uint32_t i = depthIndex[vertexCount-j-1];
-
+						//auto origin = cd::Vec4f(splatFileData[i].m_cx, splatFileData[i].m_cy, splatFileData[i].m_cz, 1.0f);
+						//auto value = pTransformComponent->GetWorldMatrix()* cd::Vec4f(splatFileData[i].m_cx, splatFileData[i].m_cy, splatFileData[i].m_cz,1.0f);
+						//splatFileData[i].m_cx = value.x();
+						//splatFileData[i].m_cy = value.y();
+						//splatFileData[i].m_cz = value.z();
+						splatFileData[i].m_cy *= -1;
 						vertexBuffer[j] = splatFileData[i];
+						splatFileData[i].m_cy *= -1;
+						//splatFileData[i].m_cx = origin.x();
+						//splatFileData[i].m_cy = origin.y();
+						//splatFileData[i].m_cz = origin.z();
 					}
 
 					bgfx::ReleaseFn releaseFn = [](void* data, void* bufferPtr) {
