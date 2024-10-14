@@ -913,6 +913,8 @@ void AssetBrowser::ImportAssetFile(const char* pFilePath)
 	{
 		ImportGaussianSplattingFile(pFilePath);
 	}
+
+	m_importOptions.AssetType = IOAssetType::Unknown;
 }
 
 void AssetBrowser::ProcessSceneDatabase(cd::SceneDatabase* pSceneDatabase, bool keepMesh, bool keepMaterial, bool keepTexture, bool keepCamera, bool keepLight)
