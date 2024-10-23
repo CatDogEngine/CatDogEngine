@@ -41,8 +41,9 @@ void main()
 	vec3 emiColor = material.emissive * u_emissiveColorAndFactor.xyz * vec3_splat(u_emissiveColorAndFactor.w);
 	
 	// Fragment Color
-	gl_FragData[0] = vec4(dirColor + envColor + emiColor, 1.0);
-	gl_FragData[1] = vec4(emiColor, 1.0);
-	
+	// gl_FragData[0] = vec4(dirColor + envColor + emiColor, 1.0);
+	// gl_FragData[1] = vec4(emiColor, 1.0);
+	gl_FragColor = vec4(dirColor + envColor + emiColor, 1.0);
+
 	// Post-processing will be used in the last pass.
 }
