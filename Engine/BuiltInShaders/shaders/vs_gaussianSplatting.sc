@@ -29,9 +29,9 @@ void main()
 		);
 
 		mat3 J = mat3(
-			u_focal.x, 0.0,        -(u_focal.x * camspace.x) / camspace.z,
+			u_focal.x,  0.0,      -(u_focal.x * camspace.x) / camspace.z,
 			0.0,       -u_focal.y, (u_focal.y * camspace.y) / camspace.z,
-			0.0,       0.0,        0.0
+			0.0,        0.0,       0.0
 		) / camspace.z;
 
 #if BGFX_SHADER_LANGUAGE_GLSL
@@ -40,9 +40,11 @@ void main()
 		mat3 W = transpose((mat3)u_view);
 #endif
 		mat3 T = mul(W, J);
-		mat3 cov = T * Vrk * transpose(T) ;
+		mat3 cov = transpose(T) * Vrk * T;
 
 		vec2 vCenter = pos2d.xy / pos2d.w;
+		vCenter.y = -vCenter.y;
+
 		float diagonal1 = cov[0][0] + 0.3;
 		float offDiagonal = cov[0][1];
 		float diagonal2 = cov[1][1] + 0.3;
@@ -59,11 +61,9 @@ void main()
 		v_position = a_position.xy;
 
 		vec2 viewSize = vec2(u_viewRect.z, u_viewRect.w);
+		vec2 offset = a_position.x * v1 / viewSize * 2.0 +
+			a_position.y * v2 / viewSize * 2.0;
 
-		gl_Position = vec4(
-			vCenter +
-			v_position.x * v1 / viewSize * 2.0 +
-			v_position.y * v2 / viewSize * 2.0,
-			 pos2d.z / pos2d.w, 1.0);
+		gl_Position = vec4(vCenter + offset, pos2d.z / pos2d.w, 1.0);
 	}
 }
