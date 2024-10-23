@@ -1,33 +1,27 @@
 $input a_position, a_color0, i_data0, i_data1, i_data2, i_data3
 $output v_position, v_color
 
-/*
- * Copyright 2023 Ali Seyedof. All rights reserved.
- * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
- */
-
 #include "../common/common.sh"
-//#include "common.sh"
 
 uniform vec4 u_focal;
 
-#define color	i_data0
-#define center	i_data1
-#define covA	i_data2
-#define covB	i_data3
+#define color  i_data0
+#define center i_data1
+#define covA   i_data2
+#define covB   i_data3
 
 void main()
 {
-	// vec4 modelspace = mul(u_model, vec4(center.xyz, 1));
-	// vec4 camspace = mul(u_view, modelspace);
 	vec4 camspace = mul(u_view, vec4(center.xyz, 1));
 	vec4 pos2d = mul(u_proj, camspace);
 
 	float bounds = 1.2 * pos2d.w;
-	if (pos2d.z < -pos2d.w || pos2d.x < -bounds || pos2d.x > bounds	|| pos2d.y < -bounds || pos2d.y > bounds) {
+	if (pos2d.z < -pos2d.w || pos2d.x < -bounds || pos2d.x > bounds	|| pos2d.y < -bounds || pos2d.y > bounds)
+	{
 		gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
 	}
-	else {
+	else
+	{
 		mat3 Vrk = mat3(
 			covA.x, covA.y, covA.z,
 			covA.y, covB.x, covB.y,
@@ -35,9 +29,9 @@ void main()
 		);
 
 		mat3 J = mat3(
-			u_focal.x,	0.0,		-(u_focal.x * camspace.x) / camspace.z,
-			0.0,		-u_focal.y,	(u_focal.y * camspace.y) / camspace.z,
-			0.0,		0.0,		0.0
+			u_focal.x, 0.0,        -(u_focal.x * camspace.x) / camspace.z,
+			0.0,       -u_focal.y, (u_focal.y * camspace.y) / camspace.z,
+			0.0,       0.0,        0.0
 		) / camspace.z;
 
 #if BGFX_SHADER_LANGUAGE_GLSL

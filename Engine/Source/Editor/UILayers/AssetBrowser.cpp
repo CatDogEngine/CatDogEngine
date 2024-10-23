@@ -1204,7 +1204,6 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 		return entity;
 	};
 
-
 	/*AddGS*/
 	engine::Entity entity = AddNamedEntity("GaussianSplattingEntity");
 	auto& transformComponent = pWorld->CreateComponent<engine::TransformComponent>(entity);
@@ -1242,6 +1241,7 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 				bboxMax[j] = rawFileData[i].center[j];
 		}
 		memcpy(&splatFileData[i].m_cx, rawFileData[i].center, 3 * sizeof(float));
+		splatFileData[i].m_cy *= -1.0f;
 		splatFileData[i].m_r = ((rawFileData[i].color >> 0) & 0xff) / 255.0f;
 		splatFileData[i].m_g = ((rawFileData[i].color >> 8) & 0xff) / 255.0f;
 		splatFileData[i].m_b = ((rawFileData[i].color >> 16) & 0xff) / 255.0f;
