@@ -1,33 +1,27 @@
 $input a_position, a_color0, i_data0, i_data1, i_data2, i_data3
 $output v_position, v_color
 
-/*
- * Copyright 2023 Ali Seyedof. All rights reserved.
- * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
- */
-
 #include "../common/common.sh"
-//#include "common.sh"
 
 uniform vec4 u_focal;
 
-#define color	i_data0
-#define center	i_data1
-#define covA	i_data2
-#define covB	i_data3
+#define color  i_data0
+#define center i_data1
+#define covA   i_data2
+#define covB   i_data3
 
 void main()
 {
-	// vec4 modelspace = mul(u_model, vec4(center.xyz, 1));
-	// vec4 camspace = mul(u_view, modelspace);
 	vec4 camspace = mul(u_view, vec4(center.xyz, 1));
 	vec4 pos2d = mul(u_proj, camspace);
 
 	float bounds = 1.2 * pos2d.w;
-	if (pos2d.z < -pos2d.w || pos2d.x < -bounds || pos2d.x > bounds	|| pos2d.y < -bounds || pos2d.y > bounds) {
+	if (pos2d.z < -pos2d.w || pos2d.x < -bounds || pos2d.x > bounds	|| pos2d.y < -bounds || pos2d.y > bounds)
+	{
 		gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
 	}
-	else {
+	else
+	{
 		mat3 Vrk = mat3(
 			covA.x, covA.y, covA.z,
 			covA.y, covB.x, covB.y,
@@ -35,9 +29,9 @@ void main()
 		);
 
 		mat3 J = mat3(
-			u_focal.x,	0.0,		-(u_focal.x * camspace.x) / camspace.z,
-			0.0,		-u_focal.y,	(u_focal.y * camspace.y) / camspace.z,
-			0.0,		0.0,		0.0
+			u_focal.x,  0.0,      -(u_focal.x * camspace.x) / camspace.z,
+			0.0,       -u_focal.y, (u_focal.y * camspace.y) / camspace.z,
+			0.0,        0.0,       0.0
 		) / camspace.z;
 
 #if BGFX_SHADER_LANGUAGE_GLSL
@@ -46,9 +40,11 @@ void main()
 		mat3 W = transpose((mat3)u_view);
 #endif
 		mat3 T = mul(W, J);
-		mat3 cov = T * Vrk * transpose(T) ;
+		mat3 cov = transpose(T) * Vrk * T;
 
 		vec2 vCenter = pos2d.xy / pos2d.w;
+		vCenter.y = -vCenter.y;
+
 		float diagonal1 = cov[0][0] + 0.3;
 		float offDiagonal = cov[0][1];
 		float diagonal2 = cov[1][1] + 0.3;
@@ -65,11 +61,9 @@ void main()
 		v_position = a_position.xy;
 
 		vec2 viewSize = vec2(u_viewRect.z, u_viewRect.w);
+		vec2 offset = a_position.x * v1 / viewSize * 2.0 +
+			a_position.y * v2 / viewSize * 2.0;
 
-		gl_Position = vec4(
-			vCenter +
-			v_position.x * v1 / viewSize * 2.0 +
-			v_position.y * v2 / viewSize * 2.0,
-			 pos2d.z / pos2d.w, 1.0);
+		gl_Position = vec4(vCenter + offset, pos2d.z / pos2d.w, 1.0);
 	}
 }

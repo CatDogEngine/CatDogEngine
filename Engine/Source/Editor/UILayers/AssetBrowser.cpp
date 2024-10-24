@@ -1204,7 +1204,6 @@ void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
 		return entity;
 	};
 
-
 	/*AddGS*/
 	engine::Entity entity = AddNamedEntity("GaussianSplattingEntity");
 	auto& transformComponent = pWorld->CreateComponent<engine::TransformComponent>(entity);

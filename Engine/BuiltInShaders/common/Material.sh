@@ -119,7 +119,7 @@ Material GetMaterial(vec2 uv, vec3 normal, mat3 TBN) {
 #endif
 	
 	float refectance = u_metallicRoughnessRefectanceFactor.z;
-	material.F0 = mix(0.16 * refectance * refectance, material.albedo, material.metallic);
+	material.F0 = mix(vec3_splat(0.16 * refectance * refectance), material.albedo, material.metallic);
 	
 	return material;
 }

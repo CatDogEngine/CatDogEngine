@@ -34,7 +34,4 @@ namespace engine
 		const static PosVertex triangleVertices[4] = { 2, -2, -2, -2, 2, 2, -2, 2 };
 		m_vbh = bgfx::createVertexBuffer(bgfx::makeRef(triangleVertices, sizeof(PosVertex) * 4), ms_layout);
 	}
-
-
-
 }
