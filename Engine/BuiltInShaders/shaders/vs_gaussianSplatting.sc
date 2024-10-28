@@ -12,7 +12,9 @@ uniform vec4 u_focal;
 
 void main()
 {
-	vec4 camspace = mul(u_view, vec4(center.xyz, 1));
+	// vec4 modelspace = mul(u_model,vec4(center.xyz, 1));
+	// vec4 camspace = mul(u_view, modelspace);
+	vec4 camspace = mul(u_modelView, vec4(center.xyz, 1));
 	vec4 pos2d = mul(u_proj, camspace);
 
 	float bounds = 1.2 * pos2d.w;
