@@ -42,6 +42,9 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
 	auto viewMatrix = pMainCameraComponent->GetViewMatrix();
+	viewMatrix.Data(1) = -viewMatrix.Data(1);
+	viewMatrix.Data(5) = -viewMatrix.Data(5);
+	viewMatrix.Data(9) = -viewMatrix.Data(9);
 	viewMatrix.Data(13) = -viewMatrix.Data(13);
 
 	auto pProjectionMatrix = pMainCameraComponent->GetProjectionMatrix();
