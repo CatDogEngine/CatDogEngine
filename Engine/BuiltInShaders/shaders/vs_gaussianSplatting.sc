@@ -37,11 +37,11 @@ void main()
 		) / camspace.z;
 
 #if BGFX_SHADER_LANGUAGE_GLSL
-		mat3 W = transpose(mat3(u_view));
+		mat3 W = transpose(mat3(u_modelView));
 #else
-		mat3 W = transpose((mat3)u_view);
+		mat3 W = transpose((mat3)u_modelView);
 #endif
-		mat3 T = mul(W, J);
+		mat3 T = mul(W, mat3(J));
 		mat3 cov = transpose(T) * Vrk * T;
 
 		vec2 vCenter = pos2d.xy / pos2d.w;
