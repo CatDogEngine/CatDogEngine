@@ -48,7 +48,6 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	viewMatrix.Data(13) = -viewMatrix.Data(13);
 
 	auto pProjectionMatrix = pMainCameraComponent->GetProjectionMatrix();
-
 	bgfx::setViewTransform(GetViewID(), &viewMatrix, &pProjectionMatrix);
 
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
