@@ -22,7 +22,6 @@ void engine::GaussianRenderer::Init()
 void engine::GaussianRenderer::UpdateView(const float* pViewMatrix, const float* pProjectionMatrix)
 {
 	UpdateViewRenderTarget();
-	bgfx::setViewTransform(GetViewID(), pViewMatrix, pProjectionMatrix);
 }
 
 void engine::GaussianRenderer::Render(float deltaTime)
@@ -42,7 +41,12 @@ void engine::GaussianRenderer::Render(float deltaTime)
 	float aspect = pMainCameraComponent->GetAspect();
 	float fx = width/ 2.0f / tanf(bx::toRad(fov / 2.0f));
 	float fy = height * aspect / 2.0f / tanf(bx::toRad(fov / 2.0f));
-	auto& viewMatrix = pMainCameraComponent->GetViewMatrix();
+	auto viewMatrix = pMainCameraComponent->GetViewMatrix();
+	viewMatrix.Data(13) = -viewMatrix.Data(13);
+
+	auto pProjectionMatrix = pMainCameraComponent->GetProjectionMatrix();
+
+	bgfx::setViewTransform(GetViewID(), &viewMatrix, &pProjectionMatrix);
 
 	for (Entity entity : m_pCurrentSceneWorld->GetGaussianRenderEntities())
 	{
