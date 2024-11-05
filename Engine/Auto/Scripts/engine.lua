@@ -108,7 +108,7 @@ project("Engine")
 		}
 
 		defines {
-			"SPDLOG_ENABLE", "SPDLOG_NO_EXCEPTIONS", "SPDLOG_USE_STD_FORMAT",
+			"SPDLOG_ENABLE", "SPDLOG_NO_EXCEPTIONS",
 		}
 	end
 
