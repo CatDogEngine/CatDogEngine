@@ -51,7 +51,7 @@ private:
 template<>
 struct fmt::formatter<cd::Vec2f> : fmt::formatter<std::string>
 {
-	auto format(cd::Vec2f vec, format_context &ctx) const -> decltype(ctx.out())
+	auto format(const cd::Vec2f &vec, format_context &ctx) const -> decltype(ctx.out())
 	{
 		return fmt::format_to(ctx.out(), "vec2:({}, {})", vec.x(), vec.y());
 	}
@@ -60,7 +60,7 @@ struct fmt::formatter<cd::Vec2f> : fmt::formatter<std::string>
 template<>
 struct fmt::formatter<cd::Vec3f> : fmt::formatter<std::string>
 {
-	auto format(cd::Vec3f vec, format_context &ctx) const -> decltype(ctx.out())
+	auto format(const cd::Vec3f &vec, format_context &ctx) const -> decltype(ctx.out())
 	{
 		return fmt::format_to(ctx.out(), "vec3:({}, {}, {})", vec.x(), vec.y(), vec.z());
 	}
@@ -69,7 +69,7 @@ struct fmt::formatter<cd::Vec3f> : fmt::formatter<std::string>
 template<>
 struct fmt::formatter<cd::Vec4f> : fmt::formatter<std::string>
 {
-	auto format(cd::Vec4f vec, format_context &ctx) const -> decltype(ctx.out())
+	auto format(const cd::Vec4f &vec, format_context &ctx) const -> decltype(ctx.out())
 	{
 		return fmt::format_to(ctx.out(), "vec4:({}, {}, {}, {})", vec.x(), vec.y(), vec.z(), vec.w());
 	}
@@ -78,7 +78,7 @@ struct fmt::formatter<cd::Vec4f> : fmt::formatter<std::string>
 template<>
 struct fmt::formatter<cd::Quaternion> : fmt::formatter<std::string>
 {
-	auto format(cd::Quaternion qua, format_context &ctx) const -> decltype(ctx.out())
+	auto format(const cd::Quaternion &qua, format_context &ctx) const -> decltype(ctx.out())
 	{
 		return fmt::format_to(ctx.out(), "Vector = ({}, {}, {}), Scalar = {}", qua.x(), qua.y(), qua.z(), qua.w());
 	}
