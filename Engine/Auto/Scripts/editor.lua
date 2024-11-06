@@ -62,7 +62,7 @@ project("Editor")
 
 	if ENABLE_SPDLOG then
 		defines {
-			"SPDLOG_ENABLE", "SPDLOG_NO_EXCEPTIONS", "SPDLOG_USE_STD_FORMAT",
+			"SPDLOG_ENABLE", "SPDLOG_NO_EXCEPTIONS",
 		}
 
 		includedirs {
