@@ -5,6 +5,7 @@
 #include "Math/Quaternion.hpp"
 
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/bundled/format.h>
 
 namespace engine
 {
@@ -48,38 +49,38 @@ private:
 #define CD_ASSERT(x, ...) { if(!(x)) { CD_FATAL(...); __debugbreak(); } }
 
 template<>
-struct std::formatter<cd::Vec2f> : std::formatter<std::string>
+struct fmt::formatter<cd::Vec2f> : fmt::formatter<std::string>
 {
-	auto format(const cd::Vec2f& vec, std::format_context& context) const
+	auto format(const cd::Vec2f &vec, format_context &ctx) const -> decltype(ctx.out())
 	{
-		return formatter<string>::format(std::format("vec2:({}, {})", vec.x(), vec.y()), context);
+		return fmt::format_to(ctx.out(), "vec2:({}, {})", vec.x(), vec.y());
 	}
 };
 
 template<>
-struct std::formatter<cd::Vec3f> : std::formatter<std::string>
+struct fmt::formatter<cd::Vec3f> : fmt::formatter<std::string>
 {
-	auto format(const cd::Vec3f& vec, std::format_context& context) const
+	auto format(const cd::Vec3f &vec, format_context &ctx) const -> decltype(ctx.out())
 	{
-		return formatter<string>::format(std::format("vec3:({}, {}, {})", vec.x(), vec.y(), vec.z()), context);
+		return fmt::format_to(ctx.out(), "vec3:({}, {}, {})", vec.x(), vec.y(), vec.z());
 	}
 };
 
 template<>
-struct std::formatter<cd::Vec4f> : std::formatter<std::string>
+struct fmt::formatter<cd::Vec4f> : fmt::formatter<std::string>
 {
-	auto format(const cd::Vec4f& vec, std::format_context& context) const
+	auto format(const cd::Vec4f &vec, format_context &ctx) const -> decltype(ctx.out())
 	{
-		return formatter<string>::format(std::format("vec4:({}, {}, {}, {})", vec.x(), vec.y(), vec.z(), vec.w()), context);
+		return fmt::format_to(ctx.out(), "vec4:({}, {}, {}, {})", vec.x(), vec.y(), vec.z(), vec.w());
 	}
 };
 
 template<>
-struct std::formatter<cd::Quaternion> : std::formatter<std::string>
+struct fmt::formatter<cd::Quaternion> : fmt::formatter<std::string>
 {
-	auto format(const cd::Quaternion& qua, std::format_context& context) const
+	auto format(const cd::Quaternion &qua, format_context &ctx) const -> decltype(ctx.out())
 	{
-		return formatter<string>::format(std::format("Vector = ({}, {}, {}), Scalar = {}", qua.x(), qua.y(), qua.z(), qua.w()), context);
+		return fmt::format_to(ctx.out(), "Vector = ({}, {}, {}), Scalar = {}", qua.x(), qua.y(), qua.z(), qua.w());
 	}
 };
 
