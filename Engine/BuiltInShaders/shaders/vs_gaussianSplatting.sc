@@ -42,7 +42,7 @@ void main()
 		mat3 W = transpose((mat3)u_modelView);
 #endif
 		mat3 T = mul(W, mat3(J));
-		mat3 cov = transpose(T) * Vrk * T;
+		mat3 cov = T * Vrk * transpose(T);
 
 		vec2 vCenter = pos2d.xy / pos2d.w;
 		vCenter.y = -vCenter.y;
