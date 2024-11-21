@@ -141,6 +141,8 @@ float textureIndex(int lightIndex, vec3 sampleVec){
 // -------------------- Point -------------------- //
 
 float CalculatePointShadow(vec3 fragPosWorldSpace, vec3 lightPosWorldSpace, float far_plane, int lightIndex) {
+	return 0.0;
+
 	vec3 lightToFrag = fragPosWorldSpace - lightPosWorldSpace;
 	float currentDepth = length(lightToFrag);
     float bias = 0.05;
@@ -193,6 +195,8 @@ vec3 CalculatePointLight(U_Light light, Material material, vec3 worldPos, vec3 v
 // -------------------- Spot -------------------- //
 
 float CalculateSpotShadow(vec3 fragPosWorldSpace, vec3 normal, vec3 lightDir,int lightViewProjOffset, int lightIndex){
+	return 0.0;
+
     vec4 fragPosLightSpace = mul(u_lightViewProjs[lightViewProjOffset], vec4(fragPosWorldSpace, 1.0));
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	vec3 sampleVec = vec3(1.0, projCoords.y, -projCoords.x);
@@ -245,6 +249,8 @@ vec3 CalculateSpotLight(U_Light light, Material material, vec3 worldPos, vec3 vi
 // -------------------- Directional -------------------- //
 
 float CalculateDirectionalShadow(vec3 fragPosWorldSpace, vec3 normal, vec3 lightDir, mat4 lightViewProj, int lightIndex, float num){
+	return 0.0;
+	
     vec4 fragPosLightSpace = mul(lightViewProj, vec4(fragPosWorldSpace, 1.0));
     vec3 projCoords = fragPosLightSpace.xyz/fragPosLightSpace.w;
     float currentDepth = projCoords.z;
