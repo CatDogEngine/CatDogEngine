@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Math/Matrix.hpp"
 #include "Renderer.h"
+
 #include <vector>
 
 namespace engine
@@ -26,6 +28,11 @@ private:
 	uint16_t m_boneVBH = UINT16_MAX;
 	uint16_t m_boneIBH = UINT16_MAX;
 	bool hasBuilt = false;
+
+	cd::Matrix4x4 m_deltaRootTransform;
+	std::vector<cd::Matrix4x4> m_globalDeltaBoneMatrix;
+	std::vector<cd::Matrix4x4> m_boneMatrixA;
+	std::vector<cd::Matrix4x4> m_boneMatrixB;
 };
 
 }

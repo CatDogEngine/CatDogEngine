@@ -69,7 +69,8 @@ void main()
 		discard;
 	}
 
-   material.albedo = CalcTexColor(v_worldPos, v_texcoord0);
+	vec4 texColor = CalcTexColor(v_worldPos, v_texcoord0);
+    material.albedo = vec3(texColor.x, texColor.y, texColor.z);
 
 	vec3 cameraPos = GetCamera().position.xyz;
 	vec3 viewDir = normalize(cameraPos - v_worldPos);
