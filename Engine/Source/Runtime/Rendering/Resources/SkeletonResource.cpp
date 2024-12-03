@@ -124,7 +124,7 @@ void SkeletonResource::BuildSkeletonBuffer()
 	constexpr uint32_t indexTypeSize = static_cast<uint32_t>(sizeof(uint16_t));
 	constexpr uint32_t posDataSize = cd::Point::Size * sizeof(cd::Point::ValueType);
 	m_currentVertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Position, cd::AttributeValueType::Float, 3);
-	m_currentVertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::BoneIndex, cd::AttributeValueType::Int16, 4U);
+	m_currentVertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Color, cd::AttributeValueType::Int16, 4U);
 	m_indexBuffer.resize((m_boneCount - 1) * 2 * indexTypeSize);
 	m_vertexBuffer.resize(m_boneCount * m_currentVertexFormat.GetStride());
 
@@ -136,7 +136,7 @@ void SkeletonResource::BuildSkeletonBuffer()
 	std::memcpy(&vbDataPtr[vbDataSize], position.begin(), posDataSize);
 	vbDataSize += posDataSize;
 	//std::vector<uint16_t> vertexBoneIndexes;
-	uint16_t selectedBoneIndex[4] = { 0U, 0U, 0U, 0U };
+	uint16_t selectedBoneIndex[4] = { 0U, 1U, 2U, 3U };
 	//vertexBoneIndexes.resize(4, 0U);
 	//vertexBoneIndexes[0] = 0U;
 	//uint16_t first = 0;

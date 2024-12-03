@@ -188,7 +188,12 @@ bool MeshResource::BuildVertexBuffer()
 	std::optional<cd::VertexBuffer> optVertexBuffer;
 	if (!m_pSkinAsset.empty())
 	{
-		optVertexBuffer = cd::BuildVertexBufferForSkeletalMesh(*m_pMeshAsset, m_currentVertexFormat, *m_pSkinAsset[0], m_pBonesAsset);
+		cd::VertexFormat tempVertexFormat;
+		tempVertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Position, cd::AttributeValueType::Float, 3);
+		tempVertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::Color, cd::AttributeValueType::Int16, 4U);
+		tempVertexFormat.AddVertexAttributeLayout(cd::VertexAttributeType::BoneWeight, cd::AttributeValueType::Float, 4U);
+
+		optVertexBuffer = cd::BuildVertexBufferForSkeletalMesh(*m_pMeshAsset, tempVertexFormat, *m_pSkinAsset[0], m_pBonesAsset);
 	}
 	else
 	{
