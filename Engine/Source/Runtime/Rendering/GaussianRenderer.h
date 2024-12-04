@@ -1,16 +1,15 @@
 #pragma once
 
-#include "Math/Matrix.hpp"
 #include "Renderer.h"
-
+#include "RenderContext.h"
+#include <atomic>
 #include <vector>
 
 namespace engine
 {
-
 class SceneWorld;
 
-class SkeletonRenderer final : public Renderer
+class GaussianRenderer final : public Renderer
 {
 public:
 	using Renderer::Renderer;
@@ -18,21 +17,15 @@ public:
 	virtual void Init() override;
 	virtual void UpdateView(const float* pViewMatrix, const float* pProjectionMatrix) override;
 	virtual void Render(float deltaTime) override;
-	void Build();
+
 	void SetSceneWorld(SceneWorld* pSceneWorld) { m_pCurrentSceneWorld = pSceneWorld; }
 
 private:
 	SceneWorld* m_pCurrentSceneWorld = nullptr;
-	std::vector<std::byte> m_vertexBuffer;
-	std::vector<std::byte> m_indexBuffer;
-	uint16_t m_boneVBH = UINT16_MAX;
-	uint16_t m_boneIBH = UINT16_MAX;
-	bool hasBuilt = false;
-
-	cd::Matrix4x4 m_deltaRootTransform;
-	std::vector<cd::Matrix4x4> m_globalDeltaBoneMatrix;
-	std::vector<cd::Matrix4x4> m_boneMatrixA;
-	std::vector<cd::Matrix4x4> m_boneMatrixB;
+	std::atomic<int>	m_curBuffer;
+	std::atomic<bool>	m_isSorting = false;
+	float m_curView[16];
+	float m_lastView[16];
 };
 
 }

@@ -364,44 +364,44 @@ void WorldRenderer::Render(float deltaTime)
 		GetRenderContext()->FillUniform(lightViewProjsCrc, lightViewProjsData.data(), totalLightViewProjOffset);
 
 		// Submit shadow map and settings of each light
-		constexpr StringCrc shadowMapSamplerCrcs[3] = { StringCrc(cubeShadowMapSamplers[0]), StringCrc(cubeShadowMapSamplers[1]), StringCrc(cubeShadowMapSamplers[2]) };
-		for (int lightIndex = 0; lightIndex < lightEntityCount; lightIndex++)
-		{
-			auto lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[lightIndex]);
-			cd::LightType lightType = lightComponent->GetType();
-
-			constexpr StringCrc CastShadowIntensityCrc(IsCastShadow);
-			if (lightComponent->IsCastShadow())
-			{
-				cd::Vec4f vec4 = cd::Vec4f::One();
-				GetRenderContext()->FillUniform(CastShadowIntensityCrc, &vec4);
-			}
-			else
-			{
-				cd::Vec4f vec4 = cd::Vec4f::Zero();
-				GetRenderContext()->FillUniform(CastShadowIntensityCrc, &vec4);
-			}
-			//GetRenderContext()->FillUniform(CastShadowIntensityCrc, &lightComponent->IsCastShadow());
-			if (cd::LightType::Directional == lightType)
-			{
-				bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());
-				bgfx::setTexture(SHADOW_MAP_CUBE_FIRST_SLOT + lightIndex, GetRenderContext()->GetUniform(shadowMapSamplerCrcs[lightIndex]), blitDstShadowMapTexture);
-				// TODO : manual 
-				constexpr StringCrc clipFrustumDepthCrc(clipFrustumDepth);
-				GetRenderContext()->FillUniform(clipFrustumDepthCrc, lightComponent->GetComputedCascadeSplit(), 1);
-			}
-			else if (cd::LightType::Point == lightType)
-			{
-				bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());
-				bgfx::setTexture(SHADOW_MAP_CUBE_FIRST_SLOT + lightIndex, GetRenderContext()->GetUniform(shadowMapSamplerCrcs[lightIndex]), blitDstShadowMapTexture);
-			}
-			else if (cd::LightType::Spot == lightType)
-			{
-				// Blit RTV(FrameBuffer Texture) to SRV(Texture)
-				bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());
-				bgfx::setTexture(SHADOW_MAP_CUBE_FIRST_SLOT + lightIndex, GetRenderContext()->GetUniform(shadowMapSamplerCrcs[lightIndex]), blitDstShadowMapTexture);
-			}
-		}
+		// constexpr StringCrc shadowMapSamplerCrcs[3] = { StringCrc(cubeShadowMapSamplers[0]), StringCrc(cubeShadowMapSamplers[1]), StringCrc(cubeShadowMapSamplers[2]) };
+		// for (int lightIndex = 0; lightIndex < lightEntityCount; lightIndex++)
+		// {
+		// 	auto lightComponent = m_pCurrentSceneWorld->GetLightComponent(lightEntities[lightIndex]);
+		// 	cd::LightType lightType = lightComponent->GetType();
+		// 
+		// 	constexpr StringCrc CastShadowIntensityCrc(IsCastShadow);
+		// 	if (lightComponent->IsCastShadow())
+		// 	{
+		// 		cd::Vec4f vec4 = cd::Vec4f::One();
+		// 		GetRenderContext()->FillUniform(CastShadowIntensityCrc, &vec4);
+		// 	}
+		// 	else
+		// 	{
+		// 		cd::Vec4f vec4 = cd::Vec4f::Zero();
+		// 		GetRenderContext()->FillUniform(CastShadowIntensityCrc, &vec4);
+		// 	}
+		// 	//GetRenderContext()->FillUniform(CastShadowIntensityCrc, &lightComponent->IsCastShadow());
+		// 	if (cd::LightType::Directional == lightType)
+		// 	{
+		// 		bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());
+		// 		bgfx::setTexture(SHADOW_MAP_CUBE_FIRST_SLOT + lightIndex, GetRenderContext()->GetUniform(shadowMapSamplerCrcs[lightIndex]), blitDstShadowMapTexture);
+		// 		// TODO : manual 
+		// 		constexpr StringCrc clipFrustumDepthCrc(clipFrustumDepth);
+		// 		GetRenderContext()->FillUniform(clipFrustumDepthCrc, lightComponent->GetComputedCascadeSplit(), 1);
+		// 	}
+		// 	else if (cd::LightType::Point == lightType)
+		// 	{
+		// 		bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());
+		// 		bgfx::setTexture(SHADOW_MAP_CUBE_FIRST_SLOT + lightIndex, GetRenderContext()->GetUniform(shadowMapSamplerCrcs[lightIndex]), blitDstShadowMapTexture);
+		// 	}
+		// 	else if (cd::LightType::Spot == lightType)
+		// 	{
+		// 		// Blit RTV(FrameBuffer Texture) to SRV(Texture)
+		// 		bgfx::TextureHandle blitDstShadowMapTexture = static_cast<bgfx::TextureHandle>(lightComponent->GetShadowMapTexture());
+		// 		bgfx::setTexture(SHADOW_MAP_CUBE_FIRST_SLOT + lightIndex, GetRenderContext()->GetUniform(shadowMapSamplerCrcs[lightIndex]), blitDstShadowMapTexture);
+		// 	}
+		// }
 
 		uint64_t state = defaultRenderingState;
 		if (!pMaterialComponent->GetTwoSided())

@@ -154,6 +154,13 @@ public:
 	int GetBlurScaling() const { return m_blurScaling; }
 	void SetBlurScaling(int blurscaling) { m_blurScaling = blurscaling; }
 #endif
+	
+	//Gaussian
+	float& GetViewWidth() { return m_viewWidth; }
+	float& GetViewHeight() { return m_viewHeight; }
+	void SetViewWidth(float width) { m_viewWidth = width; }
+	void SetViewHeight(float height) { m_viewHeight = height; }
+
 
 private:
 	// Input
@@ -189,6 +196,12 @@ private:
 	float m_blurSize;
 	int m_blurScaling;
 #endif
+
+
+	//Gaussian
+	float m_viewWidth;
+	float m_viewHeight;
+
 };
 
 }

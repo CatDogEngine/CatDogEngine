@@ -304,6 +304,7 @@ void BlendTwoPos(std::vector<cd::Matrix4x4>& boneMatrices, const cd::SceneDataba
 
 void SkeletonRenderer::Init()
 {
+	bgfx::createUniform("u_boneMatrices", bgfx::UniformType::Mat4, 128);
 	AddDependentShaderResource(GetRenderContext()->RegisterShaderProgram("SkeletonProgram", "vs_skeleton", "fs_AABB"));
 	bgfx::setViewName(GetViewID(), "SkeletonRenderer");
 }
@@ -361,16 +362,13 @@ void SkeletonRenderer::Render(float deltaTime)
 		{
 			animationRunningTime += deltaTime * pAnimationComponent->GetPlayBackSpeed();
 		}
-		static cd::Matrix4x4 deltaRootTransform = cd::Matrix4x4::Identity();
-		static std::vector<cd::Matrix4x4> globalDeltaBoneMatrix;
-		static std::vector<cd::Matrix4x4> boneMatrixA;
-		static std::vector<cd::Matrix4x4> boneMatrixB;
-		globalDeltaBoneMatrix.clear();
-		boneMatrixA.clear();
-		boneMatrixB.clear();
-		globalDeltaBoneMatrix.resize(128, cd::Matrix4x4::Identity());
-		boneMatrixA.resize(128, cd::Matrix4x4::Identity());
-		boneMatrixB.resize(128, cd::Matrix4x4::Identity());
+
+		m_globalDeltaBoneMatrix.clear();
+		m_boneMatrixA.clear();
+		m_boneMatrixB.clear();
+		m_globalDeltaBoneMatrix.resize(128, cd::Matrix4x4::Identity());
+		m_boneMatrixA.resize(128, cd::Matrix4x4::Identity());
+		m_boneMatrixB.resize(128, cd::Matrix4x4::Identity());
 		if (engine::AnimationClip::Idle == pAnimationComponent->GetAnimationClip())
 		{
 			cd::Matrix4x4 rootBone = cd::Matrix4x4::Identity();
@@ -383,8 +381,7 @@ void SkeletonRenderer::Render(float deltaTime)
 			pAnimationComponent->SetAnimationPlayTime(animationTime);
 	
 			cd::Matrix4x4 curGlobalDeltaMatrix = cd::Matrix4x4::Identity();
-			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->IsPlaying());
-			
+			details::CalculateTransform(m_globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->IsPlaying());
 		}
 		else if (engine::AnimationClip::Walking == pAnimationComponent->GetAnimationClip())
 		{
@@ -397,7 +394,7 @@ void SkeletonRenderer::Render(float deltaTime)
 			pAnimationComponent->SetAnimationPlayTime(animationTime);
 
 			cd::Matrix4x4 curGlobalDeltaMatrix = cd::Matrix4x4::Identity();
-			details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->IsPlaying());
+			details::CalculateTransform(m_globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkeletonComponent, curGlobalDeltaMatrix, deltaTime * pAnimationComponent->GetPlayBackSpeed(), pAnimationComponent->IsPlaying());
 		}
 		else if (engine::AnimationClip::Running == pAnimationComponent->GetAnimationClip())
 		{
@@ -407,7 +404,7 @@ void SkeletonRenderer::Render(float deltaTime)
 			ticksPerSecond = pSceneDatabase->GetAnimation(1).GetTicksPerSecond();
 			float animationTime = details::CustomFMod(animationRunningTime, duration);
 	
-			//details::CalculateTransform(globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkinMeshComponent, curBoneGlobalMatrix, cd::Matrix4x4::Identity());
+			//details::CalculateTransform(m_globalDeltaBoneMatrix, pSceneDatabase, animationTime, pSceneDatabase->GetBone(0), clipName, pSkinMeshComponent, curBoneGlobalMatrix, cd::Matrix4x4::Identity());
 		}
 		else if (engine::AnimationClip::Blend == pAnimationComponent->GetAnimationClip())
 		{
@@ -424,12 +421,12 @@ void SkeletonRenderer::Render(float deltaTime)
 			float clipAProgress = clipARunningTime / clipATime;
 
 			cd::Matrix4x4 curGlobalDeltaMatrix = cd::Matrix4x4::Identity();
-			details::BlendTwoPos(globalDeltaBoneMatrix, pSceneDatabase, clipAProgress, pSceneDatabase->GetBone(0), pSceneDatabase->GetAnimation(0).GetName(), pSceneDatabase->GetAnimation(1).GetName(), pSkeletonComponent, curGlobalDeltaMatrix, deltaRootTransform, factor);
+			details::BlendTwoPos(m_globalDeltaBoneMatrix, pSceneDatabase, clipAProgress, pSceneDatabase->GetBone(0), pSceneDatabase->GetAnimation(0).GetName(), pSceneDatabase->GetAnimation(1).GetName(), pSkeletonComponent, curGlobalDeltaMatrix, m_deltaRootTransform, factor);
 		}
 
 		bgfx::setTransform(cd::Matrix4x4::Identity().begin());
 
-		bgfx::setUniform(bgfx::UniformHandle{ pAnimationComponent->GetBoneMatrixsUniform() }, globalDeltaBoneMatrix.data(), static_cast<uint16_t>(globalDeltaBoneMatrix.size()));
+		bgfx::setUniform(bgfx::UniformHandle{ pAnimationComponent->GetBoneMatrixsUniform() }, m_globalDeltaBoneMatrix.data(), static_cast<uint16_t>(m_globalDeltaBoneMatrix.size()));
 		bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{ pSkeletonComponent->GetSkeletonResource()->GetVertexBufferHandle()});
 		bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ pSkeletonComponent->GetSkeletonResource()->GetIndexBufferHandle() });
 
@@ -440,7 +437,7 @@ void SkeletonRenderer::Render(float deltaTime)
 
 		constexpr StringCrc programHandleIndex{ "SkeletonProgram" };
 
-		//GetRenderContext()->Submit(GetViewID(), programHandleIndex);
+		GetRenderContext()->Submit(GetViewID(), programHandleIndex);
 	}
 }
 }

@@ -18,7 +18,7 @@ void main()
     {
         uint offset = activeMorphOffestLengthIB[i*3];
         uint length = activeMorphOffestLengthIB[i*3+1];
-        float weight = asfloat(activeMorphOffestLengthIB[i*3+2]);
+        float weight = uintBitsToFloat(activeMorphOffestLengthIB[i*3+2]);
         for(uint j = 0; j < length; j++)
         {
             uint id = allMorphVertexIDIB[(offset+j)*4];

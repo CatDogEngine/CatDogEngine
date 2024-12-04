@@ -204,6 +204,8 @@ void AnimationRenderer::Render(float deltaTime)
 			continue;
 		}
 
+		//auto pAnimationComponent = m_pCurrentSceneWorld->GetAnimationComponent(entity);
+		//bgfx::setUniform(bgfx::UniformHandle{ pAnimationComponent->GetBoneMatrixsUniform() }, globalDeltaBoneMatrix.data(), static_cast<uint16_t>(globalDeltaBoneMatrix.size()));
 		TransformComponent* pTransformComponent = m_pCurrentSceneWorld->GetTransformComponent(entity);
 		bgfx::setTransform(pTransformComponent->GetWorldMatrix().begin());
 

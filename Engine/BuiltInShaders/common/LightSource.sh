@@ -42,9 +42,9 @@ U_Light GetLightParams(int pointer) {
 	light.height            	= u_lightParams[pointer + 4].y;
 	light.lightAngleScale   	= u_lightParams[pointer + 4].z;
 	light.lightAngleOffeset 	= u_lightParams[pointer + 4].w;
-	light.shadowType        	= asint(u_lightParams[pointer + 5].x);
-	light.lightViewProjOffset	= asint(u_lightParams[pointer + 5].y);
-	light.cascadeNum        	= asint(u_lightParams[pointer + 5].z);
+	light.shadowType        	= floatBitsToInt(u_lightParams[pointer + 5].x);
+	light.lightViewProjOffset	= floatBitsToInt(u_lightParams[pointer + 5].y);
+	light.cascadeNum        	= floatBitsToInt(u_lightParams[pointer + 5].z);
 	light.shadowBias        	= u_lightParams[pointer + 5].z;
 	light.frustumClips      	= u_lightParams[pointer + 6];
 	return light;
@@ -141,6 +141,8 @@ float textureIndex(int lightIndex, vec3 sampleVec){
 // -------------------- Point -------------------- //
 
 float CalculatePointShadow(vec3 fragPosWorldSpace, vec3 lightPosWorldSpace, float far_plane, int lightIndex) {
+	return 0.0;
+
 	vec3 lightToFrag = fragPosWorldSpace - lightPosWorldSpace;
 	float currentDepth = length(lightToFrag);
     float bias = 0.05;
@@ -193,6 +195,8 @@ vec3 CalculatePointLight(U_Light light, Material material, vec3 worldPos, vec3 v
 // -------------------- Spot -------------------- //
 
 float CalculateSpotShadow(vec3 fragPosWorldSpace, vec3 normal, vec3 lightDir,int lightViewProjOffset, int lightIndex){
+	return 0.0;
+
     vec4 fragPosLightSpace = mul(u_lightViewProjs[lightViewProjOffset], vec4(fragPosWorldSpace, 1.0));
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	vec3 sampleVec = vec3(1.0, projCoords.y, -projCoords.x);
@@ -245,6 +249,8 @@ vec3 CalculateSpotLight(U_Light light, Material material, vec3 worldPos, vec3 vi
 // -------------------- Directional -------------------- //
 
 float CalculateDirectionalShadow(vec3 fragPosWorldSpace, vec3 normal, vec3 lightDir, mat4 lightViewProj, int lightIndex, float num){
+	return 0.0;
+	
     vec4 fragPosLightSpace = mul(lightViewProj, vec4(fragPosWorldSpace, 1.0));
     vec3 projCoords = fragPosLightSpace.xyz/fragPosLightSpace.w;
     float currentDepth = projCoords.z;
@@ -329,12 +335,15 @@ vec3 CalculateCelDirectionalLight(U_Light light, Material material, vec3 worldPo
 	
 	float firstShadowMask = saturate(1.0 - (halfLambert - (dividLine.x - dividLine.y)) / dividLine.y); // albedo and 1st shadow
 	float secondShadowMask = saturate (1.0 - (halfLambert - (dividLine.z - dividLine.w)) / dividLine.w); // 1st shadow and 2st shadow
-	vec3 finalBaseColor = lerp(material.albedo, lerp(celParameter.firstShadowColor, celParameter.secondShadowColor, secondShadowMask), firstShadowMask);
+	vec3 finalBaseColor = mix(material.albedo, mix(celParameter.firstShadowColor, celParameter.secondShadowColor, vec3_splat(firstShadowMask)), vec3_splat(firstShadowMask));
 	
 	// Specular
 	float halfSpecular = 0.5 * NdotH + 0.5;
 	vec4 specular = celParameter.specular;
-	vec3 specularMask = specular.y * lerp(1.0 - step(halfSpecular, (1.0 - pow(specular.x, 5.0))), pow(halfSpecular, exp2(lerp(11.0, 1.0, specular.x))), specular.w);
+	vec3 specularMask = vec3_splat(specular.y * mix(
+		1.0 - step(halfSpecular, (1.0 - pow(specular.x, 5.0))),
+		pow(halfSpecular, exp2(mix(11.0, 1.0, specular.x))),
+		specular.w));
 	vec3 specularColor = light.color * specularMask * vec3_splat(((1.0 - firstShadowMask) + (firstShadowMask * specular.z)) * light.intensity);
 	
 	// Rim

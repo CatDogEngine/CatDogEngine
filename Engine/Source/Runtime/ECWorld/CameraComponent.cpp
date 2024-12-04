@@ -22,6 +22,7 @@ void CameraComponent::BuildProjectMatrix()
 	m_projectionMatrix = cd::Matrix4x4::Perspective(m_fov, m_aspect, m_nearPlane, m_farPlane, cd::NDCDepth::MinusOneToOne == m_ndcDepth);
 }
 
+
 cd::Ray CameraComponent::EmitRay(float screenX, float screenY, float width, float height) const
 {
 	cd::Matrix4x4 vpInverse = m_projectionMatrix * m_viewMatrix;

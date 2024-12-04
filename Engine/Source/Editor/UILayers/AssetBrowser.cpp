@@ -119,6 +119,21 @@ bool IsParticleInputFile(const char* pFileExtension)
 	return false;
 }
 
+bool IsGaussianInputFile(const char* pFileExtension)
+{
+	constexpr const char* pFileExtensions[] = { ".ply",".splat"};
+	constexpr const int fileExtensionsSize = sizeof(pFileExtensions) / sizeof(pFileExtensions[0]);
+	for (int extensionIndex = 0; extensionIndex < fileExtensionsSize; ++extensionIndex)
+	{
+		if (0 == strcmp(pFileExtensions[extensionIndex], pFileExtension))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 std::string GetFilePathExtension(const std::string& FileName)
 {
 	auto pos = FileName.find_last_of('.');
@@ -814,6 +829,10 @@ void AssetBrowser::ImportAssetFile(const char* pFilePath)
 		{
 			m_importOptions.AssetType = IOAssetType::Particle;
 		}
+		else if (IsGaussianInputFile(pFileExtension.c_str()))
+		{
+			m_importOptions.AssetType = IOAssetType::GaussianSplatting;
+		}
 		else
 		{
 			// Still unknown, exit.
@@ -890,6 +909,12 @@ void AssetBrowser::ImportAssetFile(const char* pFilePath)
 	{
 		ImportParticleEffect(pFilePath);
 	}
+	else if (IOAssetType::GaussianSplatting == m_importOptions.AssetType)
+	{
+		ImportGaussianSplattingFile(pFilePath);
+	}
+
+	m_importOptions.AssetType = IOAssetType::Unknown;
 }
 
 void AssetBrowser::ProcessSceneDatabase(cd::SceneDatabase* pSceneDatabase, bool keepMesh, bool keepMaterial, bool keepTexture, bool keepCamera, bool keepLight)
@@ -1163,6 +1188,120 @@ void AssetBrowser::ImportParticleEffect(const char* pFilePath)
 	//	const char16_t* u16_cstr = reinterpret_cast<const char16_t*>(wFilePath.c_str());
 	//	cdtools::EffekseerProducer efkProducer(u16_cstr);
 	//}
+}
+
+void AssetBrowser::ImportGaussianSplattingFile(const char* pFilePath)
+{
+	CD_ERROR("GaussingTesting");
+	engine::SceneWorld* pSceneWorld = GetImGuiContextInstance()->GetSceneWorld();
+	engine::World* pWorld = pSceneWorld->GetWorld();
+	auto AddNamedEntity = [&pWorld](std::string defaultName) -> engine::Entity
+	{
+		engine::Entity entity = pWorld->CreateEntity();
+		auto& nameComponent = pWorld->CreateComponent<engine::NameComponent>(entity);
+		nameComponent.SetName(defaultName + std::to_string(entity));
+
+		return entity;
+	};
+
+	/*AddGS*/
+	engine::Entity entity = AddNamedEntity("GaussianSplattingEntity");
+	auto& transformComponent = pWorld->CreateComponent<engine::TransformComponent>(entity);
+	transformComponent.SetTransform(cd::Transform::Identity());
+	transformComponent.Build();
+	auto& GaussianRenderComponent = pWorld->CreateComponent<engine::GaussianRenderComponent>(entity);
+	//std::string filePath(pFilePath);
+	//std::replace(filePath.begin(), filePath.end(), '\\', '/');
+	//std::ifstream inFile(filePath, std::ios::in | std::ios::binary);
+	FILE* file;
+	errno_t err = fopen_s(&file, pFilePath, "rb");
+	if (err != 0) {
+		printf("Error Can't Read File\n");
+	}
+	fseek(file, 0, SEEK_END);
+	size_t fileSize = ftell(file);
+	size_t splatCount = fileSize / sizeof(engine::SplatFileRecord);
+	GaussianRenderComponent.SetSplatCount(splatCount);
+
+	std::vector<engine::SplatFileRecord> rawFileData(splatCount);
+	fseek(file, 0, SEEK_SET);
+	fread(rawFileData.data(), sizeof(engine::SplatFileRecord), splatCount, file);
+	fclose(file);
+
+	auto& splatFileData = GaussianRenderComponent.GetSplatFileData();
+	splatFileData.resize(splatCount);
+
+	float bboxMin[3]{ FLT_MAX, FLT_MAX, FLT_MAX };
+	float bboxMax[3]{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	for (size_t i = 0; i < splatCount; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			if (rawFileData[i].center[j] < bboxMin[j])
+				bboxMin[j] = rawFileData[i].center[j];
+			if (rawFileData[i].center[j] > bboxMax[j])
+				bboxMax[j] = rawFileData[i].center[j];
+		}
+		memcpy(&splatFileData[i].m_cx, rawFileData[i].center, 3 * sizeof(float));
+		splatFileData[i].m_cx *= -1;
+		splatFileData[i].m_cy *= -1;
+		splatFileData[i].m_cz *= -1;
+
+		splatFileData[i].m_r = ((rawFileData[i].color >> 0) & 0xff) / 255.0f;
+		splatFileData[i].m_g = ((rawFileData[i].color >> 8) & 0xff) / 255.0f;
+		splatFileData[i].m_b = ((rawFileData[i].color >> 16) & 0xff) / 255.0f;
+		splatFileData[i].m_a = ((rawFileData[i].color >> 24) & 0xff) / 255.0f;
+
+		float scale[3];
+		memcpy(scale, rawFileData[i].scale, 3 * sizeof(float));
+
+		float quat[4];
+		quat[0] = ((float)rawFileData[i].i - 128.0f) / 128.0f;
+		quat[1] = ((float)rawFileData[i].j - 128.0f) / 128.0f;
+		quat[2] = ((float)rawFileData[i].k - 128.0f) / 128.0f;
+		quat[3] = ((float)rawFileData[i].l - 128.0f) / 128.0f;
+
+		float rot[4];
+		memcpy(rot, quat, 4 * sizeof(float));
+
+		const float matRot[9] = {
+			1.0f - 2.0f * (rot[2] * rot[2] + rot[3] * rot[3]),
+			2.0f * (rot[1] * rot[2] + rot[0] * rot[3]),
+			2.0f * (rot[1] * rot[3] - rot[0] * rot[2]),
+
+			2.0f * (rot[1] * rot[2] - rot[0] * rot[3]),
+			1.0f - 2.0f * (rot[1] * rot[1] + rot[3] * rot[3]),
+			2.0f * (rot[2] * rot[3] + rot[0] * rot[1]),
+
+			2.0f * (rot[1] * rot[3] + rot[0] * rot[2]),
+			2.0f * (rot[2] * rot[3] - rot[0] * rot[1]),
+			1.0f - 2.0f * (rot[1] * rot[1] + rot[2] * rot[2]),
+		};
+
+		// Compute the matrix product of S and R (M = S * R)
+		const float matSR[9] = {
+			scale[0] * matRot[0],
+			scale[0] * matRot[1],
+			scale[0] * matRot[2],
+			scale[1] * matRot[3],
+			scale[1] * matRot[4],
+			scale[1] * matRot[5],
+			scale[2] * matRot[6],
+			scale[2] * matRot[7],
+			scale[2] * matRot[8],
+		};
+
+		splatFileData[i].m_cova_x = matSR[0] * matSR[0] + matSR[3] * matSR[3] + matSR[6] * matSR[6];
+		splatFileData[i].m_cova_y = matSR[0] * matSR[1] + matSR[3] * matSR[4] + matSR[6] * matSR[7];
+		splatFileData[i].m_cova_z = matSR[0] * matSR[2] + matSR[3] * matSR[5] + matSR[6] * matSR[8];
+
+		splatFileData[i].m_covb_x = matSR[1] * matSR[1] + matSR[4] * matSR[4] + matSR[7] * matSR[7];
+		splatFileData[i].m_covb_y = matSR[1] * matSR[2] + matSR[4] * matSR[5] + matSR[7] * matSR[8];
+		splatFileData[i].m_covb_z = matSR[2] * matSR[2] + matSR[5] * matSR[5] + matSR[8] * matSR[8];
+	}
+
+	rawFileData.clear();
+	GaussianRenderComponent.Initlayout();
+	GaussianRenderComponent.InitlayoutInstance();
+	GaussianRenderComponent.Build();
 }
 
 void AssetBrowser::ExportAssetFile(const char* pFilePath)

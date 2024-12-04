@@ -14,13 +14,13 @@ void main()
     {
         uint offset = activeMorphOffestLengthIB[i*3];
         uint length = activeMorphOffestLengthIB[i*3+1];
-        float weight = asfloat(activeMorphOffestLengthIB[i*3+2]);
+        float weight = uintBitsToFloat(activeMorphOffestLengthIB[i*3+2]);
         for(uint j = 0; j < length; j++)
         {
             uint id = allMorphVertexIDIB[(offset+j)*4];
-            float x = asfloat(allMorphVertexIDIB[(offset+j)*4+1]);
-            float y = asfloat(allMorphVertexIDIB[(offset+j)*4+2]);
-            float z = asfloat(allMorphVertexIDIB[(offset+j)*4+3]);
+            float x = uintBitsToFloat(allMorphVertexIDIB[(offset+j)*4+1]);
+            float y = uintBitsToFloat(allMorphVertexIDIB[(offset+j)*4+2]);
+            float z = uintBitsToFloat(allMorphVertexIDIB[(offset+j)*4+3]);
             finalMorphAffectedVB[id] = vec4(
                 finalMorphAffectedVB[id].x +weight*x,
                 finalMorphAffectedVB[id].y +weight*y,
